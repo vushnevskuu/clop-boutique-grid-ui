@@ -15,13 +15,11 @@ function Model({ modelPath, scrollProgress }: Model3DProps) {
   // Clone the scene to avoid conflicts
   const clonedScene = scene.clone();
 
-  // Rotate model based on scroll progress
+  // Rotate model based on scroll progress - subtle rotation
   useFrame(() => {
     if (meshRef.current) {
-      // Rotate Y axis based on scroll (360 degrees over full scroll)
-      meshRef.current.rotation.y = scrollProgress * Math.PI * 2;
-      // Optional: slight rotation on X axis for more dynamic effect
-      meshRef.current.rotation.x = scrollProgress * Math.PI * 0.2;
+      // Subtle rotation on Y axis (90 degrees over full scroll)
+      meshRef.current.rotation.y = scrollProgress * Math.PI * 0.5;
     }
   });
 
@@ -44,17 +42,15 @@ const Hero3D = ({ modelPath, scrollProgress }: Hero3DProps) => {
   return (
     <Canvas
       camera={{ position: [0, 0, 5], fov: 50 }}
-      style={{ width: "100%", height: "100%" }}
-      gl={{ alpha: true, antialias: true }}
+      style={{ width: "100%", height: "100%", background: "transparent" }}
+      gl={{ alpha: true, antialias: true, preserveDrawingBuffer: true }}
     >
       <Suspense fallback={null}>
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[10, 10, 5]} intensity={1} />
-        <pointLight position={[-10, -10, -5]} intensity={0.5} />
+        <ambientLight intensity={0.6} />
+        <directionalLight position={[5, 5, 5]} intensity={0.8} />
+        <directionalLight position={[-5, -5, -5]} intensity={0.4} />
         
         <Model modelPath={modelPath} scrollProgress={scrollProgress} />
-        
-        <Environment preset="sunset" />
       </Suspense>
     </Canvas>
   );

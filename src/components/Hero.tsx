@@ -40,9 +40,6 @@ const Hero = () => {
     ? Math.max(0, 1 - (scrollProgress - 0.7) * 3.33)
     : Math.min(1, (scrollProgress - 0.15) * 1.82);
 
-  // Background image scale effect
-  const backgroundScale = 1 + scrollProgress * 0.1;
-
   return (
     <section 
       ref={sectionRef}
@@ -50,28 +47,15 @@ const Hero = () => {
       style={{ height: '300vh' }} // 3 viewport heights for scrollable area
     >
       {/* Fixed Background with 3D Model */}
-      <div 
-        className="fixed inset-0 z-0"
-        style={{
-          transform: `scale(${backgroundScale})`,
-          transition: "transform 0.1s ease-out"
-        }}
-      >
-        <div className="w-full h-full bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 relative">
-          {/* 3D Model - replace "/model.glb" with your model path */}
-          <div className="absolute inset-0 opacity-80">
+      <div className="fixed inset-0 z-0 bg-white">
+        {/* 3D Model centered */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-full h-full">
             <Hero3D 
               modelPath="/model.glb" 
               scrollProgress={scrollProgress}
             />
           </div>
-          {/* Fallback image if model is not loaded */}
-          <img 
-            src="/placeholder.svg" 
-            alt="Background" 
-            className="w-full h-full object-cover opacity-30"
-            style={{ display: 'none' }} // Hide fallback when model is ready
-          />
         </div>
       </div>
 
