@@ -87,38 +87,11 @@ const Hero = () => {
             transition: "opacity 0.3s ease-out"
           }}
         >
-          <svg
-            width="200"
-            height="200"
-            viewBox="0 0 200 200"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-32 h-32 md:w-48 md:h-48 lg:w-64 lg:h-64"
-          >
-            {/* Logo design - REPEAT brand */}
-            <rect
-              x="20"
-              y="20"
-              width="160"
-              height="160"
-              stroke="white"
-              strokeWidth="3"
-              fill="none"
-              rx="8"
-            />
-            <text
-              x="100"
-              y="120"
-              textAnchor="middle"
-              fill="white"
-              fontSize="72"
-              fontWeight="bold"
-              fontFamily="var(--font-heading)"
-              letterSpacing="0.05em"
-            >
-              R
-            </text>
-          </svg>
+          <img 
+            src="/logo.svg" 
+            alt="CLOP Logo" 
+            className="w-auto h-12 md:h-16 lg:h-20"
+          />
         </div>
 
         {/* Text - appears after logo starts disappearing */}
