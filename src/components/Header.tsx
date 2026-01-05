@@ -30,16 +30,18 @@ const Header = () => {
       <div className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-4">
           {/* Header Logo - appears when hero logo disappears */}
-          {showHeaderLogo && (
-            <a href="/">
-              <img 
-                src="/logo.svg" 
-                alt="CLOP Logo" 
-                className="w-auto h-6 md:h-8 lg:h-10"
-                style={{ filter: 'brightness(0)' }} // Make logo black
-              />
-            </a>
-          )}
+          <a href="/">
+            <img 
+              src="/logo.svg" 
+              alt="CLOP Logo" 
+              className="w-auto h-6 md:h-8 lg:h-10"
+              style={{ 
+                filter: 'brightness(0)', // Make logo black
+                opacity: showHeaderLogo ? 1 : 0,
+                transition: 'opacity 0.3s ease-out'
+              }}
+            />
+          </a>
         </div>
 
         <nav className="hidden md:flex items-center gap-8">
