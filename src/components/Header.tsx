@@ -21,9 +21,9 @@ const Header = () => {
   }, []);
 
   // Logo opacity in hero: 1 -> 0 (disappears in first third of scroll)
-  // Logo appears in header when hero logo disappears (scrollProgress > 0.33)
+  // Logo appears in header only after hero logo completely disappears
   const heroLogoOpacity = Math.max(0, 1 - scrollProgress * 3);
-  const showHeaderLogo = heroLogoOpacity < 0.5; // Show header logo when hero logo is half gone
+  const showHeaderLogo = heroLogoOpacity <= 0; // Show header logo only when hero logo is completely gone
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-transparent">
