@@ -57,9 +57,43 @@ const Hero3D = ({ modelPath, scrollProgress }: Hero3DProps) => {
       gl={{ alpha: true, antialias: true, preserveDrawingBuffer: true }}
     >
       <Suspense fallback={null}>
-        <ambientLight intensity={0.6} />
-        <directionalLight position={[5, 5, 5]} intensity={0.8} />
-        <directionalLight position={[-5, -5, -5]} intensity={0.4} />
+        {/* Base ambient light for overall illumination */}
+        <ambientLight intensity={1.2} />
+        
+        {/* Hemisphere light for natural sky/ground lighting */}
+        <hemisphereLight 
+          skyColor={0xffffff} 
+          groundColor={0xffffff} 
+          intensity={0.8} 
+        />
+        
+        {/* Main directional lights from multiple angles */}
+        <directionalLight 
+          position={[5, 5, 5]} 
+          intensity={1.5} 
+          castShadow={false}
+        />
+        <directionalLight 
+          position={[-5, 5, 5]} 
+          intensity={1.2} 
+          castShadow={false}
+        />
+        <directionalLight 
+          position={[0, -5, 5]} 
+          intensity={0.8} 
+          castShadow={false}
+        />
+        <directionalLight 
+          position={[0, 5, -5]} 
+          intensity={1.0} 
+          castShadow={false}
+        />
+        
+        {/* Point light for additional fill */}
+        <pointLight 
+          position={[0, 0, 5]} 
+          intensity={0.6} 
+        />
         
         <Model modelPath={modelPath} scrollProgress={scrollProgress} />
       </Suspense>
