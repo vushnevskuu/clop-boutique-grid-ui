@@ -108,7 +108,7 @@ const Hero = () => {
           <div className="max-w-4xl text-center px-6">
             <p 
               style={{
-                fontSize: '20px',
+                fontSize: '16px',
                 lineHeight: '1.6',
                 color: 'white'
               }}
