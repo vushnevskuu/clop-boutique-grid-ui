@@ -12,42 +12,45 @@ const Hero = () => {
       const rect = sectionRef.current.getBoundingClientRect();
       const windowHeight = window.innerHeight;
       
-      // Calculate scroll progress (0 to 1)
-      // When section is at top: progress = 0
-      // When section scrolls out: progress = 1
-      const progress = Math.max(0, Math.min(1, -rect.top / windowHeight));
+      // Hero section is fixed, so we calculate progress based on scroll position
+      // The section has height of 3x viewport to create scrollable area
+      // Progress goes from 0 (top) to 1 (bottom of hero section)
+      const heroHeight = windowHeight * 3; // 3 viewport heights for scrollable area
+      const scrollPosition = window.scrollY;
+      const progress = Math.max(0, Math.min(1, scrollPosition / heroHeight));
       setScrollProgress(progress);
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll(); // Initial calculation
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Logo opacity: 1 -> 0 (disappears as we scroll)
-  const logoOpacity = Math.max(0, 1 - scrollProgress * 2);
+  // Logo opacity: 1 -> 0 (disappears in first third of scroll)
+  const logoOpacity = Math.max(0, 1 - scrollProgress * 3);
   
   // Text opacity: 0 -> 1 -> 0
-  // Text appears when logo starts disappearing (progress > 0.3)
+  // Text appears when logo starts disappearing (progress > 0.15)
   // Text disappears when progress > 0.7
-  const textOpacity = scrollProgress < 0.3 
+  const textOpacity = scrollProgress < 0.15 
     ? 0 
     : scrollProgress > 0.7 
     ? Math.max(0, 1 - (scrollProgress - 0.7) * 3.33)
-    : Math.min(1, (scrollProgress - 0.3) * 2.5);
+    : Math.min(1, (scrollProgress - 0.15) * 1.82);
 
   // Background image scale effect
-  const backgroundScale = 1 + scrollProgress * 0.2;
+  const backgroundScale = 1 + scrollProgress * 0.1;
 
   return (
     <section 
       ref={sectionRef}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      className="relative flex items-center justify-center overflow-hidden"
+      style={{ height: '300vh' }} // 3 viewport heights for scrollable area
     >
-      {/* Background Image/Video */}
+      {/* Fixed Background Image/Video */}
       <div 
-        className="absolute inset-0 z-0"
+        className="fixed inset-0 z-0"
         style={{
           transform: `scale(${backgroundScale})`,
           transition: "transform 0.1s ease-out"
@@ -74,10 +77,10 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Content Container */}
+      {/* Fixed Content Container */}
       <div 
         ref={heroRef}
-        className="relative z-10 w-full h-screen flex items-center justify-center"
+        className="fixed inset-0 z-10 w-full h-screen flex items-center justify-center"
       >
         {/* Logo - disappears on scroll */}
         <div
@@ -132,7 +135,7 @@ const Hero = () => {
 
       {/* Scroll Indicator */}
       <div 
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20"
+        className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-20"
         style={{
           opacity: logoOpacity > 0.5 ? 1 : 0,
           transition: "opacity 0.3s ease-out"
