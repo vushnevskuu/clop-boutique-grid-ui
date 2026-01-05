@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import Hero3D from "./Hero3D";
 
 const Hero = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -48,7 +49,7 @@ const Hero = () => {
       className="relative flex items-center justify-center overflow-hidden"
       style={{ height: '300vh' }} // 3 viewport heights for scrollable area
     >
-      {/* Fixed Background Image/Video */}
+      {/* Fixed Background with 3D Model */}
       <div 
         className="fixed inset-0 z-0"
         style={{
@@ -56,24 +57,21 @@ const Hero = () => {
           transition: "transform 0.1s ease-out"
         }}
       >
-        <div className="w-full h-full bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
-          {/* Placeholder for video - replace with actual video element */}
+        <div className="w-full h-full bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 relative">
+          {/* 3D Model - replace "/model.glb" with your model path */}
+          <div className="absolute inset-0 opacity-80">
+            <Hero3D 
+              modelPath="/model.glb" 
+              scrollProgress={scrollProgress}
+            />
+          </div>
+          {/* Fallback image if model is not loaded */}
           <img 
             src="/placeholder.svg" 
             alt="Background" 
-            className="w-full h-full object-cover opacity-50"
+            className="w-full h-full object-cover opacity-30"
+            style={{ display: 'none' }} // Hide fallback when model is ready
           />
-          {/* Uncomment when you have a video:
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-full object-cover"
-          >
-            <source src="/hero-video.mp4" type="video/mp4" />
-          </video>
-          */}
         </div>
       </div>
 
