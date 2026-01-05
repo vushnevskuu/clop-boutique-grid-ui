@@ -1,6 +1,6 @@
-import { useRef, Suspense } from "react";
+import { useRef, Suspense, useMemo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useGLTF, Environment } from "@react-three/drei";
+import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
 interface Model3DProps {
@@ -12,8 +12,14 @@ function Model({ modelPath, scrollProgress }: Model3DProps) {
   const { scene } = useGLTF(modelPath);
   const meshRef = useRef<THREE.Group>(null);
 
-  // Clone the scene to avoid conflicts
-  const clonedScene = scene.clone();
+  // Clone and center the scene
+  const { clonedScene, box } = useMemo(() => {
+    const cloned = scene.clone();
+    const box = new THREE.Box3().setFromObject(cloned);
+    const center = box.getCenter(new THREE.Vector3());
+    cloned.position.sub(center); // Center the model
+    return { clonedScene: cloned, box };
+  }, [scene]);
 
   // Rotate model based on scroll progress - subtle rotation
   useFrame(() => {
@@ -23,11 +29,16 @@ function Model({ modelPath, scrollProgress }: Model3DProps) {
     }
   });
 
+  // Calculate scale to fit model nicely in view
+  const size = box.getSize(new THREE.Vector3());
+  const maxDim = Math.max(size.x, size.y, size.z);
+  const scale = maxDim > 0 ? 2 / maxDim : 1;
+
   return (
     <primitive 
       ref={meshRef}
       object={clonedScene} 
-      scale={1} 
+      scale={scale}
       position={[0, 0, 0]}
     />
   );
