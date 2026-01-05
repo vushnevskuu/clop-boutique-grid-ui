@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap');
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -36,8 +34,8 @@
 
     --radius: 0rem;
 
-    --font-heading: 'Space Grotesk', sans-serif;
-    --font-body: 'Space Grotesk', sans-serif;
+    --font-heading: Arial, sans-serif;
+    --font-body: Arial, sans-serif;
   }
 
   .dark {
