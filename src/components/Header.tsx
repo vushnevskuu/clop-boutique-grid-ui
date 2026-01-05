@@ -31,16 +31,15 @@ const Header = () => {
         <div className="flex items-center gap-4">
           {/* Header Logo - appears when hero logo disappears */}
           {showHeaderLogo && (
-            <img 
-              src="/logo.svg" 
-              alt="CLOP Logo" 
-              className="w-auto h-6 md:h-8 lg:h-10"
-              style={{ filter: 'brightness(0)' }} // Make logo black
-            />
+            <a href="/">
+              <img 
+                src="/logo.svg" 
+                alt="CLOP Logo" 
+                className="w-auto h-6 md:h-8 lg:h-10"
+                style={{ filter: 'brightness(0)' }} // Make logo black
+              />
+            </a>
           )}
-          <a href="/" className="text-2xl font-bold tracking-tighter uppercase text-foreground">
-            REPEAT
-          </a>
         </div>
 
         <nav className="hidden md:flex items-center gap-8">
