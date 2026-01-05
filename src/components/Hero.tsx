@@ -102,28 +102,30 @@ const Hero = () => {
             transition: "opacity 0.3s ease-out"
           }}
         >
-          <div className="max-w-5xl text-center">
-            <h1 className="text-6xl md:text-8xl lg:text-9xl font-bold leading-none tracking-tighter uppercase mb-8 text-white">
-              New
+          <div className="max-w-4xl text-center px-6">
+            <p 
+              style={{
+                fontFamily: 'Arial, sans-serif',
+                fontSize: '20px',
+                lineHeight: '1.6',
+                color: 'white'
+              }}
+            >
+              We select and collect clothing because we love it.
               <br />
-              <span className="text-gray-300">life</span>
+              You don't need to create a new clothing brand — everything already exists.
               <br />
-              for things
-            </h1>
-            
-            <p className="text-lg md:text-xl text-gray-200 max-w-md mx-auto mb-12">
-              Buy and sell unique second-hand items. 
-              Style without compromise.
+              Fashion is cyclical, and it's not waiting for anyone.
+              <br />
+              <br />
+              We once thought about launching our own brand.
+              <br />
+              Over time, we realized something simpler: there are already countless well-made,
+              <br />
+              interesting pieces out there, forgotten and unused.
+              <br />
+              We find them and show them to you.
             </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="#shop" className="btn-brutal bg-white text-black hover:bg-gray-200">
-                View catalog
-              </a>
-              <a href="#shop" className="btn-brutal-outline border-white text-white hover:bg-white hover:text-black">
-                Sell items
-              </a>
-            </div>
           </div>
         </div>
       </div>
