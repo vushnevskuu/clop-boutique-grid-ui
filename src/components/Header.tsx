@@ -44,7 +44,13 @@ const Header = () => {
           </a>
         </div>
 
-        <nav className="hidden md:flex items-center gap-8">
+        <nav 
+          className="hidden md:flex items-center gap-8"
+          style={{ 
+            opacity: showHeaderLogo ? 1 : 0,
+            transition: 'opacity 0.3s ease-out'
+          }}
+        >
           <a href="#shop" className="nav-link text-foreground">Catalog</a>
           <a href="#about" className="nav-link text-foreground">About</a>
           <a href="#sell" className="nav-link text-foreground">Sell</a>
@@ -52,6 +58,10 @@ const Header = () => {
 
         <button
           className="md:hidden text-foreground"
+          style={{ 
+            opacity: showHeaderLogo ? 1 : 0,
+            transition: 'opacity 0.3s ease-out'
+          }}
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
