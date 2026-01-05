@@ -27,7 +27,7 @@ const About = () => {
         </ul>
       </div>
       
-      <div id="sell" className="p-12 md:p-20 flex flex-col justify-center border-b border-border">
+      <div id="sell" className="p-12 md:p-20 flex flex-col justify-center border-b border-border bg-background">
         <h2 className="text-4xl md:text-5xl font-bold tracking-tighter uppercase mb-8">
           Sell
           <br />

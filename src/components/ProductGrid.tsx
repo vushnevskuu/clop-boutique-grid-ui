@@ -77,7 +77,7 @@ const products = [
 
 const ProductGrid = () => {
   return (
-    <section id="shop" className="scroll-mt-20">
+    <section id="shop" className="scroll-mt-20 bg-background">
       <div className="px-6 py-12 border-b border-border">
         <h2 className="text-4xl md:text-5xl font-bold tracking-tighter uppercase">
           Catalog
