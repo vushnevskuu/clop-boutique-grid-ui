@@ -9,17 +9,18 @@ interface Model3DProps {
 }
 
 function Model({ modelPath, scrollProgress }: Model3DProps) {
-  const { scene } = useGLTF(modelPath);
-  const meshRef = useRef<THREE.Group>(null);
+  try {
+    const { scene } = useGLTF(modelPath);
+    const meshRef = useRef<THREE.Group>(null);
 
-  // Clone and center the scene
-  const { clonedScene, box } = useMemo(() => {
-    const cloned = scene.clone();
-    const box = new THREE.Box3().setFromObject(cloned);
-    const center = box.getCenter(new THREE.Vector3());
-    cloned.position.sub(center); // Center the model
-    return { clonedScene: cloned, box };
-  }, [scene]);
+    // Clone and center the scene
+    const { clonedScene, box } = useMemo(() => {
+      const cloned = scene.clone();
+      const box = new THREE.Box3().setFromObject(cloned);
+      const center = box.getCenter(new THREE.Vector3());
+      cloned.position.sub(center); // Center the model
+      return { clonedScene: cloned, box };
+    }, [scene]);
 
   // Rotate model based on scroll progress - subtle rotation
   useFrame(() => {
@@ -29,19 +30,23 @@ function Model({ modelPath, scrollProgress }: Model3DProps) {
     }
   });
 
-  // Calculate scale to fit model nicely in view
-  const size = box.getSize(new THREE.Vector3());
-  const maxDim = Math.max(size.x, size.y, size.z);
-  const scale = maxDim > 0 ? 2 / maxDim : 1;
+    // Calculate scale to fit model nicely in view
+    const size = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const scale = maxDim > 0 ? 2 / maxDim : 1;
 
-  return (
-    <primitive 
-      ref={meshRef}
-      object={clonedScene} 
-      scale={scale}
-      position={[0, 0, 0]}
-    />
-  );
+    return (
+      <primitive 
+        ref={meshRef}
+        object={clonedScene} 
+        scale={scale}
+        position={[0, 0, 0]}
+      />
+    );
+  } catch (error) {
+    console.error("Error loading 3D model:", error);
+    return null;
+  }
 }
 
 interface Hero3DProps {
