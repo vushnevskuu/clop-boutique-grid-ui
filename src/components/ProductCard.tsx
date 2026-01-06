@@ -30,9 +30,8 @@ const ProductCard = ({ image, hoverImage, title, price, size, brand }: ProductCa
         <div className="flex flex-col gap-1">
           <h3 className="font-bold text-xs uppercase tracking-wide" style={{ fontSize: '12px' }}>{title}</h3>
           {brand && <p className="text-xs text-muted-foreground">{brand}</p>}
-          <div className="flex justify-between items-center mt-2">
+          <div className="mt-2">
             <p className="font-bold" style={{ fontSize: '12px' }}>{price}</p>
-            {size && <p className="text-xs text-muted-foreground">Size {size}</p>}
           </div>
         </div>
       </div>
