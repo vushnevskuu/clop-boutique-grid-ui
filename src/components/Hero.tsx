@@ -99,13 +99,13 @@ const Hero = () => {
             transition: "opacity 0.3s ease-out"
           }}
         >
-          <div className="max-w-4xl text-center px-6">
+          <div className="max-w-4xl text-left px-6">
             <p 
               style={{
-                fontSize: '16px',
+                fontSize: '20px',
                 lineHeight: '1.6',
                 color: 'white',
-                textAlign: 'center'
+                textAlign: 'left'
               }}
             >
               We once thought about launching our own brand,
