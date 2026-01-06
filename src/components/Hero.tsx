@@ -107,11 +107,15 @@ const Hero = () => {
                 color: 'white'
               }}
             >
-              We once thought about launching our own brand, but realized there are already countless well-made, interesting pieces out there — forgotten, unused, and worth being seen.
+              We once thought about launching our own brand,but realized
               <br />
+              there are already countless well-made,
+              <br />
+              interesting pieces out there — forgotten, unused, 
+              <br />
+              and worth being seen.
               <br />
               Fashion is cyclical, and it's not waiting for anyone.
-              <br />
               <br />
               We select and collect clothing because we love it.
             </p>
