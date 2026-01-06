@@ -46,7 +46,16 @@ const ProductCard = ({ id, image, hoverImage, title, price, size, brand }: Produ
       </div>
       <div className="p-4 bg-background">
         <div className="flex flex-col gap-1">
-          <h3 className="font-bold uppercase tracking-wide" style={{ fontSize: '14px' }}>{title}</h3>
+          <h3 
+            className="font-bold uppercase tracking-wide transition-all duration-300" 
+            style={{ 
+              fontSize: '14px',
+              textDecoration: isHovered ? 'underline' : 'none',
+              textDecorationThickness: '1px'
+            }}
+          >
+            {title}
+          </h3>
           {brand && <p className="text-muted-foreground" style={{ fontSize: '14px' }}>{brand}</p>}
           <div className="mt-2">
             <p className="font-bold" style={{ fontSize: '14px' }}>{price}</p>
