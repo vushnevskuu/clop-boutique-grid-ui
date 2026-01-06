@@ -1,29 +1,30 @@
 import { Menu, X } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const windowHeight = window.innerHeight;
-      const heroHeight = windowHeight * 3; // 3 viewport heights for scrollable area
-      const scrollPosition = window.scrollY;
-      const progress = Math.max(0, Math.min(1, scrollPosition / heroHeight));
-      setScrollProgress(progress);
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll(); // Initial calculation
-
-    return () => window.removeEventListener("scroll", handleScroll);
+  const handleScroll = useCallback(() => {
+    const windowHeight = window.innerHeight;
+    const heroHeight = windowHeight * 3;
+    const scrollPosition = window.scrollY;
+    const progress = Math.max(0, Math.min(1, scrollPosition / heroHeight));
+    setScrollProgress(progress);
   }, []);
 
-  // Logo opacity in hero: 1 -> 0 (disappears in first third of scroll)
-  // Logo appears in header only after hero logo completely disappears
-  const heroLogoOpacity = Math.max(0, 1 - scrollProgress * 3);
-  const showHeaderLogo = heroLogoOpacity <= 0; // Show header logo only when hero logo is completely gone
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [handleScroll]);
+
+  // Memoize calculations
+  const heroLogoOpacity = useMemo(() => Math.max(0, 1 - scrollProgress * 3), [scrollProgress]);
+  const showHeaderLogo = useMemo(() => heroLogoOpacity <= 0, [heroLogoOpacity]);
+  
+  const toggleMenu = useCallback(() => setIsMenuOpen(prev => !prev), []);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-transparent">
@@ -60,7 +61,7 @@ const Header = () => {
             opacity: showHeaderLogo ? 1 : 0,
             transition: 'opacity 0.3s ease-out'
           }}
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          onClick={toggleMenu}
         >
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>

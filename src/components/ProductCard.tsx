@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo, useCallback } from "react";
 import { Link } from "react-router-dom";
 
 interface ProductCardProps {
@@ -11,16 +11,24 @@ interface ProductCardProps {
   brand?: string;
 }
 
-const ProductCard = ({ id, image, hoverImage, title, price, size, brand }: ProductCardProps) => {
+const ProductCard = memo(({ id, image, hoverImage, title, price, size, brand }: ProductCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const displayImage = isHovered && hoverImage ? hoverImage : image;
+  
+  const handleMouseEnter = useCallback(() => setIsHovered(true), []);
+  const handleMouseLeave = useCallback(() => setIsHovered(false), []);
+  const handleButtonClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Handle message us action
+  }, []);
 
   return (
     <Link 
       to={`/product/${id}`}
       className="flex flex-col"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <div className="relative aspect-[4/5] overflow-hidden">
         <img
@@ -30,11 +38,7 @@ const ProductCard = ({ id, image, hoverImage, title, price, size, brand }: Produ
         />
         {/* Message Us button - appears on hover */}
         <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            // Handle message us action
-          }}
+          onClick={handleButtonClick}
           className="absolute top-4 left-4 bg-background text-foreground px-4 py-2 uppercase tracking-wide font-normal transition-all duration-200 z-10 hover:text-accent"
           style={{
             opacity: isHovered ? 1 : 0,
@@ -63,6 +67,8 @@ const ProductCard = ({ id, image, hoverImage, title, price, size, brand }: Produ
       </div>
     </Link>
   );
-};
+});
+
+ProductCard.displayName = 'ProductCard';
 
 export default ProductCard;

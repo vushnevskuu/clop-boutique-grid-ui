@@ -8,8 +8,8 @@ interface Model3DProps {
   scrollProgress: number;
 }
 
-function Model({ modelPath, scrollProgress }: Model3DProps) {
-  const { scene } = useGLTF(modelPath, true); // Use draco compression if available
+const Model = ({ modelPath, scrollProgress }: Model3DProps) => {
+  const { scene } = useGLTF(modelPath, true);
   const meshRef = useRef<THREE.Group>(null);
   
   // Optimize: dispose of unused geometries and materials
@@ -28,27 +28,26 @@ function Model({ modelPath, scrollProgress }: Model3DProps) {
     };
   }, [scene]);
 
-  // Clone and center the scene
-  const { clonedScene, box } = useMemo(() => {
+  // Clone and center the scene - memoized
+  const { clonedScene, box, scale } = useMemo(() => {
     const cloned = scene.clone();
     const box = new THREE.Box3().setFromObject(cloned);
     const center = box.getCenter(new THREE.Vector3());
-    cloned.position.sub(center); // Center the model
-    return { clonedScene: cloned, box };
+    cloned.position.sub(center);
+    const size = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const scale = maxDim > 0 ? 2 / maxDim : 1;
+    return { clonedScene: cloned, box, scale };
   }, [scene]);
 
-  // Rotate model based on scroll progress - subtle rotation
+  // Rotate model based on scroll progress - memoized calculation
+  const rotationY = useMemo(() => scrollProgress * Math.PI * 0.5, [scrollProgress]);
+  
   useFrame(() => {
     if (meshRef.current) {
-      // Subtle rotation on Y axis (90 degrees over full scroll)
-      meshRef.current.rotation.y = scrollProgress * Math.PI * 0.5;
+      meshRef.current.rotation.y = rotationY;
     }
   });
-
-  // Calculate scale to fit model nicely in view
-  const size = box.getSize(new THREE.Vector3());
-  const maxDim = Math.max(size.x, size.y, size.z);
-  const scale = maxDim > 0 ? 2 / maxDim : 1;
 
   return (
     <primitive 
@@ -58,7 +57,7 @@ function Model({ modelPath, scrollProgress }: Model3DProps) {
       position={[0, 0, 0]}
     />
   );
-}
+};
 
 interface Hero3DProps {
   modelPath: string;

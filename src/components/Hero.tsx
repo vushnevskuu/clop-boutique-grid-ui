@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import Hero3D from "./Hero3D";
 import { useGLTF } from "@react-three/drei";
 
@@ -10,39 +10,31 @@ const Hero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
 
+  const handleScroll = useCallback(() => {
+    if (!sectionRef.current) return;
+
+    const windowHeight = window.innerHeight;
+    const heroHeight = windowHeight * 3;
+    const scrollPosition = window.scrollY;
+    const progress = Math.max(0, Math.min(1, scrollPosition / heroHeight));
+    setScrollProgress(progress);
+  }, []);
+
   useEffect(() => {
-    const handleScroll = () => {
-      if (!sectionRef.current) return;
-
-      const rect = sectionRef.current.getBoundingClientRect();
-      const windowHeight = window.innerHeight;
-      
-      // Hero section is fixed, so we calculate progress based on scroll position
-      // The section has height of 3x viewport to create scrollable area
-      // Progress goes from 0 (top) to 1 (bottom of hero section)
-      const heroHeight = windowHeight * 3; // 3 viewport heights for scrollable area
-      const scrollPosition = window.scrollY;
-      const progress = Math.max(0, Math.min(1, scrollPosition / heroHeight));
-      setScrollProgress(progress);
-    };
-
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll(); // Initial calculation
 
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [handleScroll]);
 
-  // Logo opacity: 1 -> 0 (disappears in first third of scroll)
-  const logoOpacity = Math.max(0, 1 - scrollProgress * 3);
+  // Memoize opacity calculations to avoid recalculations
+  const logoOpacity = useMemo(() => Math.max(0, 1 - scrollProgress * 3), [scrollProgress]);
   
-  // Text opacity: 0 -> 1 -> 0
-  // Text appears when logo starts disappearing (progress > 0.15)
-  // Text disappears when progress > 0.7
-  const textOpacity = scrollProgress < 0.15 
-    ? 0 
-    : scrollProgress > 0.7 
-    ? Math.max(0, 1 - (scrollProgress - 0.7) * 3.33)
-    : Math.min(1, (scrollProgress - 0.15) * 1.82);
+  const textOpacity = useMemo(() => {
+    if (scrollProgress < 0.15) return 0;
+    if (scrollProgress > 0.7) return Math.max(0, 1 - (scrollProgress - 0.7) * 3.33);
+    return Math.min(1, (scrollProgress - 0.15) * 1.82);
+  }, [scrollProgress]);
 
   return (
     <section 
