@@ -102,8 +102,8 @@ const Hero = () => {
           <div className="max-w-4xl text-left px-6">
             <p 
               style={{
-                fontSize: '20px',
-                lineHeight: '1.6',
+                fontSize: '14px',
+                lineHeight: '100%',
                 color: 'white',
                 textAlign: 'left'
               }}
