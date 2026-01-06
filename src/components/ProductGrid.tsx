@@ -78,12 +78,6 @@ const products = [
 const ProductGrid = () => {
   return (
     <section id="shop" className="scroll-mt-20 bg-background relative z-30">
-      <div className="px-6 py-12 border-b border-border">
-        <h2 className="text-4xl md:text-5xl font-bold tracking-tighter uppercase">
-          Catalog
-        </h2>
-      </div>
-      
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {products.map((product) => (
           <ProductCard
