@@ -95,20 +95,13 @@ const Hero = () => {
                 color: 'white'
               }}
             >
-              We select and collect clothing because we love it.
+              We once thought about launching our own brand, but realized there are already countless well-made, interesting pieces out there — forgotten, unused, and worth being seen.
               <br />
-              You don't need to create a new clothing brand — everything already exists.
               <br />
               Fashion is cyclical, and it's not waiting for anyone.
               <br />
               <br />
-              We once thought about launching our own brand.
-              <br />
-              Over time, we realized something simpler: there are already countless well-made,
-              <br />
-              interesting pieces out there, forgotten and unused.
-              <br />
-              We find them and show them to you.
+              We select and collect clothing because we love it.
             </p>
           </div>
         </div>
