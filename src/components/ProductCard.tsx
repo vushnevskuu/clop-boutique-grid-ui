@@ -35,7 +35,7 @@ const ProductCard = ({ id, image, hoverImage, title, price, size, brand }: Produ
             e.stopPropagation();
             // Handle message us action
           }}
-          className="absolute top-4 left-4 bg-background text-foreground px-4 py-2 uppercase tracking-wide font-bold transition-opacity duration-300 z-10"
+          className="absolute top-4 left-4 bg-background text-foreground px-4 py-2 uppercase tracking-wide font-normal transition-all duration-200 z-10 hover:text-accent"
           style={{
             opacity: isHovered ? 1 : 0,
             fontSize: '12px'
@@ -47,7 +47,7 @@ const ProductCard = ({ id, image, hoverImage, title, price, size, brand }: Produ
       <div className="p-4 bg-background">
         <div className="flex flex-col gap-1">
           <h3 
-            className="font-bold uppercase tracking-wide transition-colors duration-200" 
+            className="font-normal uppercase tracking-wide transition-colors duration-200" 
             style={{ 
               fontSize: '12px',
               color: isHovered ? 'hsl(var(--accent))' : 'inherit'
