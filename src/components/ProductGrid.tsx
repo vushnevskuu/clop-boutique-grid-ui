@@ -78,7 +78,7 @@ const products = [
 const ProductGrid = () => {
   return (
     <section id="shop" className="scroll-mt-20 bg-background relative z-30">
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
         {products.map((product) => (
           <ProductCard
             key={product.id}
