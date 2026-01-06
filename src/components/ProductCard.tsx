@@ -28,6 +28,21 @@ const ProductCard = ({ id, image, hoverImage, title, price, size, brand }: Produ
           alt={title}
           className="w-full h-full object-cover transition-opacity duration-300"
         />
+        {/* Message Us button - appears on hover */}
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            // Handle message us action
+          }}
+          className="absolute top-4 left-4 bg-background text-foreground px-4 py-2 uppercase tracking-wide font-bold text-xs transition-opacity duration-300 z-10"
+          style={{
+            opacity: isHovered ? 1 : 0,
+            fontSize: '12px'
+          }}
+        >
+          message us
+        </button>
       </div>
       <div className="p-4 bg-background">
         <div className="flex flex-col gap-1">
