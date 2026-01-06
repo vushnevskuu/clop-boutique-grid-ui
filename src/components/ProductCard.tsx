@@ -47,11 +47,10 @@ const ProductCard = ({ id, image, hoverImage, title, price, size, brand }: Produ
       <div className="p-4 bg-background">
         <div className="flex flex-col gap-1">
           <h3 
-            className="font-bold uppercase tracking-wide transition-all duration-300" 
+            className="font-bold uppercase tracking-wide transition-colors duration-200" 
             style={{ 
               fontSize: '14px',
-              textDecoration: isHovered ? 'underline' : 'none',
-              textDecorationThickness: '1px'
+              color: isHovered ? 'hsl(var(--accent))' : 'inherit'
             }}
           >
             {title}
