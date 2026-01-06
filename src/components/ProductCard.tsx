@@ -35,10 +35,10 @@ const ProductCard = ({ id, image, hoverImage, title, price, size, brand }: Produ
             e.stopPropagation();
             // Handle message us action
           }}
-          className="absolute top-4 left-4 bg-background text-foreground px-4 py-2 uppercase tracking-wide font-bold text-xs transition-opacity duration-300 z-10"
+          className="absolute top-4 left-4 bg-background text-foreground px-4 py-2 uppercase tracking-wide font-bold transition-opacity duration-300 z-10"
           style={{
             opacity: isHovered ? 1 : 0,
-            fontSize: '12px'
+            fontSize: '14px'
           }}
         >
           message us
