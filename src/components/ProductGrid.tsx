@@ -13,6 +13,7 @@ const products = [
   {
     id: 1,
     image: product1,
+    hoverImage: product2,
     title: "Leather jacket",
     brand: "Vintage",
     price: "$125",
@@ -21,6 +22,7 @@ const products = [
   {
     id: 2,
     image: product2,
+    hoverImage: product3,
     title: "Classic jeans",
     brand: "Levi's",
     price: "$42",
@@ -29,6 +31,7 @@ const products = [
   {
     id: 3,
     image: product3,
+    hoverImage: product4,
     title: "Wool sweater",
     brand: "Handmade",
     price: "$58",
@@ -37,6 +40,7 @@ const products = [
   {
     id: 4,
     image: product4,
+    hoverImage: product5,
     title: "Leather sneakers",
     brand: "Vintage",
     price: "$39",
@@ -45,6 +49,7 @@ const products = [
   {
     id: 5,
     image: product5,
+    hoverImage: product6,
     title: "Silk scarf",
     brand: "Italian",
     price: "$21",
@@ -52,6 +57,7 @@ const products = [
   {
     id: 6,
     image: product6,
+    hoverImage: product7,
     title: "Corduroy pants",
     brand: "Vintage",
     price: "$45",
@@ -60,6 +66,7 @@ const products = [
   {
     id: 7,
     image: product7,
+    hoverImage: product8,
     title: "Oversized blazer",
     brand: "90s",
     price: "$72",
@@ -68,6 +75,7 @@ const products = [
   {
     id: 8,
     image: product8,
+    hoverImage: product1,
     title: "Basic t-shirt",
     brand: "Premium Cotton",
     price: "$18",
@@ -83,6 +91,7 @@ const ProductGrid = () => {
           <ProductCard
             key={product.id}
             image={product.image}
+            hoverImage={product.hoverImage}
             title={product.title}
             brand={product.brand}
             price={product.price}
