@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import Hero3D from "./Hero3D";
+import { useGLTF } from "@react-three/drei";
+
+// Preload 3D model for faster initial load
+useGLTF.preload("/model.glb");
 
 const Hero = () => {
   const [scrollProgress, setScrollProgress] = useState(0);

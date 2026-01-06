@@ -1,4 +1,4 @@
-import { useRef, Suspense, useMemo } from "react";
+import { useRef, Suspense, useMemo, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
@@ -9,8 +9,24 @@ interface Model3DProps {
 }
 
 function Model({ modelPath, scrollProgress }: Model3DProps) {
-  const { scene } = useGLTF(modelPath);
+  const { scene } = useGLTF(modelPath, true); // Use draco compression if available
   const meshRef = useRef<THREE.Group>(null);
+  
+  // Optimize: dispose of unused geometries and materials
+  useEffect(() => {
+    return () => {
+      scene.traverse((child) => {
+        if (child instanceof THREE.Mesh) {
+          child.geometry?.dispose();
+          if (Array.isArray(child.material)) {
+            child.material.forEach((mat) => mat.dispose());
+          } else {
+            child.material?.dispose();
+          }
+        }
+      });
+    };
+  }, [scene]);
 
   // Clone and center the scene
   const { clonedScene, box } = useMemo(() => {
@@ -54,7 +70,16 @@ const Hero3D = ({ modelPath, scrollProgress }: Hero3DProps) => {
     <Canvas
       camera={{ position: [0, 0, 5], fov: 50 }}
       style={{ width: "100%", height: "100%", background: "transparent" }}
-      gl={{ alpha: true, antialias: true, preserveDrawingBuffer: true }}
+      gl={{ 
+        alpha: true, 
+        antialias: true, 
+        preserveDrawingBuffer: false, // Disable for better performance
+        powerPreference: "high-performance",
+        stencil: false,
+        depth: true
+      }}
+      dpr={[1, 2]} // Limit pixel ratio for better performance
+      performance={{ min: 0.5 }} // Lower framerate threshold
       onError={(error) => {
         console.error("3D Canvas error:", error);
       }}
