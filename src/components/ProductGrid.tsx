@@ -90,6 +90,7 @@ const ProductGrid = () => {
         {products.map((product) => (
           <ProductCard
             key={product.id}
+            id={product.id}
             image={product.image}
             hoverImage={product.hoverImage}
             title={product.title}

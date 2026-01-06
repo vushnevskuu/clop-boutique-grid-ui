@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 interface ProductCardProps {
+  id: number;
   image: string;
   hoverImage?: string;
   title: string;
@@ -9,12 +11,13 @@ interface ProductCardProps {
   brand?: string;
 }
 
-const ProductCard = ({ image, hoverImage, title, price, size, brand }: ProductCardProps) => {
+const ProductCard = ({ id, image, hoverImage, title, price, size, brand }: ProductCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const displayImage = isHovered && hoverImage ? hoverImage : image;
 
   return (
-    <div 
+    <Link 
+      to={`/product/${id}`}
       className="flex flex-col"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -35,7 +38,7 @@ const ProductCard = ({ image, hoverImage, title, price, size, brand }: ProductCa
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 
