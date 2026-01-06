@@ -52,8 +52,6 @@ const Header = () => {
           }}
         >
           <a href="#shop" className="nav-link text-foreground">Catalog</a>
-          <a href="#about" className="nav-link text-foreground">About</a>
-          <a href="#sell" className="nav-link text-foreground">Sell</a>
         </nav>
 
         <button
@@ -70,14 +68,8 @@ const Header = () => {
 
       {isMenuOpen && (
         <nav className="md:hidden bg-transparent">
-          <a href="#shop" className="block px-6 py-4 border-b border-foreground/20 nav-link text-foreground">
+          <a href="#shop" className="block px-6 py-4 nav-link text-foreground">
             Catalog
-          </a>
-          <a href="#about" className="block px-6 py-4 border-b border-foreground/20 nav-link text-foreground">
-            About
-          </a>
-          <a href="#sell" className="block px-6 py-4 nav-link text-foreground">
-            Sell
           </a>
         </nav>
       )}
