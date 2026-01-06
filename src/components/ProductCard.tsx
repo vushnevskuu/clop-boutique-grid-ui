@@ -38,7 +38,7 @@ const ProductCard = ({ id, image, hoverImage, title, price, size, brand }: Produ
           className="absolute top-4 left-4 bg-background text-foreground px-4 py-2 uppercase tracking-wide font-bold transition-opacity duration-300 z-10"
           style={{
             opacity: isHovered ? 1 : 0,
-            fontSize: '14px'
+            fontSize: '12px'
           }}
         >
           message us
@@ -49,7 +49,7 @@ const ProductCard = ({ id, image, hoverImage, title, price, size, brand }: Produ
           <h3 
             className="font-bold uppercase tracking-wide transition-colors duration-200" 
             style={{ 
-              fontSize: '14px',
+              fontSize: '12px',
               color: isHovered ? 'hsl(var(--accent))' : 'inherit'
             }}
           >
