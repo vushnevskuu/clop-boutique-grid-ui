@@ -46,8 +46,15 @@ const Hero = () => {
       className="relative flex items-center justify-center overflow-hidden"
       style={{ height: '300vh' }} // 3 viewport heights for scrollable area
     >
-      {/* Fixed Background with 3D Model */}
-      <div className="fixed inset-0 z-0 bg-white">
+      {/* Fixed Background with 3D Model - hide after scroll completes */}
+      <div 
+        className="fixed inset-0 z-0 bg-white"
+        style={{
+          opacity: scrollProgress >= 1 ? 0 : 1,
+          pointerEvents: scrollProgress >= 1 ? 'none' : 'auto',
+          transition: 'opacity 0.3s ease-out'
+        }}
+      >
         {/* 3D Model centered */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-full h-full">
@@ -59,10 +66,15 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Fixed Content Container */}
+      {/* Fixed Content Container - hide after scroll completes */}
       <div 
         ref={heroRef}
         className="fixed inset-0 z-10 w-full h-screen flex items-center justify-center"
+        style={{
+          opacity: scrollProgress >= 1 ? 0 : 1,
+          pointerEvents: scrollProgress >= 1 ? 'none' : 'auto',
+          transition: 'opacity 0.3s ease-out'
+        }}
       >
         {/* Logo - disappears on scroll */}
         <div
@@ -111,7 +123,8 @@ const Hero = () => {
       <div 
         className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-20"
         style={{
-          opacity: logoOpacity > 0.5 ? 1 : 0,
+          opacity: (logoOpacity > 0.5 && scrollProgress < 1) ? 1 : 0,
+          pointerEvents: scrollProgress >= 1 ? 'none' : 'auto',
           transition: "opacity 0.3s ease-out"
         }}
       >
