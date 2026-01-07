@@ -77,10 +77,8 @@ const Hero = () => {
       <div 
         className="fixed inset-0 z-0 bg-white"
         style={{
-          opacity: scrollProgress >= 1 ? 0 : 1,
-          pointerEvents: scrollProgress >= 1 ? 'none' : 'auto',
           transform: `translateY(${heroTranslateY}%)`,
-          transition: scrollProgress >= 1 ? 'transform 0.3s ease-out, opacity 0.3s ease-out' : 'opacity 0.3s ease-out'
+          transition: scrollProgress >= 1 ? 'transform 0.3s ease-out' : 'none'
         }}
       >
         {/* 3D Model centered - lazy loaded */}
