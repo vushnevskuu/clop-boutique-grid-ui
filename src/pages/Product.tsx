@@ -227,8 +227,16 @@ const Product = () => {
 
                 <div className="pt-8">
                   <button 
-                    className="px-8 py-4 uppercase font-bold w-full transition-all duration-200 hover:bg-foreground hover:text-background"
+                    className="px-8 py-4 uppercase font-bold w-full transition-all duration-200"
                     style={{ backgroundColor: '#f3f3f3', color: '#000000' }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#000000';
+                      e.currentTarget.style.color = '#ffffff';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#f3f3f3';
+                      e.currentTarget.style.color = '#000000';
+                    }}
                   >
                     Add to cart
                   </button>
