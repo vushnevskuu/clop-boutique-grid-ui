@@ -42,7 +42,7 @@ const Footer = () => {
   const rotateX = mousePosition.y * 2; // Reduced to 2 degrees max
   const rotateY = -mousePosition.x * 2; // Reduced to 2 degrees max
   const translateZ = Math.abs(mousePosition.x) * 5 + Math.abs(mousePosition.y) * 5; // Reduced lift effect
-  const scale = 1.05; // Slightly scale up to cover edges
+  const scale = 1.1; // Increased scale to cover all edges
 
   return (
     <footer 
@@ -65,12 +65,12 @@ const Footer = () => {
         className="w-full h-auto object-cover"
         style={{ 
           display: 'block', 
-          width: '105%', 
+          width: '120%', 
           height: 'auto', 
           margin: 0, 
           padding: 0,
           minHeight: '200px',
-          marginLeft: '-2.5%', // Center the scaled image
+          marginLeft: '-10%', // Center the scaled image
           transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(${translateZ}px) scale(${scale})`,
           transition: 'transform 0.1s ease-out',
           willChange: 'transform',
