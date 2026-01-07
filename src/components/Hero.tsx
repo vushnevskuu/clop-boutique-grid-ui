@@ -1,9 +1,6 @@
 import { useEffect, useRef, useState, useMemo, useCallback, lazy, Suspense } from "react";
 import { useGLTF } from "@react-three/drei";
 
-// Preload 3D model for faster loading
-useGLTF.preload("/model.glb");
-
 // Lazy load Hero3D to improve initial page load
 const Hero3D = lazy(() => import("./Hero3D"));
 
@@ -95,7 +92,14 @@ const Hero = () => {
         {/* 3D Model centered - lazy loaded */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-full h-full">
-            <Suspense fallback={<div className="w-full h-full bg-white" />}>
+            <Suspense fallback={
+              <div className="w-full h-full bg-white flex items-center justify-center">
+                <div className="text-center">
+                  <div className="inline-block w-8 h-8 border-4 border-gray-300 border-t-gray-600 rounded-full animate-spin mb-2"></div>
+                  <p className="text-sm text-gray-600">Loading...</p>
+                </div>
+              </div>
+            }>
               <Hero3D 
                 modelPath="/model.glb" 
                 scrollProgress={scrollProgress}
