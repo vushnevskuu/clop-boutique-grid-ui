@@ -1,7 +1,6 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import { useState, useMemo } from "react";
+import { useState, useMemo, memo, useCallback } from "react";
 
 import product1 from "@/assets/product-1.jpg";
 import product2 from "@/assets/product-2.jpg";
@@ -86,12 +85,24 @@ const products = [
   },
 ];
 
-const Product = () => {
+const Product = memo(() => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  const product = products.find((p) => p.id === Number(id));
+  const product = useMemo(() => products.find((p) => p.id === Number(id)), [id]);
+  
+  const handleBackClick = useCallback(() => {
+    navigate("/");
+  }, [navigate]);
+  
+  const handleImageClick = useCallback((src: string) => {
+    setSelectedImage(src);
+  }, []);
+  
+  const handleCloseModal = useCallback(() => {
+    setSelectedImage(null);
+  }, []);
 
   if (!product) {
     return (
@@ -101,7 +112,7 @@ const Product = () => {
           <div className="text-center">
             <h1 className="text-2xl font-bold mb-4">Product not found</h1>
             <button
-              onClick={() => navigate("/")}
+              onClick={handleBackClick}
               className="btn-brutal"
             >
               Back to catalog
@@ -139,7 +150,7 @@ const Product = () => {
       <main className="pt-20 pb-12">
         <div style={{ marginLeft: '30px', marginRight: '30px' }}>
           <button
-            onClick={() => navigate("/")}
+            onClick={handleBackClick}
             className="mb-8 text-foreground hover:text-accent transition-colors"
             style={{ fontSize: '12px' }}
           >
@@ -167,7 +178,7 @@ const Product = () => {
                             className="w-full h-auto object-cover cursor-pointer"
                             loading="lazy"
                             decoding="async"
-                            onClick={() => setSelectedImage(currentImage.src)}
+                            onClick={() => handleImageClick(currentImage.src)}
                           />
                         </div>
                       );
@@ -184,7 +195,7 @@ const Product = () => {
                               className="w-full h-auto object-cover cursor-pointer"
                               loading="lazy"
                               decoding="async"
-                              onClick={() => setSelectedImage(currentImage.src)}
+                              onClick={() => handleImageClick(currentImage.src)}
                             />
                           </div>
                           {nextImage ? (
@@ -277,10 +288,11 @@ const Product = () => {
           )}
         </div>
       </main>
-      <Footer />
     </div>
   );
-};
+});
+
+Product.displayName = 'Product';
 
 export default Product;
 
