@@ -55,7 +55,8 @@ const Footer = () => {
         zIndex: 1,
         boxShadow: '0 -10px 30px rgba(0, 0, 0, 0.1)',
         overflow: 'hidden',
-        width: '100%'
+        width: '100%',
+        minHeight: '200px'
       }}
     >
       <img 
@@ -65,18 +66,28 @@ const Footer = () => {
         className="w-full h-auto object-cover"
         style={{ 
           display: 'block', 
-          position: 'relative',
+          position: 'absolute',
+          top: 0,
           left: '50%',
           width: '120%', 
-          height: 'auto', 
+          height: '100%', 
           margin: 0, 
           padding: 0,
-          minHeight: '200px',
+          objectFit: 'cover',
           transform: `translateX(-50%) perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(${translateZ}px)`,
           transformOrigin: 'center center',
           transition: 'transform 0.1s ease-out',
-          willChange: 'transform',
-          objectFit: 'cover'
+          willChange: 'transform'
+        }}
+        onLoad={(e) => {
+          const img = e.currentTarget;
+          if (footerRef.current && img.naturalHeight) {
+            const aspectRatio = img.naturalWidth / img.naturalHeight;
+            const containerWidth = footerRef.current.offsetWidth;
+            const calculatedHeight = containerWidth / aspectRatio;
+            footerRef.current.style.height = `${calculatedHeight}px`;
+          }
+          console.log('Footer image loaded successfully');
         }}
         loading="lazy"
         decoding="async"
