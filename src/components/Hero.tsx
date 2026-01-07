@@ -58,12 +58,13 @@ const Hero = () => {
     <section 
       ref={sectionRef}
       className="relative flex items-center justify-center overflow-hidden"
-      style={{ height: '300vh' }} // 3 viewport heights for scrollable area
+      style={{ height: '300vh', position: 'relative' }} // 3 viewport heights for scrollable area
     >
-      {/* Fixed Background with 3D Model - stays fixed on first screen */}
+      {/* Sticky Background with 3D Model - sticks to top while scrolling Hero section */}
       <div 
-        className="fixed inset-0 z-0 bg-white"
+        className="sticky top-0 z-0 bg-white"
         style={{
+          height: '100vh',
           opacity: scrollProgress >= 1 ? 0 : 1,
           pointerEvents: scrollProgress >= 1 ? 'none' : 'auto',
           transition: 'opacity 0.3s ease-out'
@@ -83,13 +84,12 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Fixed Content Container - stays fixed on first screen */}
+      {/* Sticky Content Container - sticks to top while scrolling Hero section */}
       <div 
         ref={heroRef}
-        className="fixed inset-0 z-10 w-full h-screen flex items-center justify-center"
+        className="sticky top-0 z-10 w-full h-screen flex items-center justify-center pointer-events-none"
         style={{
           opacity: scrollProgress >= 1 ? 0 : 1,
-          pointerEvents: scrollProgress >= 1 ? 'none' : 'auto',
           transition: 'opacity 0.3s ease-out'
         }}
       >
@@ -145,8 +145,10 @@ const Hero = () => {
 
       {/* Scroll Indicator */}
       <div 
-        className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-20"
+        className="sticky top-0 z-20 flex items-end justify-center"
         style={{
+          height: '100vh',
+          paddingBottom: '2rem',
           opacity: (logoOpacity > 0.5 && scrollProgress < 1) ? 1 : 0,
           pointerEvents: scrollProgress >= 1 ? 'none' : 'auto',
           transition: "opacity 0.3s ease-out"
