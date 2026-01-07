@@ -60,11 +60,11 @@ const Hero = () => {
     const windowHeight = window.innerHeight;
     const heroHeight = windowHeight * 3;
     
-    // Start moving up when we're close to completing hero section (around 80% of scroll)
+    // Start moving up when we're close to completing hero section (around 60% of scroll)
     // This makes sphere move up as second screen appears
-    if (scrollProgress >= 0.8) {
-      // Calculate how much we've scrolled past the 80% point
-      const startMovingAt = heroHeight * 0.8;
+    if (scrollProgress >= 0.6) {
+      // Calculate how much we've scrolled past the 60% point
+      const startMovingAt = heroHeight * 0.6;
       const scrollPastStart = Math.max(0, scrollPosition - startMovingAt);
       // Move hero up based on scroll past the start point
       // This will make it disappear above the screen as second screen appears
