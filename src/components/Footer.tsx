@@ -135,6 +135,7 @@ const Footer = memo(() => {
         loading="lazy"
         decoding="async"
         fetchPriority="low"
+        fetchpriority="low"
         onError={(e) => {
           console.error('Footer image failed to load:', e);
         }}
