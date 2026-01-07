@@ -56,13 +56,15 @@ const Hero = () => {
   }, [scrollProgress]);
 
   // Calculate translateY for hero section to move up after animations complete
+  // Hero moves up at the same speed as ProductGrid (1:1 with scroll)
   const heroTranslateY = useMemo(() => {
     if (scrollProgress >= 1) {
       const windowHeight = window.innerHeight;
       const heroHeight = windowHeight * 3;
       const extraScroll = Math.max(0, scrollPosition - heroHeight);
-      // Move hero up based on extra scroll
-      return -100 - (extraScroll / windowHeight) * 100;
+      // Move hero up by the same amount as extraScroll (pixels, not percentage)
+      // This ensures Hero and ProductGrid move at the same speed
+      return -extraScroll;
     }
     return 0;
   }, [scrollProgress, scrollPosition]);
@@ -77,8 +79,8 @@ const Hero = () => {
       <div 
         className="fixed inset-0 z-0 bg-white"
         style={{
-          transform: `translateY(${heroTranslateY}%)`,
-          transition: scrollProgress >= 1 ? 'transform 0.3s ease-out' : 'none'
+          transform: `translateY(${heroTranslateY}px)`,
+          transition: 'none' // No transition for smooth scroll-based movement
         }}
       >
         {/* 3D Model centered - lazy loaded */}
@@ -102,8 +104,8 @@ const Hero = () => {
         style={{
           opacity: scrollProgress >= 1 ? 0 : 1,
           pointerEvents: scrollProgress >= 1 ? 'none' : 'auto',
-          transform: `translateY(${heroTranslateY}%)`,
-          transition: scrollProgress >= 1 ? 'transform 0.3s ease-out, opacity 0.3s ease-out' : 'opacity 0.3s ease-out'
+          transform: `translateY(${heroTranslateY}px)`,
+          transition: 'opacity 0.3s ease-out' // Only transition opacity, not transform
         }}
       >
         {/* Logo - disappears on scroll */}

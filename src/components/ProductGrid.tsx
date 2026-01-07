@@ -131,7 +131,7 @@ const ProductGrid = memo(() => {
         paddingBottom: '0', 
         backgroundColor: 'transparent',
         transform: `translateY(${gridTranslateY}px)`,
-        transition: scrollProgress >= 1 ? 'transform 0.3s ease-out' : 'none'
+        transition: 'none' // No transition for smooth scroll-based movement
       }}
     >
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6" style={{ rowGap: '20px', columnGap: '20px' }}>
