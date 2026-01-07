@@ -100,7 +100,7 @@ const Hero = () => {
             <Suspense fallback={
               <div className="w-full h-full bg-white flex items-center justify-center">
                 <div className="text-center">
-                  <div className="inline-block w-8 h-8 border-4 border-gray-300 border-t-gray-600 rounded-full animate-spin mb-2"></div>
+                  <div className="inline-block w-8 h-8 border-4 border-gray-300 border-t-gray-600 rounded-full animate-spin mb-2" aria-label="Loading 3D model"></div>
                   <p className="text-sm text-gray-600">Loading...</p>
                 </div>
               </div>
