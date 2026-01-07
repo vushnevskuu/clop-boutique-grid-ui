@@ -101,14 +101,19 @@ const Footer = memo(() => {
         display: 'block', 
         margin: 0, 
         padding: 0, 
-        position: 'relative', 
-        zIndex: 1,
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 10,
         overflow: 'hidden',
         width: '100%',
         minHeight: '200px',
         touchAction: 'none',
         overscrollBehavior: 'none',
         backgroundColor: 'transparent',
+        opacity: 0,
+        transition: 'opacity 0.3s ease-out'
       }}
     >
       <img 
