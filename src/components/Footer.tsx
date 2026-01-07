@@ -103,12 +103,12 @@ const Footer = memo(() => {
         padding: 0, 
         position: 'relative', 
         zIndex: 1,
-        boxShadow: '0 -10px 30px rgba(0, 0, 0, 0.1)',
         overflow: 'hidden',
         width: '100%',
         minHeight: '200px',
         touchAction: 'none',
-        overscrollBehavior: 'none'
+        overscrollBehavior: 'none',
+        backgroundColor: 'transparent'
       }}
     >
       <img 
@@ -129,7 +129,8 @@ const Footer = memo(() => {
           transform: transform,
           transformOrigin: 'center center',
           transition: 'transform 0.1s ease-out',
-          willChange: 'transform'
+          willChange: 'transform',
+          boxShadow: '0 -10px 30px rgba(0, 0, 0, 0.1)'
         }}
         loading="lazy"
         decoding="async"
