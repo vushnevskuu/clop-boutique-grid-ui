@@ -84,7 +84,15 @@ const Hero3D = ({ modelPath, scrollProgress, mousePosition = { x: 0, y: 0 } }: H
   return (
     <Canvas
       camera={{ position: [0, 0, 5], fov: 50 }}
-      style={{ width: "100%", height: "100%", background: "white" }}
+      style={{ 
+        width: "100%", 
+        height: "100%", 
+        background: "white",
+        display: "block",
+        position: "absolute",
+        top: 0,
+        left: 0
+      }}
       gl={{ 
         alpha: true, 
         antialias: true, 

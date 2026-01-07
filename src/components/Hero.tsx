@@ -65,22 +65,22 @@ const Hero = () => {
         className="sticky top-0 z-0 bg-white"
         style={{
           height: '100vh',
+          width: '100%',
+          position: 'relative',
           opacity: scrollProgress >= 1 ? 0 : 1,
           pointerEvents: scrollProgress >= 1 ? 'none' : 'auto',
           transition: 'opacity 0.3s ease-out'
         }}
       >
         {/* 3D Model centered - lazy loaded */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-full h-full">
-            <Suspense fallback={<div className="w-full h-full bg-white" />}>
-              <Hero3D 
-                modelPath="/model.glb" 
-                scrollProgress={scrollProgress}
-                mousePosition={mousePosition}
-              />
-            </Suspense>
-          </div>
+        <div className="absolute inset-0 w-full h-full" style={{ position: 'relative' }}>
+          <Suspense fallback={<div className="w-full h-full bg-white" />}>
+            <Hero3D 
+              modelPath="/model.glb" 
+              scrollProgress={scrollProgress}
+              mousePosition={mousePosition}
+            />
+          </Suspense>
         </div>
       </div>
 
