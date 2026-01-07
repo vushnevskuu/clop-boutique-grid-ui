@@ -6,9 +6,10 @@ import * as THREE from "three";
 interface Model3DProps {
   modelPath: string;
   scrollProgress: number;
+  mousePosition?: { x: number; y: number };
 }
 
-const Model = ({ modelPath, scrollProgress }: Model3DProps) => {
+const Model = ({ modelPath, scrollProgress, mousePosition = { x: 0, y: 0 } }: Model3DProps) => {
   const { scene } = useGLTF(modelPath, true);
   const meshRef = useRef<THREE.Group>(null);
   
@@ -62,12 +63,28 @@ const Model = ({ modelPath, scrollProgress }: Model3DProps) => {
 interface Hero3DProps {
   modelPath: string;
   scrollProgress: number;
+  mousePosition?: { x: number; y: number };
 }
 
-const Hero3D = ({ modelPath, scrollProgress }: Hero3DProps) => {
+const Hero3D = ({ modelPath, scrollProgress, mousePosition = { x: 0, y: 0 } }: Hero3DProps) => {
+  const cameraRef = useRef<THREE.PerspectiveCamera>(null);
+  
+  // Apply mouse movement to camera position
+  useFrame(() => {
+    if (cameraRef.current) {
+      const intensity = 0.5; // Adjust this to control the movement intensity
+      cameraRef.current.position.x = mousePosition.x * intensity;
+      cameraRef.current.position.y = -mousePosition.y * intensity; // Invert Y for natural feel
+      cameraRef.current.lookAt(0, 0, 0);
+    }
+  });
+
   return (
     <Canvas
       camera={{ position: [0, 0, 5], fov: 50 }}
+      onCreated={({ camera }) => {
+        cameraRef.current = camera as THREE.PerspectiveCamera;
+      }}
       style={{ width: "100%", height: "100%", background: "transparent" }}
       gl={{ 
         alpha: true, 
@@ -122,7 +139,7 @@ const Hero3D = ({ modelPath, scrollProgress }: Hero3DProps) => {
           intensity={0.6} 
         />
         
-        <Model modelPath={modelPath} scrollProgress={scrollProgress} />
+        <Model modelPath={modelPath} scrollProgress={scrollProgress} mousePosition={mousePosition} />
       </Suspense>
     </Canvas>
   );

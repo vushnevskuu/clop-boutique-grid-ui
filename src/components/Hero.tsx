@@ -7,6 +7,7 @@ useGLTF.preload("/model.glb");
 
 const Hero = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const heroRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -20,12 +21,30 @@ const Hero = () => {
     setScrollProgress(progress);
   }, []);
 
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!sectionRef.current) return;
+    
+    const rect = sectionRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    // Calculate mouse position relative to center (-1 to 1)
+    const x = (e.clientX - centerX) / (rect.width / 2);
+    const y = (e.clientY - centerY) / (rect.height / 2);
+    
+    setMousePosition({ x, y });
+  }, []);
+
   useEffect(() => {
     window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
     handleScroll(); // Initial calculation
 
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [handleScroll]);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, [handleScroll, handleMouseMove]);
 
   // Memoize opacity calculations to avoid recalculations
   const logoOpacity = useMemo(() => Math.max(0, 1 - scrollProgress * 3), [scrollProgress]);
@@ -57,6 +76,7 @@ const Hero = () => {
             <Hero3D 
               modelPath="/model.glb" 
               scrollProgress={scrollProgress}
+              mousePosition={mousePosition}
             />
           </div>
         </div>
