@@ -1,6 +1,6 @@
 const Footer = () => {
   return (
-    <footer className="w-full" style={{ transform: 'translateY(50%)' }}>
+    <footer className="w-full" style={{ marginTop: '100vh' }}>
       <img 
         src="/footer.jpg" 
         alt="Footer" 
