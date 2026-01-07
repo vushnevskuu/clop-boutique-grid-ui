@@ -324,7 +324,7 @@ const Product = memo(() => {
               <h2 className="text-2xl md:text-3xl font-bold uppercase mb-8" style={{ fontSize: '12px' }}>
                 You may also like
               </h2>
-              <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+              <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-10">
                 {similarProducts.map((item) => (
                   <Link key={item.id} to={`/product/${item.id}`} className="block">
                     <div className="aspect-[4/5] overflow-hidden bg-gray-100">
