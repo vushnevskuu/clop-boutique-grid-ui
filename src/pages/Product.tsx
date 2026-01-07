@@ -226,7 +226,10 @@ const Product = () => {
                 )}
 
                 <div className="pt-8">
-                  <button className="bg-gray-400 text-white px-8 py-4 uppercase font-bold w-full transition-all duration-200 hover:bg-foreground hover:text-background">
+                  <button 
+                    className="px-8 py-4 uppercase font-bold w-full transition-all duration-200 hover:bg-foreground hover:text-background"
+                    style={{ backgroundColor: '#f3f3f3', color: '#000000' }}
+                  >
                     Add to cart
                   </button>
                 </div>
