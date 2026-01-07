@@ -187,13 +187,21 @@ const Loader = memo(() => {
     >
       <div
         style={{
-          fontSize: '48px',
-          fontWeight: 'normal',
-          color: '#000000',
-          fontFamily: 'Arial, sans-serif',
+          backgroundColor: '#f3f3f3',
+          padding: '12px 24px',
+          borderRadius: '0',
         }}
       >
-        {loadingProgress}%
+        <div
+          style={{
+            fontSize: '14px',
+            fontWeight: 'normal',
+            color: '#000000',
+            fontFamily: 'Arial, sans-serif',
+          }}
+        >
+          {loadingProgress}%
+        </div>
       </div>
     </div>
   );
