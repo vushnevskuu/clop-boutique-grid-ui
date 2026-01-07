@@ -292,8 +292,13 @@ const Product = memo(() => {
 
                 <div className="pt-8">
                   <button 
-                    className="px-8 py-4 uppercase font-bold w-full transition-all duration-200"
-                    style={{ backgroundColor: '#f3f3f3', color: '#000000' }}
+                    className="px-8 py-4 w-full transition-all duration-200"
+                    style={{ 
+                      backgroundColor: '#f3f3f3', 
+                      color: '#000000',
+                      fontSize: '14px',
+                      fontWeight: 'normal'
+                    }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.backgroundColor = '#000000';
                       e.currentTarget.style.color = '#ffffff';
@@ -303,7 +308,7 @@ const Product = memo(() => {
                       e.currentTarget.style.color = '#000000';
                     }}
                   >
-                    Add to cart
+                    message us
                   </button>
                 </div>
               </div>
