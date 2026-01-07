@@ -41,6 +41,7 @@ const ProductCard = memo(({ id, image, hoverImage, title, price, size, brand }: 
           className="w-full h-full object-cover transition-opacity duration-300"
           loading="lazy"
           decoding="async"
+          fetchPriority="low"
         />
         {/* Message Us button - appears on hover */}
         <button
