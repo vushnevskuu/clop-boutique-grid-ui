@@ -65,7 +65,7 @@ const Footer = () => {
         className="w-full h-auto object-cover"
         style={{ 
           display: 'block', 
-          position: 'absolute',
+          position: 'relative',
           left: '50%',
           width: '120%', 
           height: 'auto', 
