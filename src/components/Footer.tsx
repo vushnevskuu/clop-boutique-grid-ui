@@ -5,6 +5,48 @@ const Footer = () => {
   const footerRef = useRef<HTMLElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
 
+  // Prevent overscroll/bounce effect when scrolled to footer
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      if (!footerRef.current) return;
+      
+      const rect = footerRef.current.getBoundingClientRect();
+      const isAtBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 10;
+      
+      // If we're at the bottom and trying to scroll down, prevent it
+      if (isAtBottom && e.deltaY > 0) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!footerRef.current) return;
+      
+      const isAtBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 10;
+      
+      // If we're at the bottom, prevent touch scrolling
+      if (isAtBottom) {
+        const touch = e.touches[0];
+        const element = document.elementFromPoint(touch.clientX, touch.clientY);
+        
+        // Only prevent if touching the footer
+        if (footerRef.current.contains(element)) {
+          e.preventDefault();
+        }
+      }
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, []);
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!footerRef.current) return;
@@ -56,7 +98,9 @@ const Footer = () => {
         boxShadow: '0 -10px 30px rgba(0, 0, 0, 0.1)',
         overflow: 'hidden',
         width: '100%',
-        minHeight: '200px'
+        minHeight: '200px',
+        touchAction: 'none',
+        overscrollBehavior: 'none'
       }}
     >
       <img 
