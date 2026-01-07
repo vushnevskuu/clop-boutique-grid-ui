@@ -118,7 +118,7 @@ const Product = memo(() => {
         <Header />
         <main className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Product not found</h1>
+            <h1 className="font-bold mb-4" style={{ fontSize: '32px' }}>Product not found</h1>
             <button
               onClick={handleBackClick}
               className="btn-brutal"
@@ -163,7 +163,7 @@ const Product = memo(() => {
           <button
             onClick={handleBackClick}
             className="mb-8 text-foreground hover:text-accent transition-colors"
-            style={{ fontSize: '12px' }}
+            style={{ fontSize: '14px' }}
           >
             ← Back to catalog
           </button>
@@ -277,19 +277,19 @@ const Product = memo(() => {
             <div className="flex-shrink-0" style={{ width: '750px', marginLeft: '20px' }}>
               <div className="space-y-6 sticky top-24">
                 {product.brand && (
-                  <p className="text-xs text-muted-foreground uppercase tracking-widest">
+                  <p className="text-muted-foreground uppercase tracking-widest" style={{ fontSize: '14px' }}>
                     {product.brand}
                   </p>
                 )}
-                <h1 className="text-2xl font-bold uppercase tracking-tighter">
+                <h1 className="font-bold uppercase tracking-tighter" style={{ fontSize: '32px' }}>
                   {product.title}
                 </h1>
-                <p className="font-bold text-xl">{product.price}</p>
+                <p className="font-bold" style={{ fontSize: '14px' }}>{product.price}</p>
                 
                 {product.size && (
                   <div>
-                    <p className="text-sm text-muted-foreground mb-2">Size</p>
-                    <p className="text-sm">{product.size}</p>
+                    <p className="text-muted-foreground mb-2" style={{ fontSize: '14px' }}>Size</p>
+                    <p style={{ fontSize: '14px' }}>{product.size}</p>
                   </div>
                 )}
 
@@ -321,7 +321,7 @@ const Product = memo(() => {
           {/* You may also like section */}
           {similarProducts.length > 0 && (
             <section className="mt-20">
-              <h2 className="text-2xl md:text-3xl font-bold uppercase mb-8" style={{ fontSize: '12px' }}>
+              <h2 className="font-bold uppercase mb-8" style={{ fontSize: '14px' }}>
                 You may also like
               </h2>
               <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-10">
