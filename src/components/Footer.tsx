@@ -54,7 +54,8 @@ const Footer = () => {
         position: 'relative', 
         zIndex: 1,
         boxShadow: '0 -10px 30px rgba(0, 0, 0, 0.1)',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        width: '100%'
       }}
     >
       <img 
@@ -64,12 +65,13 @@ const Footer = () => {
         className="w-full h-auto object-cover"
         style={{ 
           display: 'block', 
+          position: 'absolute',
+          left: '50%',
           width: '120%', 
           height: 'auto', 
           margin: 0, 
           padding: 0,
           minHeight: '200px',
-          marginLeft: '50%',
           transform: `translateX(-50%) perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(${translateZ}px)`,
           transformOrigin: 'center center',
           transition: 'transform 0.1s ease-out',
