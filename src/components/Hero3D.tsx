@@ -99,8 +99,9 @@ const Hero3D = ({ modelPath, scrollProgress, mousePosition = { x: 0, y: 0 } }: H
         stencil: false,
         depth: true
       }}
-      dpr={[1, 2]} // Limit pixel ratio for better performance
+      dpr={[1, 1.5]} // Limit pixel ratio for better performance (reduced from 2)
       performance={{ min: 0.5 }} // Lower framerate threshold
+      frameloop="demand" // Only render when needed
       onError={(error) => {
         console.error("3D Canvas error:", error);
       }}

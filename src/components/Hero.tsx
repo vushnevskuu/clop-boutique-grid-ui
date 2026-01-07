@@ -1,4 +1,8 @@
 import { useEffect, useRef, useState, useMemo, useCallback, lazy, Suspense } from "react";
+import { useGLTF } from "@react-three/drei";
+
+// Preload 3D model for faster loading
+useGLTF.preload("/model.glb");
 
 // Lazy load Hero3D to improve initial page load
 const Hero3D = lazy(() => import("./Hero3D"));
