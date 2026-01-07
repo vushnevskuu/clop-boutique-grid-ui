@@ -1,3 +1,4 @@
+import { useEffect, useState, useCallback, useMemo, memo } from "react";
 import ProductCard from "./ProductCard";
 
 import product1 from "@/assets/product-1.jpg";
@@ -83,9 +84,55 @@ const products = [
   },
 ];
 
-const ProductGrid = () => {
+const ProductGrid = memo(() => {
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [scrollPosition, setScrollPosition] = useState(0);
+
+  const handleScroll = useCallback(() => {
+    const windowHeight = window.innerHeight;
+    const heroHeight = windowHeight * 3;
+    const currentScroll = window.scrollY;
+    setScrollPosition(currentScroll);
+    const progress = Math.max(0, Math.min(1, currentScroll / heroHeight));
+    setScrollProgress(progress);
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll(); // Initial calculation
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [handleScroll]);
+
+  // Calculate translateY for product grid to appear from below
+  const gridTranslateY = useMemo(() => {
+    if (scrollProgress >= 1) {
+      const windowHeight = window.innerHeight;
+      const heroHeight = windowHeight * 3;
+      const extraScroll = Math.max(0, scrollPosition - heroHeight);
+      // Start from below screen and move up as user scrolls
+      const initialOffset = windowHeight; // Start below screen
+      const scrollOffset = extraScroll;
+      return Math.max(0, initialOffset - scrollOffset);
+    }
+    // Before hero completes, keep grid below screen
+    return window.innerHeight;
+  }, [scrollProgress, scrollPosition]);
+
   return (
-    <section id="shop" className="scroll-mt-20 relative z-30" style={{ padding: '30px', paddingBottom: '0', backgroundColor: 'transparent' }}>
+    <section 
+      id="shop" 
+      className="scroll-mt-20 relative z-30" 
+      style={{ 
+        padding: '30px', 
+        paddingBottom: '0', 
+        backgroundColor: 'transparent',
+        transform: `translateY(${gridTranslateY}px)`,
+        transition: scrollProgress >= 1 ? 'transform 0.3s ease-out' : 'none'
+      }}
+    >
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6" style={{ rowGap: '20px', columnGap: '20px' }}>
         {products.map((product) => (
           <ProductCard
@@ -102,6 +149,8 @@ const ProductGrid = () => {
       </div>
     </section>
   );
-};
+});
+
+ProductGrid.displayName = 'ProductGrid';
 
 export default ProductGrid;
