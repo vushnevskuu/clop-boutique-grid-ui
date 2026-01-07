@@ -108,7 +108,8 @@ const Footer = memo(() => {
         minHeight: '200px',
         touchAction: 'none',
         overscrollBehavior: 'none',
-        backgroundColor: 'transparent'
+        backgroundColor: 'transparent',
+        clear: 'both' // Ensure footer is below all floated/transformed elements
       }}
     >
       <img 
