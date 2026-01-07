@@ -87,7 +87,8 @@ const Hero3D = ({ modelPath, scrollProgress, mousePosition = { x: 0, y: 0 } }: H
       style={{ 
         width: "100%", 
         height: "100%", 
-        background: "white"
+        background: "white",
+        display: "block"
       }}
       gl={{ 
         alpha: true, 
