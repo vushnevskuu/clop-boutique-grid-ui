@@ -3,7 +3,7 @@ import Hero3D from "./Hero3D";
 import { useGLTF } from "@react-three/drei";
 
 // Preload 3D model for faster initial load
-useGLTF.preload("/model2.glb");
+useGLTF.preload("/model.glb");
 
 const Hero = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -55,7 +55,7 @@ const Hero = () => {
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-full h-full">
             <Hero3D 
-              modelPath="/model2.glb" 
+              modelPath="/model.glb" 
               scrollProgress={scrollProgress}
             />
           </div>
