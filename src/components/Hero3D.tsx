@@ -10,8 +10,8 @@ interface Model3DProps {
 }
 
 const Model = ({ modelPath, scrollProgress, mousePosition = { x: 0, y: 0 } }: Model3DProps) => {
-  // Use draco loader for better compression if available, otherwise use default
-  const { scene } = useGLTF(modelPath);
+  // Load model with caching enabled
+  const { scene } = useGLTF(modelPath, true);
   const meshRef = useRef<THREE.Group>(null);
   
   // Optimize: dispose of unused geometries and materials
