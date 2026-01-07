@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo, memo } from "react";
+import { memo } from "react";
 import ProductCard from "./ProductCard";
 
 import product1 from "@/assets/product-1.jpg";
@@ -85,43 +85,6 @@ const products = [
 ];
 
 const ProductGrid = memo(() => {
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [scrollPosition, setScrollPosition] = useState(0);
-
-  const handleScroll = useCallback(() => {
-    const windowHeight = window.innerHeight;
-    const heroHeight = windowHeight * 3;
-    const currentScroll = window.scrollY;
-    setScrollPosition(currentScroll);
-    const progress = Math.max(0, Math.min(1, currentScroll / heroHeight));
-    setScrollProgress(progress);
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll(); // Initial calculation
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [handleScroll]);
-
-  // Calculate translateY for product grid to appear from below
-  const gridTranslateY = useMemo(() => {
-    const windowHeight = window.innerHeight;
-    const heroHeight = windowHeight * 3;
-    
-    if (scrollProgress >= 1) {
-      const extraScroll = Math.max(0, scrollPosition - heroHeight);
-      // Start from below screen (one viewport height) and move up as user scrolls
-      // When extraScroll = 0, grid is at windowHeight (below screen)
-      // As extraScroll increases, grid moves up
-      return Math.max(0, windowHeight - extraScroll);
-    }
-    // Before hero completes, keep grid below screen
-    return windowHeight;
-  }, [scrollProgress, scrollPosition]);
-
   return (
     <section 
       id="shop" 
@@ -129,9 +92,7 @@ const ProductGrid = memo(() => {
       style={{ 
         padding: '30px', 
         paddingBottom: '0', 
-        backgroundColor: 'transparent',
-        transform: `translateY(${gridTranslateY}px)`,
-        transition: 'none' // No transition for smooth scroll-based movement
+        backgroundColor: 'transparent'
       }}
     >
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6" style={{ rowGap: '20px', columnGap: '20px' }}>

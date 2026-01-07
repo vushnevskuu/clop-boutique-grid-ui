@@ -5,7 +5,6 @@ const Hero3D = lazy(() => import("./Hero3D"));
 
 const Hero = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [scrollPosition, setScrollPosition] = useState(0);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const heroRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
@@ -16,7 +15,6 @@ const Hero = () => {
     const windowHeight = window.innerHeight;
     const heroHeight = windowHeight * 3;
     const currentScroll = window.scrollY;
-    setScrollPosition(currentScroll);
     const progress = Math.max(0, Math.min(1, currentScroll / heroHeight));
     setScrollProgress(progress);
   }, []);
@@ -55,19 +53,6 @@ const Hero = () => {
     return Math.min(1, (scrollProgress - 0.15) * 1.82);
   }, [scrollProgress]);
 
-  // Calculate translateY for hero section to move up after animations complete
-  // Hero moves up at the same speed as ProductGrid (1:1 with scroll)
-  const heroTranslateY = useMemo(() => {
-    if (scrollProgress >= 1) {
-      const windowHeight = window.innerHeight;
-      const heroHeight = windowHeight * 3;
-      const extraScroll = Math.max(0, scrollPosition - heroHeight);
-      // Move hero up by the same amount as extraScroll (pixels, not percentage)
-      // This ensures Hero and ProductGrid move at the same speed
-      return -extraScroll;
-    }
-    return 0;
-  }, [scrollProgress, scrollPosition]);
 
   return (
     <section 
@@ -75,12 +60,13 @@ const Hero = () => {
       className="relative flex items-center justify-center overflow-hidden"
       style={{ height: '300vh' }} // 3 viewport heights for scrollable area
     >
-      {/* Fixed Background with 3D Model - moves up after scroll completes */}
+      {/* Fixed Background with 3D Model - stays fixed on first screen */}
       <div 
         className="fixed inset-0 z-0 bg-white"
         style={{
-          transform: `translateY(${heroTranslateY}px)`,
-          transition: 'none' // No transition for smooth scroll-based movement
+          opacity: scrollProgress >= 1 ? 0 : 1,
+          pointerEvents: scrollProgress >= 1 ? 'none' : 'auto',
+          transition: 'opacity 0.3s ease-out'
         }}
       >
         {/* 3D Model centered - lazy loaded */}
@@ -97,15 +83,14 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Fixed Content Container - moves up after scroll completes */}
+      {/* Fixed Content Container - stays fixed on first screen */}
       <div 
         ref={heroRef}
         className="fixed inset-0 z-10 w-full h-screen flex items-center justify-center"
         style={{
           opacity: scrollProgress >= 1 ? 0 : 1,
           pointerEvents: scrollProgress >= 1 ? 'none' : 'auto',
-          transform: `translateY(${heroTranslateY}px)`,
-          transition: 'opacity 0.3s ease-out' // Only transition opacity, not transform
+          transition: 'opacity 0.3s ease-out'
         }}
       >
         {/* Logo - disappears on scroll */}
