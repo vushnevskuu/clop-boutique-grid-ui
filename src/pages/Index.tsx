@@ -2,7 +2,6 @@ import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import ProductGrid from "@/components/ProductGrid";
 import About from "@/components/About";
-import Footer from "@/components/Footer";
 
 const Index = () => {
   return (
@@ -13,7 +12,6 @@ const Index = () => {
         <ProductGrid />
         <About />
       </main>
-      <Footer />
     </div>
   );
 };

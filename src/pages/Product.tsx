@@ -1,6 +1,5 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import { useState, useMemo } from "react";
 
 import product1 from "@/assets/product-1.jpg";
@@ -108,7 +107,6 @@ const Product = () => {
             </button>
           </div>
         </main>
-        <Footer />
       </div>
     );
   }
@@ -259,7 +257,6 @@ const Product = () => {
           )}
         </div>
       </main>
-      <Footer />
     </div>
   );
 };
