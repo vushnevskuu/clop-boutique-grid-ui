@@ -1,7 +1,6 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import ProductGrid from "@/components/ProductGrid";
-import About from "@/components/About";
 
 const Index = () => {
   return (
@@ -10,7 +9,6 @@ const Index = () => {
       <main>
         <Hero />
         <ProductGrid />
-        <About />
       </main>
     </div>
   );
