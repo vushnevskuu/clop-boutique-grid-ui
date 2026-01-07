@@ -239,12 +239,8 @@ const ProductGrid = memo(() => {
 
     const section = sectionRef.current;
     const sectionTop = section.offsetTop;
-    const sectionHeight = section.offsetHeight;
     const windowHeight = window.innerHeight;
     const scrollY = window.scrollY;
-
-    // Calculate scroll position relative to section
-    const scrollPosition = scrollY + windowHeight - sectionTop;
 
     // Find second-to-last row element
     const grid = section.querySelector('.grid');
@@ -263,12 +259,16 @@ const ProductGrid = memo(() => {
 
     const secondToLastRowTop = secondToLastRowCards[0].offsetTop;
     const secondToLastRowHeight = secondToLastRowCards[0].offsetHeight;
-    const rowBottom = secondToLastRowTop + secondToLastRowHeight;
 
-    // Calculate how much of second-to-last row is scrolled
-    const rowScrollPosition = scrollY + windowHeight - (sectionTop + secondToLastRowTop);
+    // Calculate scroll position relative to second-to-last row
+    // This is the distance from top of viewport to top of second-to-last row
+    const rowTopInViewport = (sectionTop + secondToLastRowTop) - scrollY;
     const thresholdHeight = secondToLastRowHeight * FOOTER_APPEAR_THRESHOLD;
-    const rowScrollProgress = Math.max(0, Math.min(1, rowScrollPosition / thresholdHeight));
+    
+    // Calculate how much of second-to-last row is visible
+    // When rowTopInViewport <= windowHeight - thresholdHeight, footer should appear
+    const scrollPastThreshold = Math.max(0, (windowHeight - rowTopInViewport) - thresholdHeight);
+    const rowScrollProgress = Math.max(0, Math.min(1, scrollPastThreshold / thresholdHeight));
 
     setScrollProgress(rowScrollProgress);
 
@@ -278,10 +278,10 @@ const ProductGrid = memo(() => {
       
       // Calculate how much to translate last row
       // Last row should move synchronously with scroll (1:1)
-      // It starts hidden below footer and moves up as user scrolls
-      const extraScroll = Math.max(0, rowScrollPosition - thresholdHeight);
+      // extraScroll is how much we've scrolled past the threshold
+      const extraScroll = scrollPastThreshold - thresholdHeight;
       const initialOffset = footerHeight * (1 - LAST_ROW_INITIAL_VISIBILITY);
-      // Move up synchronously with scroll (1:1 ratio)
+      // Move up synchronously with scroll (1:1 ratio) - each pixel scrolled = 1 pixel moved up
       setLastRowTranslateY(Math.max(0, initialOffset - extraScroll));
     } else {
       setShowFooter(false);
