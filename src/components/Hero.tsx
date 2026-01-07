@@ -55,17 +55,20 @@ const Hero = () => {
     return Math.min(1, (scrollProgress - 0.15) * 1.82);
   }, [scrollProgress]);
 
-  // Calculate translateY for hero to move up after animations complete
+  // Calculate translateY for hero to move up when second screen starts appearing
   const heroTranslateY = useMemo(() => {
     const windowHeight = window.innerHeight;
     const heroHeight = windowHeight * 3;
     
-    if (scrollProgress >= 1) {
-      // After animations complete, start moving up immediately
-      const extraScroll = Math.max(0, scrollPosition - heroHeight);
-      // Move hero up based on extra scroll (1:1 with scroll speed)
-      // This will make it disappear above the screen
-      return -extraScroll;
+    // Start moving up when we're close to completing hero section (around 80% of scroll)
+    // This makes sphere move up as second screen appears
+    if (scrollProgress >= 0.8) {
+      // Calculate how much we've scrolled past the 80% point
+      const startMovingAt = heroHeight * 0.8;
+      const scrollPastStart = Math.max(0, scrollPosition - startMovingAt);
+      // Move hero up based on scroll past the start point
+      // This will make it disappear above the screen as second screen appears
+      return -scrollPastStart;
     }
     return 0;
   }, [scrollProgress, scrollPosition]);
