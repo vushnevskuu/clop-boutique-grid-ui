@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useEffect, useState, useRef, useCallback, useMemo } from "react";
 import ProductCard from "./ProductCard";
 
 import product1 from "@/assets/product-1.jpg";
@@ -191,9 +191,121 @@ const products = [
   },
 ];
 
+// Configurable parameters
+const FOOTER_APPEAR_THRESHOLD = 0.5; // 50% of second-to-last row (adjustable)
+const LAST_ROW_INITIAL_VISIBILITY = 0; // 0 = fully hidden, 1 = fully visible (adjustable)
+const CARDS_PER_ROW_LG = 6; // Cards per row on large screens
+
 const ProductGrid = memo(() => {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [footerHeight, setFooterHeight] = useState(0);
+  const [showFooter, setShowFooter] = useState(false);
+  const [lastRowTranslateY, setLastRowTranslateY] = useState(0);
+
+  // Calculate number of rows dynamically
+  const totalRows = useMemo(() => {
+    return Math.ceil(products.length / CARDS_PER_ROW_LG);
+  }, []);
+
+  const secondToLastRowIndex = totalRows - 2; // Index of second-to-last row (0-based)
+  const lastRowStartIndex = secondToLastRowIndex * CARDS_PER_ROW_LG; // Start index of last row
+
+  // Split products into rows
+  const productRows = useMemo(() => {
+    const rows: typeof products[] = [];
+    for (let i = 0; i < products.length; i += CARDS_PER_ROW_LG) {
+      rows.push(products.slice(i, i + CARDS_PER_ROW_LG));
+    }
+    return rows;
+  }, []);
+
+  // Get footer height
+  useEffect(() => {
+    const footer = document.querySelector('footer');
+    if (footer) {
+      const updateFooterHeight = () => {
+        setFooterHeight(footer.offsetHeight);
+      };
+      updateFooterHeight();
+      window.addEventListener('resize', updateFooterHeight);
+      return () => window.removeEventListener('resize', updateFooterHeight);
+    }
+  }, []);
+
+  // Track scroll to detect when second-to-last row is scrolled
+  const handleScroll = useCallback(() => {
+    if (!sectionRef.current) return;
+
+    const section = sectionRef.current;
+    const sectionTop = section.offsetTop;
+    const sectionHeight = section.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollY = window.scrollY;
+
+    // Calculate scroll position relative to section
+    const scrollPosition = scrollY + windowHeight - sectionTop;
+
+    // Find second-to-last row element
+    const grid = section.querySelector('.grid');
+    if (!grid) return;
+
+    const allCards = Array.from(grid.children) as HTMLElement[];
+    if (allCards.length === 0) return;
+
+    // Find cards in second-to-last row
+    const secondToLastRowCards = allCards.slice(
+      secondToLastRowIndex * CARDS_PER_ROW_LG,
+      (secondToLastRowIndex + 1) * CARDS_PER_ROW_LG
+    );
+
+    if (secondToLastRowCards.length === 0) return;
+
+    const secondToLastRowTop = secondToLastRowCards[0].offsetTop;
+    const secondToLastRowHeight = secondToLastRowCards[0].offsetHeight;
+    const rowBottom = secondToLastRowTop + secondToLastRowHeight;
+
+    // Calculate how much of second-to-last row is scrolled
+    const rowScrollPosition = scrollY + windowHeight - (sectionTop + secondToLastRowTop);
+    const rowScrollProgress = Math.max(0, Math.min(1, rowScrollPosition / (secondToLastRowHeight * FOOTER_APPEAR_THRESHOLD)));
+
+    setScrollProgress(rowScrollProgress);
+
+    // Show footer when threshold is reached
+    if (rowScrollProgress >= 1) {
+      setShowFooter(true);
+      
+      // Calculate how much to translate last row
+      const extraScroll = Math.max(0, rowScrollPosition - (secondToLastRowHeight * FOOTER_APPEAR_THRESHOLD));
+      const initialOffset = footerHeight * (1 - LAST_ROW_INITIAL_VISIBILITY);
+      setLastRowTranslateY(Math.max(0, initialOffset - extraScroll));
+    } else {
+      setShowFooter(false);
+      setLastRowTranslateY(footerHeight * (1 - LAST_ROW_INITIAL_VISIBILITY));
+    }
+  }, [secondToLastRowIndex, footerHeight]);
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // Initial calculation
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [handleScroll]);
+
+  // Control footer visibility
+  useEffect(() => {
+    const footer = document.querySelector('footer') as HTMLElement;
+    if (footer) {
+      footer.style.opacity = showFooter ? '1' : '0';
+      footer.style.pointerEvents = showFooter ? 'auto' : 'none';
+    }
+  }, [showFooter]);
+
   return (
     <section 
+      ref={sectionRef}
       id="shop" 
       className="scroll-mt-20 relative z-30" 
       style={{ 
@@ -203,18 +315,29 @@ const ProductGrid = memo(() => {
       }}
     >
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6" style={{ rowGap: '20px', columnGap: '20px' }}>
-        {products.map((product) => (
-          <ProductCard
-            key={product.id}
-            id={product.id}
-            image={product.image}
-            hoverImage={product.hoverImage}
-            title={product.title}
-            brand={product.brand}
-            price={product.price}
-            size={product.size}
-          />
-        ))}
+        {products.map((product, index) => {
+          const isLastRow = index >= lastRowStartIndex;
+          return (
+            <div
+              key={product.id}
+              style={{
+                transform: isLastRow ? `translateY(${lastRowTranslateY}px)` : 'none',
+                transition: 'none',
+                zIndex: isLastRow ? 0 : 1
+              }}
+            >
+              <ProductCard
+                id={product.id}
+                image={product.image}
+                hoverImage={product.hoverImage}
+                title={product.title}
+                brand={product.brand}
+                price={product.price}
+                size={product.size}
+              />
+            </div>
+          );
+        })}
       </div>
     </section>
   );
