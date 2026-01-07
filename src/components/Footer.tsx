@@ -113,7 +113,7 @@ const Footer = memo(() => {
         overscrollBehavior: 'none',
         backgroundColor: 'transparent',
         opacity: 0,
-        transition: 'opacity 0.3s ease-out'
+        transition: 'none'
       }}
     >
       <img 
