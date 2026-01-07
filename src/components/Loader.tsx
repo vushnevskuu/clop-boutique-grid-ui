@@ -5,80 +5,120 @@ const Loader = memo(() => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    // Track all resources loading
-    const resources = [
-      // Critical images
+    // Block scrolling
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+
+    let progress = 0;
+    const targetProgress = 100;
+
+    // Track critical resources
+    const criticalResources = [
       "/logo.svg",
       "/model.glb",
       "/footer.webp",
-      // Product images (lazy loaded, but we track them)
-      ...Array.from({ length: 8 }, (_, i) => `/src/assets/product-${i + 1}.jpg`),
     ];
 
     let loadedCount = 0;
-    const totalResources = resources.length;
+    const totalCritical = criticalResources.length;
 
-    const updateProgress = () => {
-      loadedCount++;
-      const progress = Math.min(100, Math.round((loadedCount / totalResources) * 100));
-      setLoadingProgress(progress);
-      
-      if (loadedCount >= totalResources) {
-        // Wait a bit for React to fully render
-        setTimeout(() => {
-          setIsLoaded(true);
-          // Remove loader after fade out
-          setTimeout(() => {
-            document.body.style.overflow = '';
-          }, 300);
-        }, 200);
+    const updateProgress = (increment: number = 0) => {
+      if (increment > 0) {
+        loadedCount += increment;
       }
+      
+      // Calculate progress: 70% for critical resources, 30% for window load
+      const criticalProgress = Math.min(70, (loadedCount / totalCritical) * 70);
+      const windowProgress = window.performance.timing.loadEventEnd > 0 ? 30 : 0;
+      progress = Math.min(100, Math.round(criticalProgress + windowProgress));
+      
+      setLoadingProgress(progress);
     };
 
     // Load critical resources
-    const loadResource = (src: string) => {
+    criticalResources.forEach((src) => {
       if (src.endsWith('.glb')) {
-        // For GLB, use fetch
-        fetch(src, { method: 'HEAD' })
-          .then(() => updateProgress())
-          .catch(() => updateProgress());
-      } else if (src.includes('/assets/')) {
-        // For imported assets, they're already in bundle, just count them
-        updateProgress();
+        // For GLB, check if it's loading
+        fetch(src, { method: 'HEAD', cache: 'force-cache' })
+          .then(() => {
+            updateProgress(1);
+            checkComplete();
+          })
+          .catch(() => {
+            updateProgress(1);
+            checkComplete();
+          });
       } else {
         // For images
         const img = new Image();
-        img.onload = updateProgress;
-        img.onerror = updateProgress;
+        img.onload = () => {
+          updateProgress(1);
+          checkComplete();
+        };
+        img.onerror = () => {
+          updateProgress(1);
+          checkComplete();
+        };
         img.src = src;
+      }
+    });
+
+    const checkComplete = () => {
+      // Check if everything is loaded
+      if (document.readyState === 'complete' && loadedCount >= totalCritical) {
+        setTimeout(() => {
+          setLoadingProgress(100);
+          setTimeout(() => {
+            setIsLoaded(true);
+            setTimeout(() => {
+              document.body.style.overflow = '';
+              document.documentElement.style.overflow = '';
+            }, 300);
+          }, 100);
+        }, 300);
       }
     };
 
-    // Start loading resources
-    resources.forEach(loadResource);
-
-    // Also track window load event
+    // Track window load event
     const handleWindowLoad = () => {
-      // Ensure we reach 100% when window is loaded
-      if (loadedCount < totalResources) {
-        loadedCount = totalResources;
+      updateProgress();
+      checkComplete();
+    };
+
+    // Check if already loaded
+    if (document.readyState === 'complete') {
+      handleWindowLoad();
+    } else {
+      window.addEventListener('load', handleWindowLoad);
+    }
+
+    // Also track DOMContentLoaded
+    const handleDOMContentLoaded = () => {
+      updateProgress();
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', handleDOMContentLoaded);
+    } else {
+      handleDOMContentLoaded();
+    }
+
+    // Fallback: ensure we reach 100% after reasonable time
+    const fallbackTimeout = setTimeout(() => {
+      if (progress < 100) {
         setLoadingProgress(100);
         setTimeout(() => {
           setIsLoaded(true);
-          setTimeout(() => {
-            document.body.style.overflow = '';
-          }, 300);
-        }, 200);
+          document.body.style.overflow = '';
+          document.documentElement.style.overflow = '';
+        }, 300);
       }
-    };
-
-    window.addEventListener('load', handleWindowLoad);
-
-    // Block scrolling
-    document.body.style.overflow = 'hidden';
+    }, 5000);
 
     return () => {
       window.removeEventListener('load', handleWindowLoad);
+      document.removeEventListener('DOMContentLoaded', handleDOMContentLoaded);
+      clearTimeout(fallbackTimeout);
     };
   }, []);
 
@@ -98,7 +138,7 @@ const Loader = memo(() => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 9999,
+        zIndex: 99999,
         opacity: isLoaded ? 0 : 1,
         transition: 'opacity 0.3s ease-out',
         pointerEvents: isLoaded ? 'none' : 'auto',
