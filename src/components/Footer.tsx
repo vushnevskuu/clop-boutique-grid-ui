@@ -2,7 +2,7 @@ const Footer = () => {
   return (
     <footer className="w-full">
       <img 
-        src="/подвал.jpg" 
+        src="/footer.jpg" 
         alt="Footer" 
         className="w-full h-auto object-cover"
       />
