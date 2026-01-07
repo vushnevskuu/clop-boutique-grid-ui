@@ -57,11 +57,14 @@ const Hero = () => {
 
   // Calculate translateY for hero to move up after animations complete
   const heroTranslateY = useMemo(() => {
+    const windowHeight = window.innerHeight;
+    const heroHeight = windowHeight * 3;
+    
     if (scrollProgress >= 1) {
-      const windowHeight = window.innerHeight;
-      const heroHeight = windowHeight * 3;
+      // After animations complete, start moving up immediately
       const extraScroll = Math.max(0, scrollPosition - heroHeight);
       // Move hero up based on extra scroll (1:1 with scroll speed)
+      // This will make it disappear above the screen
       return -extraScroll;
     }
     return 0;
@@ -104,7 +107,8 @@ const Hero = () => {
           opacity: scrollProgress >= 1 ? 0 : 1,
           pointerEvents: scrollProgress >= 1 ? 'none' : 'auto',
           transform: `translateY(${heroTranslateY}px)`,
-          transition: 'opacity 0.3s ease-out'
+          transition: 'opacity 0.3s ease-out',
+          willChange: 'transform'
         }}
       >
         {/* Logo - disappears on scroll */}
