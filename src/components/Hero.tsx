@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState, useMemo, useCallback, lazy, Suspense } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback, Suspense } from "react";
+import Hero3D from "./Hero3D";
 
-// Lazy load Hero3D to improve initial page load
 // Note: Model preloading is done in main.tsx for earlier start
-const Hero3D = lazy(() => import("./Hero3D"));
+// Removed lazy loading to start loading immediately
 
 const Hero = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
