@@ -1,7 +1,6 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import ProductCard from "@/components/ProductCard";
 import { useState, useMemo } from "react";
 import {
   Carousel,
@@ -228,15 +227,15 @@ const Product = () => {
                 <CarouselContent className="-ml-2 md:-ml-4">
                   {similarProducts.map((item) => (
                     <CarouselItem key={item.id} className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4">
-                      <ProductCard
-                        id={item.id}
-                        image={item.image}
-                        hoverImage={item.hoverImage}
-                        title={item.title}
-                        brand={item.brand}
-                        price={item.price}
-                        size={item.size}
-                      />
+                      <Link to={`/product/${item.id}`} className="block">
+                        <div className="aspect-[4/5] overflow-hidden bg-gray-100">
+                          <img
+                            src={item.image}
+                            alt={item.title}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </Link>
                     </CarouselItem>
                   ))}
                 </CarouselContent>
