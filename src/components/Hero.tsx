@@ -5,6 +5,7 @@ const Hero3D = lazy(() => import("./Hero3D"));
 
 const Hero = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [scrollPosition, setScrollPosition] = useState(0);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const heroRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
@@ -15,6 +16,7 @@ const Hero = () => {
     const windowHeight = window.innerHeight;
     const heroHeight = windowHeight * 3;
     const currentScroll = window.scrollY;
+    setScrollPosition(currentScroll);
     const progress = Math.max(0, Math.min(1, currentScroll / heroHeight));
     setScrollProgress(progress);
   }, []);
@@ -53,6 +55,18 @@ const Hero = () => {
     return Math.min(1, (scrollProgress - 0.15) * 1.82);
   }, [scrollProgress]);
 
+  // Calculate translateY for hero to move up after animations complete
+  const heroTranslateY = useMemo(() => {
+    if (scrollProgress >= 1) {
+      const windowHeight = window.innerHeight;
+      const heroHeight = windowHeight * 3;
+      const extraScroll = Math.max(0, scrollPosition - heroHeight);
+      // Move hero up based on extra scroll (1:1 with scroll speed)
+      return -extraScroll;
+    }
+    return 0;
+  }, [scrollProgress, scrollPosition]);
+
 
   return (
     <section 
@@ -60,36 +74,36 @@ const Hero = () => {
       className="relative flex items-center justify-center overflow-hidden"
       style={{ height: '300vh', position: 'relative' }} // 3 viewport heights for scrollable area
     >
-      {/* Sticky Background with 3D Model - sticks to top while scrolling Hero section */}
+      {/* Fixed Background with 3D Model - moves up after animations complete */}
       <div 
-        className="sticky top-0 z-0 flex items-center justify-center"
+        className="fixed inset-0 z-0 bg-white"
         style={{
-          height: '100vh',
-          width: '100%',
-          backgroundColor: 'white',
-          opacity: scrollProgress >= 1 ? 0 : 1,
-          pointerEvents: scrollProgress >= 1 ? 'none' : 'auto',
-          transition: 'opacity 0.3s ease-out'
+          transform: `translateY(${heroTranslateY}px)`,
+          transition: 'none'
         }}
       >
         {/* 3D Model centered - lazy loaded */}
-        <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}>
-          <Suspense fallback={<div className="w-full h-full bg-white" />}>
-            <Hero3D 
-              modelPath="/model.glb" 
-              scrollProgress={scrollProgress}
-              mousePosition={mousePosition}
-            />
-          </Suspense>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-full h-full">
+            <Suspense fallback={<div className="w-full h-full bg-white" />}>
+              <Hero3D 
+                modelPath="/model.glb" 
+                scrollProgress={scrollProgress}
+                mousePosition={mousePosition}
+              />
+            </Suspense>
+          </div>
         </div>
       </div>
 
-      {/* Sticky Content Container - sticks to top while scrolling Hero section */}
+      {/* Fixed Content Container - moves up after animations complete */}
       <div 
         ref={heroRef}
-        className="sticky top-0 z-10 w-full h-screen flex items-center justify-center pointer-events-none"
+        className="fixed inset-0 z-10 w-full h-screen flex items-center justify-center"
         style={{
           opacity: scrollProgress >= 1 ? 0 : 1,
+          pointerEvents: scrollProgress >= 1 ? 'none' : 'auto',
+          transform: `translateY(${heroTranslateY}px)`,
           transition: 'opacity 0.3s ease-out'
         }}
       >
@@ -123,7 +137,7 @@ const Hero = () => {
               style={{
                 fontSize: '14px',
                 lineHeight: '100%',
-                color: '#000000',
+                color: 'white',
                 textAlign: 'left'
               }}
             >
@@ -145,10 +159,8 @@ const Hero = () => {
 
       {/* Scroll Indicator */}
       <div 
-        className="sticky top-0 z-20 flex items-end justify-center"
+        className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-20"
         style={{
-          height: '100vh',
-          paddingBottom: '2rem',
           opacity: (logoOpacity > 0.5 && scrollProgress < 1) ? 1 : 0,
           pointerEvents: scrollProgress >= 1 ? 'none' : 'auto',
           transition: "opacity 0.3s ease-out"

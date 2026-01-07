@@ -52,13 +52,12 @@ const Model = ({ modelPath, scrollProgress, mousePosition = { x: 0, y: 0 } }: Mo
   });
 
   return (
-    <Center>
-      <primitive 
-        ref={meshRef}
-        object={clonedScene} 
-        scale={scale}
-      />
-    </Center>
+    <primitive 
+      ref={meshRef}
+      object={clonedScene} 
+      scale={scale}
+      position={[0, 0, 0]}
+    />
   );
 };
 
