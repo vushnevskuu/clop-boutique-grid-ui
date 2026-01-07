@@ -10,7 +10,9 @@ const Loader = memo(() => {
     document.documentElement.style.overflow = 'hidden';
 
     let progress = 0;
-    const targetProgress = 100;
+    let resourcesLoaded = false;
+    let windowLoaded = false;
+    let componentsRendered = false;
 
     // Track critical resources
     const criticalResources = [
@@ -22,16 +24,13 @@ const Loader = memo(() => {
     let loadedCount = 0;
     const totalCritical = criticalResources.length;
 
-    const updateProgress = (increment: number = 0) => {
-      if (increment > 0) {
-        loadedCount += increment;
-      }
+    const updateProgress = () => {
+      // Calculate progress: 40% for resources, 30% for window load, 30% for React render
+      const resourceProgress = resourcesLoaded ? 40 : (loadedCount / totalCritical) * 40;
+      const windowProgress = windowLoaded ? 30 : 0;
+      const renderProgress = componentsRendered ? 30 : 0;
       
-      // Calculate progress: 70% for critical resources, 30% for window load
-      const criticalProgress = Math.min(70, (loadedCount / totalCritical) * 70);
-      const windowProgress = window.performance.timing.loadEventEnd > 0 ? 30 : 0;
-      progress = Math.min(100, Math.round(criticalProgress + windowProgress));
-      
+      progress = Math.min(100, Math.round(resourceProgress + windowProgress + renderProgress));
       setLoadingProgress(progress);
     };
 
@@ -41,46 +40,91 @@ const Loader = memo(() => {
         // For GLB, check if it's loading
         fetch(src, { method: 'HEAD', cache: 'force-cache' })
           .then(() => {
-            updateProgress(1);
+            loadedCount++;
+            if (loadedCount >= totalCritical) {
+              resourcesLoaded = true;
+            }
+            updateProgress();
             checkComplete();
           })
           .catch(() => {
-            updateProgress(1);
+            loadedCount++;
+            if (loadedCount >= totalCritical) {
+              resourcesLoaded = true;
+            }
+            updateProgress();
             checkComplete();
           });
       } else {
         // For images
         const img = new Image();
         img.onload = () => {
-          updateProgress(1);
+          loadedCount++;
+          if (loadedCount >= totalCritical) {
+            resourcesLoaded = true;
+          }
+          updateProgress();
           checkComplete();
         };
         img.onerror = () => {
-          updateProgress(1);
+          loadedCount++;
+          if (loadedCount >= totalCritical) {
+            resourcesLoaded = true;
+          }
+          updateProgress();
           checkComplete();
         };
         img.src = src;
       }
     });
 
+    // Check if React components are rendered
+    const checkComponentsRendered = () => {
+      // Wait for main content to appear (header, hero, or product grid)
+      const checkInterval = setInterval(() => {
+        const hasContent = 
+          document.querySelector('header') ||
+          document.querySelector('[class*="Hero"]') ||
+          document.querySelector('[class*="ProductGrid"]') ||
+          document.querySelector('main');
+        
+        if (hasContent) {
+          componentsRendered = true;
+          updateProgress();
+          clearInterval(checkInterval);
+          checkComplete();
+        }
+      }, 50);
+
+      // Stop checking after 3 seconds
+      setTimeout(() => {
+        clearInterval(checkInterval);
+        componentsRendered = true;
+        updateProgress();
+        checkComplete();
+      }, 3000);
+    };
+
     const checkComplete = () => {
-      // Check if everything is loaded
-      if (document.readyState === 'complete' && loadedCount >= totalCritical) {
+      // Wait for all conditions to be met
+      if (resourcesLoaded && windowLoaded && componentsRendered) {
+        // Ensure we show at least 100% for a moment
+        setLoadingProgress(100);
+        
+        // Wait a bit to ensure everything is ready, then hide loader
         setTimeout(() => {
-          setLoadingProgress(100);
+          setIsLoaded(true);
           setTimeout(() => {
-            setIsLoaded(true);
-            setTimeout(() => {
-              document.body.style.overflow = '';
-              document.documentElement.style.overflow = '';
-            }, 300);
-          }, 100);
-        }, 300);
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+          }, 300);
+        }, 200);
       }
     };
 
     // Track window load event
     const handleWindowLoad = () => {
+      windowLoaded = true;
       updateProgress();
       checkComplete();
     };
@@ -92,32 +136,29 @@ const Loader = memo(() => {
       window.addEventListener('load', handleWindowLoad);
     }
 
-    // Also track DOMContentLoaded
-    const handleDOMContentLoaded = () => {
-      updateProgress();
-    };
-
+    // Start checking for React components after DOM is ready
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', handleDOMContentLoaded);
+      document.addEventListener('DOMContentLoaded', checkComponentsRendered);
     } else {
-      handleDOMContentLoaded();
+      // DOM already ready, start checking immediately
+      setTimeout(checkComponentsRendered, 100);
     }
 
-    // Fallback: ensure we reach 100% after reasonable time
+    // Fallback: ensure we complete after reasonable time (even if something fails)
     const fallbackTimeout = setTimeout(() => {
-      if (progress < 100) {
-        setLoadingProgress(100);
-        setTimeout(() => {
-          setIsLoaded(true);
-          document.body.style.overflow = '';
-          document.documentElement.style.overflow = '';
-        }, 300);
-      }
-    }, 5000);
+      resourcesLoaded = true;
+      windowLoaded = true;
+      componentsRendered = true;
+      setLoadingProgress(100);
+      setTimeout(() => {
+        setIsLoaded(true);
+        document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
+      }, 300);
+    }, 8000);
 
     return () => {
       window.removeEventListener('load', handleWindowLoad);
-      document.removeEventListener('DOMContentLoaded', handleDOMContentLoaded);
       clearTimeout(fallbackTimeout);
     };
   }, []);
