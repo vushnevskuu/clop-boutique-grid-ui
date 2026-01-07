@@ -205,8 +205,8 @@ const Product = () => {
               </div>
             </div>
 
-            {/* Product Info Panel - 250px width */}
-            <div className="flex-shrink-0" style={{ width: '250px', marginLeft: '20px' }}>
+            {/* Product Info Panel - 750px width */}
+            <div className="flex-shrink-0" style={{ width: '750px', marginLeft: '20px' }}>
               <div className="space-y-6 sticky top-24">
                 {product.brand && (
                   <p className="text-xs text-muted-foreground uppercase tracking-widest">
