@@ -39,7 +39,7 @@ const ProductCard = memo(({ id, image, hoverImage, title, price, size, brand }: 
         {/* Message Us button - appears on hover */}
         <button
           onClick={handleButtonClick}
-          className="absolute top-4 left-4 bg-transparent border-2 border-foreground text-foreground px-4 py-2 font-normal transition-all duration-200 z-10 hover:text-accent hover:border-accent"
+          className="absolute top-4 left-4 bg-transparent border-2 border-foreground text-foreground px-4 py-2 font-normal transition-all duration-200 z-10 hover:bg-foreground hover:text-background"
           style={{
             opacity: isHovered ? 1 : 0,
             fontSize: '14px'
