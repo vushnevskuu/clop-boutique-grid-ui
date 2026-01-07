@@ -226,7 +226,7 @@ const Product = () => {
                 )}
 
                 <div className="pt-8">
-                  <button className="btn-brutal w-full">
+                  <button className="bg-gray-400 text-white px-8 py-4 uppercase font-bold w-full transition-all duration-200 hover:bg-foreground hover:text-background">
                     Add to cart
                   </button>
                 </div>

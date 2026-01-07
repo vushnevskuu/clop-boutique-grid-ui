@@ -54,7 +54,7 @@ const Header = () => {
         >
           <a 
             href="#shop" 
-            className="bg-transparent border-2 border-foreground text-foreground px-4 py-2 uppercase font-normal transition-all duration-200 hover:bg-foreground hover:text-background"
+            className="bg-gray-400 text-white px-4 py-2 uppercase font-normal transition-all duration-200 hover:bg-foreground hover:text-background"
             style={{ fontSize: '14px' }}
           >
             Catalog
@@ -77,7 +77,7 @@ const Header = () => {
         <nav className="md:hidden bg-transparent">
           <a 
             href="#shop" 
-            className="block px-6 py-4 bg-transparent border-2 border-foreground text-foreground uppercase font-normal transition-all duration-200 hover:bg-foreground hover:text-background"
+            className="block px-6 py-4 bg-gray-400 text-white uppercase font-normal transition-all duration-200 hover:bg-foreground hover:text-background"
             style={{ fontSize: '14px' }}
           >
             Catalog
