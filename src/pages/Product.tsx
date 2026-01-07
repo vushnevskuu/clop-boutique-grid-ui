@@ -1,7 +1,15 @@
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { useState } from "react";
+import ProductCard from "@/components/ProductCard";
+import { useState, useMemo } from "react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 import product1 from "@/assets/product-1.jpg";
 import product2 from "@/assets/product-2.jpg";
@@ -115,6 +123,17 @@ const Product = () => {
 
   const displayImage = selectedImage || product.image;
 
+  // Find similar products (same brand first, then other products)
+  const similarProducts = useMemo(() => {
+    const sameBrand = products.filter((p) => p.id !== product.id && p.brand === product.brand);
+    if (sameBrand.length >= 4) {
+      return sameBrand.slice(0, 6);
+    }
+    // If not enough same brand products, add other products
+    const otherProducts = products.filter((p) => p.id !== product.id && p.brand !== product.brand);
+    return [...sameBrand, ...otherProducts].slice(0, 6);
+  }, [product.id, product.brand]);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -128,10 +147,10 @@ const Product = () => {
             ← Back to catalog
           </button>
 
-          <div className="grid md:grid-cols-2 gap-12">
-            {/* Images */}
-            <div className="space-y-4">
-              <div className="aspect-square overflow-hidden bg-gray-100">
+          <div className="grid md:grid-cols-2 gap-12 mb-20">
+            {/* Images - увеличены в 2 раза */}
+            <div className="space-y-4 md:col-span-1">
+              <div className="overflow-hidden bg-gray-100" style={{ width: '100%', height: '800px' }}>
                 <img
                   src={displayImage}
                   alt={product.title}
@@ -192,6 +211,40 @@ const Product = () => {
               </div>
             </div>
           </div>
+
+          {/* You may also like section */}
+          {similarProducts.length > 0 && (
+            <section className="mt-20">
+              <h2 className="text-2xl md:text-3xl font-bold uppercase mb-8" style={{ fontSize: '12px' }}>
+                You may also like
+              </h2>
+              <Carousel
+                opts={{
+                  align: "start",
+                  loop: false,
+                }}
+                className="w-full"
+              >
+                <CarouselContent className="-ml-2 md:-ml-4">
+                  {similarProducts.map((item) => (
+                    <CarouselItem key={item.id} className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4">
+                      <ProductCard
+                        id={item.id}
+                        image={item.image}
+                        hoverImage={item.hoverImage}
+                        title={item.title}
+                        brand={item.brand}
+                        price={item.price}
+                        size={item.size}
+                      />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+              </Carousel>
+            </section>
+          )}
         </div>
       </main>
       <Footer />
