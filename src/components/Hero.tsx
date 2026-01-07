@@ -149,7 +149,7 @@ const Hero = () => {
             <p 
               style={{
                 fontSize: '14px',
-                lineHeight: '100%',
+                lineHeight: '110%',
                 color: 'white',
                 textAlign: 'left'
               }}
