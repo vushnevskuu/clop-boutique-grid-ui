@@ -38,10 +38,11 @@ const Footer = () => {
     };
   }, []);
 
-  // Calculate 3D transform based on mouse position
-  const rotateX = mousePosition.y * 5; // Max 5 degrees tilt
-  const rotateY = -mousePosition.x * 5; // Max 5 degrees tilt
-  const translateZ = Math.abs(mousePosition.x) * 10 + Math.abs(mousePosition.y) * 10; // Slight lift effect
+  // Calculate 3D transform based on mouse position - reduced intensity to avoid white gaps
+  const rotateX = mousePosition.y * 2; // Reduced to 2 degrees max
+  const rotateY = -mousePosition.x * 2; // Reduced to 2 degrees max
+  const translateZ = Math.abs(mousePosition.x) * 5 + Math.abs(mousePosition.y) * 5; // Reduced lift effect
+  const scale = 1.05; // Slightly scale up to cover edges
 
   return (
     <footer 
@@ -64,14 +65,16 @@ const Footer = () => {
         className="w-full h-auto object-cover"
         style={{ 
           display: 'block', 
-          width: '100%', 
+          width: '105%', 
           height: 'auto', 
           margin: 0, 
           padding: 0,
           minHeight: '200px',
-          transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(${translateZ}px)`,
+          marginLeft: '-2.5%', // Center the scaled image
+          transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(${translateZ}px) scale(${scale})`,
           transition: 'transform 0.1s ease-out',
-          willChange: 'transform'
+          willChange: 'transform',
+          objectFit: 'cover'
         }}
         loading="lazy"
         decoding="async"
