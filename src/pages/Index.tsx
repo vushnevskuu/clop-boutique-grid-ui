@@ -5,9 +5,9 @@ import Footer from "@/components/Footer";
 
 const Index = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" style={{ margin: 0, padding: 0 }}>
       <Header />
-      <main>
+      <main style={{ margin: 0, padding: 0 }}>
         <Hero />
         <ProductGrid />
       </main>
