@@ -27,6 +27,10 @@ const ProductCard = memo(({ id, image, hoverImage, title, price, size, brand }: 
     <Link 
       to={`/product/${id}`}
       className="flex flex-col"
+      style={{
+        backgroundColor: '#ffffff',
+        border: '1px solid #f3f3f3'
+      }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -60,7 +64,7 @@ const ProductCard = memo(({ id, image, hoverImage, title, price, size, brand }: 
           message us
         </button>
       </div>
-      <div className="p-4 bg-background">
+      <div className="p-4" style={{ backgroundColor: '#ffffff' }}>
         <div className="flex flex-col gap-1">
           <h3 
             className="font-normal uppercase tracking-wide" 

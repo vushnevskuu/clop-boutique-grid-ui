@@ -85,7 +85,7 @@ const products = [
 
 const ProductGrid = () => {
   return (
-    <section id="shop" className="scroll-mt-20 bg-background relative z-30" style={{ padding: '30px', paddingBottom: '0' }}>
+    <section id="shop" className="scroll-mt-20 relative z-30" style={{ padding: '30px', paddingBottom: '0', backgroundColor: 'transparent' }}>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6" style={{ rowGap: '20px', columnGap: '20px' }}>
         {products.map((product) => (
           <ProductCard
