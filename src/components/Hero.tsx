@@ -5,6 +5,7 @@ const Hero3D = lazy(() => import("./Hero3D"));
 
 const Hero = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [scrollPosition, setScrollPosition] = useState(0);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const heroRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
@@ -14,14 +15,10 @@ const Hero = () => {
 
     const windowHeight = window.innerHeight;
     const heroHeight = windowHeight * 3;
-    const scrollPosition = window.scrollY;
-    const progress = Math.max(0, Math.min(1, scrollPosition / heroHeight));
+    const currentScroll = window.scrollY;
+    setScrollPosition(currentScroll);
+    const progress = Math.max(0, Math.min(1, currentScroll / heroHeight));
     setScrollProgress(progress);
-    
-    // Force re-render to update translateY calculation
-    if (progress >= 1) {
-      setScrollProgress(progress);
-    }
   }, []);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
@@ -61,12 +58,14 @@ const Hero = () => {
   // Calculate translateY for hero section to move up after animations complete
   const heroTranslateY = useMemo(() => {
     if (scrollProgress >= 1) {
-      // After scroll completes, move hero up
-      const extraScroll = (window.scrollY - (window.innerHeight * 3)) / window.innerHeight;
-      return Math.max(0, -100 - extraScroll * 100); // Move up and continue moving as user scrolls
+      const windowHeight = window.innerHeight;
+      const heroHeight = windowHeight * 3;
+      const extraScroll = Math.max(0, scrollPosition - heroHeight);
+      // Move hero up based on extra scroll
+      return -100 - (extraScroll / windowHeight) * 100;
     }
     return 0;
-  }, [scrollProgress]);
+  }, [scrollProgress, scrollPosition]);
 
   return (
     <section 
