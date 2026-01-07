@@ -135,7 +135,8 @@ const Footer = memo(() => {
           transformOrigin: 'center center',
           transition: 'transform 0.1s ease-out',
           willChange: 'transform',
-          filter: 'drop-shadow(0 -10px 30px rgba(0, 0, 0, 0.1))'
+          filter: 'drop-shadow(0 -10px 30px rgba(0, 0, 0, 0.1))',
+          zIndex: 101
         }}
         loading="lazy"
         decoding="async"
