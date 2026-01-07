@@ -138,7 +138,7 @@ const Product = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="pt-20 pb-12">
-        <div style={{ marginLeft: '300px', marginRight: '50px' }}>
+        <div>
           <button
             onClick={() => navigate("/")}
             className="mb-8 text-foreground hover:text-accent transition-colors"
