@@ -307,11 +307,12 @@ const ProductGrid = memo(() => {
     <section 
       ref={sectionRef}
       id="shop" 
-      className="scroll-mt-20 relative z-30" 
+      className="scroll-mt-20 relative" 
       style={{ 
         padding: '30px', 
         paddingBottom: '0', 
-        backgroundColor: 'transparent'
+        backgroundColor: 'transparent',
+        zIndex: 1
       }}
     >
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6" style={{ rowGap: '20px', columnGap: '20px' }}>
@@ -323,7 +324,7 @@ const ProductGrid = memo(() => {
               style={{
                 transform: isLastRow ? `translateY(${lastRowTranslateY}px)` : 'none',
                 transition: 'none',
-                zIndex: isLastRow ? 5 : 1
+                zIndex: isLastRow ? 1 : 1
               }}
             >
               <ProductCard
