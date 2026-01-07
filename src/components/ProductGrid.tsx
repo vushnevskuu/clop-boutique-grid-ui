@@ -323,7 +323,7 @@ const ProductGrid = memo(() => {
               style={{
                 transform: isLastRow ? `translateY(${lastRowTranslateY}px)` : 'none',
                 transition: 'none',
-                zIndex: isLastRow ? 0 : 1
+                zIndex: isLastRow ? 5 : 1
               }}
             >
               <ProductCard

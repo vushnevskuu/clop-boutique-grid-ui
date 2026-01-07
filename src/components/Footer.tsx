@@ -105,7 +105,7 @@ const Footer = memo(() => {
         bottom: 0,
         left: 0,
         right: 0,
-        zIndex: 10,
+        zIndex: 20,
         overflow: 'hidden',
         width: '100%',
         minHeight: '200px',
