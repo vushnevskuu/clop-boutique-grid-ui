@@ -1,5 +1,5 @@
 import { useRef, Suspense, useMemo, useEffect } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
@@ -66,25 +66,23 @@ interface Hero3DProps {
   mousePosition?: { x: number; y: number };
 }
 
-const Hero3D = ({ modelPath, scrollProgress, mousePosition = { x: 0, y: 0 } }: Hero3DProps) => {
-  const cameraRef = useRef<THREE.PerspectiveCamera>(null);
+const CameraController = ({ mousePosition }: { mousePosition: { x: number; y: number } }) => {
+  const { camera } = useThree();
   
-  // Apply mouse movement to camera position
   useFrame(() => {
-    if (cameraRef.current) {
-      const intensity = 0.5; // Adjust this to control the movement intensity
-      cameraRef.current.position.x = mousePosition.x * intensity;
-      cameraRef.current.position.y = -mousePosition.y * intensity; // Invert Y for natural feel
-      cameraRef.current.lookAt(0, 0, 0);
-    }
+    const intensity = 0.5; // Adjust this to control the movement intensity
+    camera.position.x = mousePosition.x * intensity;
+    camera.position.y = -mousePosition.y * intensity; // Invert Y for natural feel
+    camera.lookAt(0, 0, 0);
   });
+  
+  return null;
+};
 
+const Hero3D = ({ modelPath, scrollProgress, mousePosition = { x: 0, y: 0 } }: Hero3DProps) => {
   return (
     <Canvas
       camera={{ position: [0, 0, 5], fov: 50 }}
-      onCreated={({ camera }) => {
-        cameraRef.current = camera as THREE.PerspectiveCamera;
-      }}
       style={{ width: "100%", height: "100%", background: "transparent" }}
       gl={{ 
         alpha: true, 
@@ -101,6 +99,7 @@ const Hero3D = ({ modelPath, scrollProgress, mousePosition = { x: 0, y: 0 } }: H
       }}
     >
       <Suspense fallback={null}>
+        <CameraController mousePosition={mousePosition} />
         {/* Base ambient light for overall illumination */}
         <ambientLight intensity={1.2} />
         
