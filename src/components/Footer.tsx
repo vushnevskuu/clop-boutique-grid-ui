@@ -113,7 +113,7 @@ const Footer = memo(() => {
     >
       <img 
         ref={imgRef}
-        src="/footer.jpg" 
+        src="/footer.webp" 
         alt="Footer" 
         className="w-full h-auto object-cover"
         style={{ 
