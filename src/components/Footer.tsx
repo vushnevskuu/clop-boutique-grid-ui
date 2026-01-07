@@ -123,6 +123,11 @@ const Footer = () => {
           transition: 'transform 0.1s ease-out',
           willChange: 'transform'
         }}
+        loading="lazy"
+        decoding="async"
+        onError={(e) => {
+          console.error('Footer image failed to load:', e);
+        }}
         onLoad={(e) => {
           const img = e.currentTarget;
           if (footerRef.current && img.naturalHeight) {
@@ -131,14 +136,6 @@ const Footer = () => {
             const calculatedHeight = containerWidth / aspectRatio;
             footerRef.current.style.height = `${calculatedHeight}px`;
           }
-          console.log('Footer image loaded successfully');
-        }}
-        loading="lazy"
-        decoding="async"
-        onError={(e) => {
-          console.error('Footer image failed to load:', e);
-        }}
-        onLoad={() => {
           console.log('Footer image loaded successfully');
         }}
       />
