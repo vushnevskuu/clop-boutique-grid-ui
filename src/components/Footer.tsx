@@ -38,10 +38,10 @@ const Footer = () => {
     };
   }, []);
 
-  // Calculate 3D transform based on mouse position - reduced intensity to avoid white gaps
-  const rotateX = mousePosition.y * 2; // Reduced to 2 degrees max
-  const rotateY = -mousePosition.x * 2; // Reduced to 2 degrees max
-  const translateZ = Math.abs(mousePosition.x) * 5 + Math.abs(mousePosition.y) * 5; // Reduced lift effect
+  // Calculate 3D transform based on mouse position - reduced by 95%
+  const rotateX = mousePosition.y * 0.1; // 5% of original (2 * 0.05)
+  const rotateY = -mousePosition.x * 0.1; // 5% of original (2 * 0.05)
+  const translateZ = (Math.abs(mousePosition.x) * 5 + Math.abs(mousePosition.y) * 5) * 0.05; // 5% of original
 
   return (
     <footer 
