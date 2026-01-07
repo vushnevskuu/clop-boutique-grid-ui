@@ -1,8 +1,13 @@
-import { useEffect, useRef, useState, useMemo, useCallback, Suspense } from "react";
-import Hero3D from "./Hero3D";
+import { useEffect, useRef, useState, useMemo, useCallback, lazy, Suspense } from "react";
+import { useGLTF } from "@react-three/drei";
 
-// Note: Model preloading is done in main.tsx for earlier start
-// Removed lazy loading to start loading immediately
+// Preload 3D model for faster loading
+if (typeof window !== 'undefined') {
+  useGLTF.preload("/model.glb");
+}
+
+// Lazy load Hero3D to improve initial page load
+const Hero3D = lazy(() => import("./Hero3D"));
 
 const Hero = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
