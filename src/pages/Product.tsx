@@ -165,6 +165,8 @@ const Product = () => {
                             src={currentImage.src}
                             alt={`${product.title} ${i + 1}`}
                             className="w-full h-auto object-cover cursor-pointer"
+                            loading="lazy"
+                            decoding="async"
                             onClick={() => setSelectedImage(currentImage.src)}
                           />
                         </div>
@@ -180,6 +182,8 @@ const Product = () => {
                               src={currentImage.src}
                               alt={`${product.title} ${i + 1}`}
                               className="w-full h-auto object-cover cursor-pointer"
+                              loading="lazy"
+                              decoding="async"
                               onClick={() => setSelectedImage(currentImage.src)}
                             />
                           </div>
@@ -189,6 +193,8 @@ const Product = () => {
                                 src={nextImage.src}
                                 alt={`${product.title} ${i + 2}`}
                                 className="w-full h-auto object-cover cursor-pointer"
+                                loading="lazy"
+                                decoding="async"
                                 onClick={() => setSelectedImage(nextImage.src)}
                               />
                             </div>
