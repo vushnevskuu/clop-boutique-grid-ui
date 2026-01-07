@@ -93,11 +93,12 @@ const Hero3D = ({ modelPath, scrollProgress, mousePosition = { x: 0, y: 0 } }: H
       }}
       gl={{ 
         alpha: true, 
-        antialias: true, 
+        antialias: false, // Disable antialiasing for better performance
         preserveDrawingBuffer: false, // Disable for better performance
         powerPreference: "high-performance",
         stencil: false,
-        depth: true
+        depth: true,
+        precision: "mediump" // Use medium precision for better performance
       }}
       dpr={[1, 1.2]} // Limit pixel ratio for better performance (further reduced)
       performance={{ min: 0.5 }} // Lower framerate threshold
