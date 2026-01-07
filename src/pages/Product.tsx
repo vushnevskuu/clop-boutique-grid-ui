@@ -172,11 +172,13 @@ const Product = memo(() => {
                 <button
                   key={index}
                   onClick={() => handleThumbnailClick(index)}
-                  className="w-full aspect-square overflow-hidden border-2 border-transparent hover:border-gray-400 transition-colors"
+                  className="w-full aspect-square overflow-hidden"
                   style={{ 
                     padding: 0,
                     background: 'transparent',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    border: 'none',
+                    outline: 'none'
                   }}
                 >
                   <img
