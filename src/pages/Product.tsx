@@ -165,13 +165,38 @@ const Product = memo(() => {
             ← Back to catalog
           </button>
 
-          <div className="flex gap-0 mb-20">
+          <div className="flex gap-4 mb-20">
+            {/* Thumbnails - left side */}
+            <div className="flex flex-col gap-2" style={{ width: '80px', flexShrink: 0 }}>
+              {productImages.map((img, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleThumbnailClick(index)}
+                  className="w-full aspect-square overflow-hidden border-2 border-transparent hover:border-gray-400 transition-colors"
+                  style={{ 
+                    padding: 0,
+                    background: 'transparent',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <img
+                    src={img.src}
+                    alt={`${product.title} thumbnail ${index + 1}`}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </button>
+              ))}
+            </div>
+
             {/* Images Gallery - takes remaining space */}
             <div className="flex-1">
               <div className="flex flex-col">
                 {(() => {
                   const rows: JSX.Element[] = [];
                   let i = 0;
+                  let imageIndex = 0; // Track actual image index for refs
                   
                   while (i < productImages.length) {
                     const currentImage = productImages[i];
@@ -179,10 +204,14 @@ const Product = memo(() => {
                     if (currentImage.layout === 'full') {
                       // Full width image
                       rows.push(
-                        <div key={i} className="w-full">
+                        <div 
+                          key={i} 
+                          ref={(el) => { imageRefs.current[imageIndex] = el; }}
+                          className="w-full"
+                        >
                           <img
                             src={currentImage.src}
-                            alt={`${product.title} ${i + 1}`}
+                            alt={`${product.title} ${imageIndex + 1}`}
                             className="w-full h-auto object-cover cursor-pointer"
                             loading="lazy"
                             decoding="async"
@@ -191,15 +220,19 @@ const Product = memo(() => {
                         </div>
                       );
                       i++;
+                      imageIndex++;
                     } else {
                       // Half width - create a row with 2 images
                       const nextImage = productImages[i + 1];
                       rows.push(
                         <div key={i} className="flex w-full">
-                          <div className="w-1/2">
+                          <div 
+                            className="w-1/2"
+                            ref={(el) => { imageRefs.current[imageIndex] = el; }}
+                          >
                             <img
                               src={currentImage.src}
-                              alt={`${product.title} ${i + 1}`}
+                              alt={`${product.title} ${imageIndex + 1}`}
                               className="w-full h-auto object-cover cursor-pointer"
                               loading="lazy"
                               decoding="async"
@@ -207,14 +240,17 @@ const Product = memo(() => {
                             />
                           </div>
                           {nextImage ? (
-                            <div className="w-1/2">
+                            <div 
+                              className="w-1/2"
+                              ref={(el) => { imageRefs.current[imageIndex + 1] = el; }}
+                            >
                               <img
                                 src={nextImage.src}
-                                alt={`${product.title} ${i + 2}`}
+                                alt={`${product.title} ${imageIndex + 2}`}
                                 className="w-full h-auto object-cover cursor-pointer"
                                 loading="lazy"
                                 decoding="async"
-                                onClick={() => setSelectedImage(nextImage.src)}
+                                onClick={() => handleImageClick(nextImage.src)}
                               />
                             </div>
                           ) : (
@@ -223,6 +259,7 @@ const Product = memo(() => {
                         </div>
                       );
                       i += 2; // Skip next image as it's already rendered
+                      imageIndex += nextImage ? 2 : 1;
                     }
                   }
                   
