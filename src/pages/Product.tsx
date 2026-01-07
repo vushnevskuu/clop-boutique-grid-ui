@@ -1,6 +1,6 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import Header from "@/components/Header";
-import { useState, useMemo, memo, useCallback } from "react";
+import { useState, useMemo, memo, useCallback, useRef } from "react";
 
 import product1 from "@/assets/product-1.jpg";
 import product2 from "@/assets/product-2.jpg";
@@ -89,6 +89,7 @@ const Product = memo(() => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const product = useMemo(() => products.find((p) => p.id === Number(id)), [id]);
   
@@ -102,6 +103,13 @@ const Product = memo(() => {
   
   const handleCloseModal = useCallback(() => {
     setSelectedImage(null);
+  }, []);
+
+  const handleThumbnailClick = useCallback((index: number) => {
+    const ref = imageRefs.current[index];
+    if (ref) {
+      ref.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   }, []);
 
   if (!product) {
