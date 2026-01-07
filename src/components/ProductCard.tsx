@@ -51,10 +51,9 @@ const ProductCard = memo(({ id, image, hoverImage, title, price, size, brand }: 
       <div className="p-4 bg-background">
         <div className="flex flex-col gap-1">
           <h3 
-            className="font-normal uppercase tracking-wide transition-colors duration-200" 
+            className="font-normal uppercase tracking-wide" 
             style={{ 
-              fontSize: '12px',
-              color: isHovered ? 'hsl(var(--accent))' : 'inherit'
+              fontSize: '12px'
             }}
           >
             {title}
