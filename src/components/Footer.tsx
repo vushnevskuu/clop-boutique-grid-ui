@@ -83,6 +83,16 @@ const Footer = memo(() => {
     return `translateX(-50%) perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(${translateZ}px)`;
   }, [mousePosition.x, mousePosition.y]);
 
+  const handleImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    if (footerRef.current && img.naturalHeight) {
+      const aspectRatio = img.naturalWidth / img.naturalHeight;
+      const containerWidth = footerRef.current.offsetWidth;
+      const calculatedHeight = containerWidth / aspectRatio;
+      footerRef.current.style.height = `${calculatedHeight}px`;
+    }
+  }, []);
+
   return (
     <footer 
       ref={footerRef}
@@ -126,15 +136,7 @@ const Footer = memo(() => {
         onError={(e) => {
           console.error('Footer image failed to load:', e);
         }}
-        onLoad={useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
-          const img = e.currentTarget;
-          if (footerRef.current && img.naturalHeight) {
-            const aspectRatio = img.naturalWidth / img.naturalHeight;
-            const containerWidth = footerRef.current.offsetWidth;
-            const calculatedHeight = containerWidth / aspectRatio;
-            footerRef.current.style.height = `${calculatedHeight}px`;
-          }
-        }, [])}
+        onLoad={handleImageLoad}
       />
     </footer>
   );
