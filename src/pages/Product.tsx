@@ -144,12 +144,15 @@ const Product = memo(() => {
   // Find similar products (same brand first, then other products)
   const similarProducts = useMemo(() => {
     const sameBrand = products.filter((p) => p.id !== product.id && p.brand === product.brand);
-    if (sameBrand.length >= 4) {
-      return sameBrand.slice(0, 6);
-    }
-    // If not enough same brand products, add other products
     const otherProducts = products.filter((p) => p.id !== product.id && p.brand !== product.brand);
-    return [...sameBrand, ...otherProducts].slice(0, 6);
+    // Combine and repeat if needed to get 16 products
+    const combined = [...sameBrand, ...otherProducts];
+    // If we have less than 16, repeat the array
+    const result = [];
+    while (result.length < 16 && combined.length > 0) {
+      result.push(...combined);
+    }
+    return result.slice(0, 16);
   }, [product.id, product.brand]);
 
   return (
@@ -321,7 +324,7 @@ const Product = memo(() => {
               <h2 className="text-2xl md:text-3xl font-bold uppercase mb-8" style={{ fontSize: '12px' }}>
                 You may also like
               </h2>
-              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+              <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
                 {similarProducts.map((item) => (
                   <Link key={item.id} to={`/product/${item.id}`} className="block">
                     <div className="aspect-[4/5] overflow-hidden bg-gray-100">
