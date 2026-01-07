@@ -108,17 +108,18 @@ const ProductGrid = memo(() => {
 
   // Calculate translateY for product grid to appear from below
   const gridTranslateY = useMemo(() => {
+    const windowHeight = window.innerHeight;
+    const heroHeight = windowHeight * 3;
+    
     if (scrollProgress >= 1) {
-      const windowHeight = window.innerHeight;
-      const heroHeight = windowHeight * 3;
       const extraScroll = Math.max(0, scrollPosition - heroHeight);
-      // Start from below screen and move up as user scrolls
-      const initialOffset = windowHeight; // Start below screen
-      const scrollOffset = extraScroll;
-      return Math.max(0, initialOffset - scrollOffset);
+      // Start from below screen (one viewport height) and move up as user scrolls
+      // When extraScroll = 0, grid is at windowHeight (below screen)
+      // As extraScroll increases, grid moves up
+      return Math.max(0, windowHeight - extraScroll);
     }
     // Before hero completes, keep grid below screen
-    return window.innerHeight;
+    return windowHeight;
   }, [scrollProgress, scrollPosition]);
 
   return (
