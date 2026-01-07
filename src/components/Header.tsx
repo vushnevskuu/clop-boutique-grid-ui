@@ -52,7 +52,13 @@ const Header = () => {
             transition: 'opacity 0.3s ease-out'
           }}
         >
-          <a href="#shop" className="nav-link text-foreground">Catalog</a>
+          <a 
+            href="#shop" 
+            className="bg-transparent border-2 border-foreground text-foreground px-4 py-2 uppercase font-normal transition-all duration-200 hover:bg-foreground hover:text-background"
+            style={{ fontSize: '14px' }}
+          >
+            Catalog
+          </a>
         </nav>
 
         <button
@@ -69,7 +75,11 @@ const Header = () => {
 
       {isMenuOpen && (
         <nav className="md:hidden bg-transparent">
-          <a href="#shop" className="block px-6 py-4 nav-link text-foreground">
+          <a 
+            href="#shop" 
+            className="block px-6 py-4 bg-transparent border-2 border-foreground text-foreground uppercase font-normal transition-all duration-200 hover:bg-foreground hover:text-background"
+            style={{ fontSize: '14px' }}
+          >
             Catalog
           </a>
         </nav>
