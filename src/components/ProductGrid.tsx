@@ -267,7 +267,8 @@ const ProductGrid = memo(() => {
 
     // Calculate how much of second-to-last row is scrolled
     const rowScrollPosition = scrollY + windowHeight - (sectionTop + secondToLastRowTop);
-    const rowScrollProgress = Math.max(0, Math.min(1, rowScrollPosition / (secondToLastRowHeight * FOOTER_APPEAR_THRESHOLD)));
+    const thresholdHeight = secondToLastRowHeight * FOOTER_APPEAR_THRESHOLD;
+    const rowScrollProgress = Math.max(0, Math.min(1, rowScrollPosition / thresholdHeight));
 
     setScrollProgress(rowScrollProgress);
 
@@ -276,11 +277,15 @@ const ProductGrid = memo(() => {
       setShowFooter(true);
       
       // Calculate how much to translate last row
-      const extraScroll = Math.max(0, rowScrollPosition - (secondToLastRowHeight * FOOTER_APPEAR_THRESHOLD));
+      // Last row should move synchronously with scroll (1:1)
+      // It starts hidden below footer and moves up as user scrolls
+      const extraScroll = Math.max(0, rowScrollPosition - thresholdHeight);
       const initialOffset = footerHeight * (1 - LAST_ROW_INITIAL_VISIBILITY);
+      // Move up synchronously with scroll (1:1 ratio)
       setLastRowTranslateY(Math.max(0, initialOffset - extraScroll));
     } else {
       setShowFooter(false);
+      // Keep last row hidden below footer before threshold
       setLastRowTranslateY(footerHeight * (1 - LAST_ROW_INITIAL_VISIBILITY));
     }
   }, [secondToLastRowIndex, footerHeight]);
