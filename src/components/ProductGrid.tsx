@@ -300,6 +300,7 @@ const ProductGrid = memo(() => {
     if (footer) {
       footer.style.opacity = showFooter ? '1' : '0';
       footer.style.pointerEvents = showFooter ? 'auto' : 'none';
+      footer.style.transition = 'none'; // Remove transition for instant appearance
     }
   }, [showFooter]);
 
