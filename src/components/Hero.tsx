@@ -17,6 +17,11 @@ const Hero = () => {
     const scrollPosition = window.scrollY;
     const progress = Math.max(0, Math.min(1, scrollPosition / heroHeight));
     setScrollProgress(progress);
+    
+    // Force re-render to update translateY calculation
+    if (progress >= 1) {
+      setScrollProgress(progress);
+    }
   }, []);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
@@ -53,19 +58,30 @@ const Hero = () => {
     return Math.min(1, (scrollProgress - 0.15) * 1.82);
   }, [scrollProgress]);
 
+  // Calculate translateY for hero section to move up after animations complete
+  const heroTranslateY = useMemo(() => {
+    if (scrollProgress >= 1) {
+      // After scroll completes, move hero up
+      const extraScroll = (window.scrollY - (window.innerHeight * 3)) / window.innerHeight;
+      return Math.max(0, -100 - extraScroll * 100); // Move up and continue moving as user scrolls
+    }
+    return 0;
+  }, [scrollProgress]);
+
   return (
     <section 
       ref={sectionRef}
       className="relative flex items-center justify-center overflow-hidden"
       style={{ height: '300vh' }} // 3 viewport heights for scrollable area
     >
-      {/* Fixed Background with 3D Model - hide after scroll completes */}
+      {/* Fixed Background with 3D Model - moves up after scroll completes */}
       <div 
         className="fixed inset-0 z-0 bg-white"
         style={{
           opacity: scrollProgress >= 1 ? 0 : 1,
           pointerEvents: scrollProgress >= 1 ? 'none' : 'auto',
-          transition: 'opacity 0.3s ease-out'
+          transform: `translateY(${heroTranslateY}%)`,
+          transition: scrollProgress >= 1 ? 'transform 0.3s ease-out, opacity 0.3s ease-out' : 'opacity 0.3s ease-out'
         }}
       >
         {/* 3D Model centered - lazy loaded */}
@@ -82,14 +98,15 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Fixed Content Container - hide after scroll completes */}
+      {/* Fixed Content Container - moves up after scroll completes */}
       <div 
         ref={heroRef}
         className="fixed inset-0 z-10 w-full h-screen flex items-center justify-center"
         style={{
           opacity: scrollProgress >= 1 ? 0 : 1,
           pointerEvents: scrollProgress >= 1 ? 'none' : 'auto',
-          transition: 'opacity 0.3s ease-out'
+          transform: `translateY(${heroTranslateY}%)`,
+          transition: scrollProgress >= 1 ? 'transform 0.3s ease-out, opacity 0.3s ease-out' : 'opacity 0.3s ease-out'
         }}
       >
         {/* Logo - disappears on scroll */}
