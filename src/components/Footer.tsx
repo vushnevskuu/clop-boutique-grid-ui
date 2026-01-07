@@ -13,6 +13,8 @@ const Footer = () => {
           padding: 0,
           minHeight: '200px'
         }}
+        loading="lazy"
+        decoding="async"
         onError={(e) => {
           console.error('Footer image failed to load:', e);
         }}

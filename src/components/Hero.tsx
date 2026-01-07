@@ -1,9 +1,7 @@
-import { useEffect, useRef, useState, useMemo, useCallback } from "react";
-import Hero3D from "./Hero3D";
-import { useGLTF } from "@react-three/drei";
+import { useEffect, useRef, useState, useMemo, useCallback, lazy, Suspense } from "react";
 
-// Preload 3D model for faster initial load
-useGLTF.preload("/model.glb");
+// Lazy load Hero3D to improve initial page load
+const Hero3D = lazy(() => import("./Hero3D"));
 
 const Hero = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -70,14 +68,16 @@ const Hero = () => {
           transition: 'opacity 0.3s ease-out'
         }}
       >
-        {/* 3D Model centered */}
+        {/* 3D Model centered - lazy loaded */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-full h-full">
-            <Hero3D 
-              modelPath="/model.glb" 
-              scrollProgress={scrollProgress}
-              mousePosition={mousePosition}
-            />
+            <Suspense fallback={<div className="w-full h-full bg-white" />}>
+              <Hero3D 
+                modelPath="/model.glb" 
+                scrollProgress={scrollProgress}
+                mousePosition={mousePosition}
+              />
+            </Suspense>
           </div>
         </div>
       </div>
@@ -104,6 +104,8 @@ const Hero = () => {
             src="/logo.svg" 
             alt="CLOP Logo" 
             className="w-auto h-12 md:h-16 lg:h-20"
+            loading="eager"
+            fetchPriority="high"
           />
         </div>
 
