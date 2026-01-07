@@ -62,19 +62,18 @@ const Hero = () => {
     >
       {/* Sticky Background with 3D Model - sticks to top while scrolling Hero section */}
       <div 
-        className="sticky top-0 z-0"
+        className="sticky top-0 z-0 flex items-center justify-center"
         style={{
           height: '100vh',
           width: '100%',
           backgroundColor: 'white',
           opacity: scrollProgress >= 1 ? 0 : 1,
           pointerEvents: scrollProgress >= 1 ? 'none' : 'auto',
-          transition: 'opacity 0.3s ease-out',
-          position: 'relative'
+          transition: 'opacity 0.3s ease-out'
         }}
       >
         {/* 3D Model centered - lazy loaded */}
-        <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+        <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}>
           <Suspense fallback={<div className="w-full h-full bg-white" />}>
             <Hero3D 
               modelPath="/model.glb" 
@@ -124,7 +123,7 @@ const Hero = () => {
               style={{
                 fontSize: '14px',
                 lineHeight: '100%',
-                color: 'white',
+                color: '#000000',
                 textAlign: 'left'
               }}
             >

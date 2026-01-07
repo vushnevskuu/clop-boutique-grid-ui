@@ -1,6 +1,6 @@
 import { useRef, Suspense, useMemo, useEffect } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useGLTF } from "@react-three/drei";
+import { useGLTF, Center } from "@react-three/drei";
 import * as THREE from "three";
 
 interface Model3DProps {
@@ -52,12 +52,13 @@ const Model = ({ modelPath, scrollProgress, mousePosition = { x: 0, y: 0 } }: Mo
   });
 
   return (
-    <primitive 
-      ref={meshRef}
-      object={clonedScene} 
-      scale={scale}
-      position={[0, 0, 0]}
-    />
+    <Center>
+      <primitive 
+        ref={meshRef}
+        object={clonedScene} 
+        scale={scale}
+      />
+    </Center>
   );
 };
 
@@ -74,6 +75,7 @@ const CameraController = ({ mousePosition }: { mousePosition: { x: number; y: nu
     const intensity = 0.5; // Adjust this to control the movement intensity
     camera.position.x = mousePosition.x * intensity;
     camera.position.y = -mousePosition.y * intensity; // Invert Y for natural feel
+    camera.position.z = 5; // Keep Z position constant
     camera.lookAt(0, 0, 0);
   });
   
