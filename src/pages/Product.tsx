@@ -113,7 +113,15 @@ const Product = () => {
     );
   }
 
-  const displayImage = selectedImage || product.image;
+  // Prepare images array with layout info
+  // Each image can have layout: 'full' (1 per row) or 'half' (2 per row)
+  const productImages = useMemo(() => {
+    const images = [
+      { src: product.image, layout: 'full' as 'full' | 'half' },
+      ...(product.hoverImage ? [{ src: product.hoverImage, layout: 'half' as 'full' | 'half' }] : [])
+    ];
+    return images;
+  }, [product.image, product.hoverImage]);
 
   // Find similar products (same brand first, then other products)
   const similarProducts = useMemo(() => {
@@ -130,7 +138,7 @@ const Product = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="pt-20 pb-12">
-        <div className="max-w-7xl mx-auto px-6">
+        <div style={{ marginLeft: '300px', marginRight: '50px' }}>
           <button
             onClick={() => navigate("/")}
             className="mb-8 text-foreground hover:text-accent transition-colors"
@@ -139,54 +147,78 @@ const Product = () => {
             ← Back to catalog
           </button>
 
-          <div className="grid md:grid-cols-2 gap-12 mb-20">
-            {/* Images - увеличены в 2 раза */}
-            <div className="space-y-4 md:col-span-1">
-              <div className="overflow-hidden bg-gray-100" style={{ width: '100%', height: '800px' }}>
-                <img
-                  src={displayImage}
-                  alt={product.title}
-                  className="w-full h-full object-cover"
-                />
+          <div className="flex gap-0 mb-20">
+            {/* Images Gallery - takes remaining space */}
+            <div className="flex-1">
+              <div className="flex flex-col">
+                {(() => {
+                  const rows: JSX.Element[] = [];
+                  let i = 0;
+                  
+                  while (i < productImages.length) {
+                    const currentImage = productImages[i];
+                    
+                    if (currentImage.layout === 'full') {
+                      // Full width image
+                      rows.push(
+                        <div key={i} className="w-full">
+                          <img
+                            src={currentImage.src}
+                            alt={`${product.title} ${i + 1}`}
+                            className="w-full h-auto object-cover cursor-pointer"
+                            onClick={() => setSelectedImage(currentImage.src)}
+                          />
+                        </div>
+                      );
+                      i++;
+                    } else {
+                      // Half width - create a row with 2 images
+                      const nextImage = productImages[i + 1];
+                      rows.push(
+                        <div key={i} className="flex w-full">
+                          <div className="w-1/2">
+                            <img
+                              src={currentImage.src}
+                              alt={`${product.title} ${i + 1}`}
+                              className="w-full h-auto object-cover cursor-pointer"
+                              onClick={() => setSelectedImage(currentImage.src)}
+                            />
+                          </div>
+                          {nextImage ? (
+                            <div className="w-1/2">
+                              <img
+                                src={nextImage.src}
+                                alt={`${product.title} ${i + 2}`}
+                                className="w-full h-auto object-cover cursor-pointer"
+                                onClick={() => setSelectedImage(nextImage.src)}
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-1/2"></div>
+                          )}
+                        </div>
+                      );
+                      i += 2; // Skip next image as it's already rendered
+                    }
+                  }
+                  
+                  return rows;
+                })()}
               </div>
-              {product.hoverImage && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div
-                    className="aspect-square overflow-hidden bg-gray-100 cursor-pointer border-2 border-transparent hover:border-foreground transition-colors"
-                    onClick={() => setSelectedImage(product.image)}
-                  >
-                    <img
-                      src={product.image}
-                      alt={product.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div
-                    className="aspect-square overflow-hidden bg-gray-100 cursor-pointer border-2 border-transparent hover:border-foreground transition-colors"
-                    onClick={() => setSelectedImage(product.hoverImage!)}
-                  >
-                    <img
-                      src={product.hoverImage}
-                      alt={product.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-              )}
             </div>
 
-            {/* Product Info */}
-            <div className="flex flex-col justify-center">
-              <div className="space-y-6">
+            {/* Product Info Panel - 250px width */}
+            <div className="flex-shrink-0" style={{ width: '250px', marginLeft: '20px' }}>
+              <div className="space-y-6 sticky top-24">
                 {product.brand && (
                   <p className="text-xs text-muted-foreground uppercase tracking-widest">
                     {product.brand}
                   </p>
                 )}
-                <h1 className="text-4xl md:text-5xl font-bold uppercase tracking-tighter">
+                <h1 className="text-2xl font-bold uppercase tracking-tighter">
                   {product.title}
                 </h1>
-                <p className="font-bold text-2xl">{product.price}</p>
+                <p className="font-bold text-xl">{product.price}</p>
                 
                 {product.size && (
                   <div>
@@ -196,7 +228,7 @@ const Product = () => {
                 )}
 
                 <div className="pt-8">
-                  <button className="btn-brutal w-full md:w-auto">
+                  <button className="btn-brutal w-full">
                     Add to cart
                   </button>
                 </div>
