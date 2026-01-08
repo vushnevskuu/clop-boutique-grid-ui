@@ -111,16 +111,34 @@ const Product = memo(() => {
     if (refIndex !== undefined) {
       const ref = imageRefs.current[refIndex];
       if (ref) {
-        // Вычисляем позицию элемента относительно документа
-        const elementTop = ref.getBoundingClientRect().top + window.pageYOffset;
-        const elementHeight = ref.getBoundingClientRect().height;
-        const windowHeight = window.innerHeight;
-        const offset = (windowHeight - elementHeight) / 2;
+        // Находим родительский контейнер с overflow
+        let scrollContainer = ref.parentElement;
+        while (scrollContainer && !scrollContainer.classList.contains('overflow-y-auto')) {
+          scrollContainer = scrollContainer.parentElement;
+        }
         
-        window.scrollTo({
-          top: elementTop - offset,
-          behavior: 'smooth'
-        });
+        if (scrollContainer) {
+          // Скроллим внутри контейнера
+          const containerRect = scrollContainer.getBoundingClientRect();
+          const elementRect = ref.getBoundingClientRect();
+          const scrollTop = scrollContainer.scrollTop;
+          const elementTop = elementRect.top - containerRect.top + scrollTop;
+          const containerHeight = scrollContainer.clientHeight;
+          const elementHeight = elementRect.height;
+          const scrollPosition = elementTop - (containerHeight / 2) + (elementHeight / 2);
+          
+          scrollContainer.scrollTo({
+            top: scrollPosition,
+            behavior: 'smooth'
+          });
+        } else {
+          // Если контейнера нет, используем обычный scrollIntoView
+          ref.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center',
+            inline: 'nearest'
+          });
+        }
       }
     }
   }, []);
@@ -174,14 +192,18 @@ const Product = memo(() => {
       <main className="pt-20 pb-12">
         <div style={{ marginLeft: '30px', marginRight: '30px' }}>
           <div className="flex gap-4 mb-20">
-            {/* Thumbnails and Images Gallery - sticky container */}
-            <div className="flex gap-4 flex-1 sticky top-24" style={{ alignSelf: 'flex-start' }}>
+            {/* Thumbnails and Images Gallery - sticky container, как описание */}
+            <div className="flex gap-4 flex-1">
               {/* Thumbnails - left side */}
               <div className="flex flex-col gap-6" style={{ width: '240px', flexShrink: 0 }}>
                 {productImages.map((img, index) => (
                   <button
                     key={index}
-                    onClick={() => handleThumbnailClick(index)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleThumbnailClick(index);
+                    }}
                     className="w-full aspect-square overflow-hidden"
                     style={{ 
                       padding: 0,
@@ -202,52 +224,27 @@ const Product = memo(() => {
                 ))}
               </div>
 
-              {/* Images Gallery - takes remaining space */}
-              <div className="flex-1">
-              <div className="flex flex-col">
-                {(() => {
-                  // Очищаем маппинг перед созданием нового
-                  thumbnailToRefMap.current.clear();
-                  const rows: JSX.Element[] = [];
-                  let thumbnailIndex = 0; // Индекс в массиве thumbnails (productImages)
-                  let refIndex = 0; // Индекс в массиве refs
-                  
-                  while (thumbnailIndex < productImages.length) {
-                    const currentImage = productImages[thumbnailIndex];
+              {/* Images Gallery - takes remaining space, sticky как описание */}
+              <div className="flex-1 sticky top-24" style={{ alignSelf: 'flex-start', maxHeight: 'calc(100vh - 6rem)', overflowY: 'auto' }}>
+                <div className="flex flex-col">
+                  {(() => {
+                    // Очищаем маппинг перед созданием нового
+                    thumbnailToRefMap.current.clear();
+                    const rows: JSX.Element[] = [];
+                    let thumbnailIndex = 0; // Индекс в массиве thumbnails (productImages)
+                    let refIndex = 0; // Индекс в массиве refs
                     
-                    if (currentImage.layout === 'full') {
-                      // Full width image - один thumbnail соответствует одному ref
-                      thumbnailToRefMap.current.set(thumbnailIndex, refIndex);
-                      rows.push(
-                        <div 
-                          key={thumbnailIndex} 
-                          ref={(el) => { imageRefs.current[refIndex] = el; }}
-                          className="w-full"
-                        >
-                          <img
-                            src={currentImage.src}
-                            alt={`${product.title} ${refIndex + 1}`}
-                            className="w-full h-auto object-cover cursor-pointer"
-                            loading="lazy"
-                            decoding="async"
-                            onClick={() => handleImageClick(currentImage.src)}
-                          />
-                        </div>
-                      );
-                      thumbnailIndex++;
-                      refIndex++;
-                    } else {
-                      // Half width - создаем строку с 2 изображениями
-                      const nextImage = productImages[thumbnailIndex + 1];
+                    while (thumbnailIndex < productImages.length) {
+                      const currentImage = productImages[thumbnailIndex];
                       
-                      // Маппинг для первого изображения в паре
-                      thumbnailToRefMap.current.set(thumbnailIndex, refIndex);
-                      
-                      rows.push(
-                        <div key={thumbnailIndex} className="flex w-full">
+                      if (currentImage.layout === 'full') {
+                        // Full width image - один thumbnail соответствует одному ref
+                        thumbnailToRefMap.current.set(thumbnailIndex, refIndex);
+                        rows.push(
                           <div 
-                            className="w-1/2"
+                            key={thumbnailIndex} 
                             ref={(el) => { imageRefs.current[refIndex] = el; }}
+                            className="w-full"
                           >
                             <img
                               src={currentImage.src}
@@ -255,45 +252,82 @@ const Product = memo(() => {
                               className="w-full h-auto object-cover cursor-pointer"
                               loading="lazy"
                               decoding="async"
-                              onClick={() => handleImageClick(currentImage.src)}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleImageClick(currentImage.src);
+                              }}
                             />
                           </div>
-                          {nextImage ? (
+                        );
+                        thumbnailIndex++;
+                        refIndex++;
+                      } else {
+                        // Half width - создаем строку с 2 изображениями
+                        const nextImage = productImages[thumbnailIndex + 1];
+                        
+                        // Маппинг для первого изображения в паре
+                        thumbnailToRefMap.current.set(thumbnailIndex, refIndex);
+                        
+                        rows.push(
+                          <div key={thumbnailIndex} className="flex w-full">
                             <div 
                               className="w-1/2"
-                              ref={(el) => { imageRefs.current[refIndex + 1] = el; }}
+                              ref={(el) => { imageRefs.current[refIndex] = el; }}
                             >
                               <img
-                                src={nextImage.src}
-                                alt={`${product.title} ${refIndex + 2}`}
+                                src={currentImage.src}
+                                alt={`${product.title} ${refIndex + 1}`}
                                 className="w-full h-auto object-cover cursor-pointer"
                                 loading="lazy"
                                 decoding="async"
-                                onClick={() => handleImageClick(nextImage.src)}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleImageClick(currentImage.src);
+                                }}
                               />
                             </div>
-                          ) : (
-                            <div className="w-1/2"></div>
-                          )}
-                        </div>
-                      );
-                      
-                      // Если есть следующее изображение, создаем маппинг и для него
-                      if (nextImage) {
-                        thumbnailToRefMap.current.set(thumbnailIndex + 1, refIndex + 1);
-                        thumbnailIndex += 2; // Пропускаем оба изображения
-                        refIndex += 2;
-                      } else {
-                        // Если следующего изображения нет, обрабатываем только текущее
-                        thumbnailIndex++;
-                        refIndex++;
+                            {nextImage ? (
+                              <div 
+                                className="w-1/2"
+                                ref={(el) => { imageRefs.current[refIndex + 1] = el; }}
+                              >
+                                <img
+                                  src={nextImage.src}
+                                  alt={`${product.title} ${refIndex + 2}`}
+                                  className="w-full h-auto object-cover cursor-pointer"
+                                  loading="lazy"
+                                  decoding="async"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handleImageClick(nextImage.src);
+                                  }}
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-1/2"></div>
+                            )}
+                          </div>
+                        );
+                        
+                        // Если есть следующее изображение, создаем маппинг и для него
+                        if (nextImage) {
+                          thumbnailToRefMap.current.set(thumbnailIndex + 1, refIndex + 1);
+                          thumbnailIndex += 2; // Пропускаем оба изображения
+                          refIndex += 2;
+                        } else {
+                          // Если следующего изображения нет, обрабатываем только текущее
+                          thumbnailIndex++;
+                          refIndex++;
+                        }
                       }
                     }
-                  }
-                  
-                  return rows;
-                })()}
-              </div>
+                    
+                    return rows;
+                  })()}
+                </div>
               </div>
             </div>
 
