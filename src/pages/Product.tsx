@@ -89,8 +89,7 @@ const Product = memo(() => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const thumbnailToRefMap = useRef<Map<number, number>>(new Map());
+  const imageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
   const product = useMemo(() => products.find((p) => p.id === Number(id)), [id]);
   
@@ -106,13 +105,18 @@ const Product = memo(() => {
     setSelectedImage(null);
   }, []);
 
-  const handleThumbnailClick = useCallback((thumbnailIndex: number) => {
-    const refIndex = thumbnailToRefMap.current.get(thumbnailIndex);
-    if (refIndex !== undefined) {
-      const ref = imageRefs.current[refIndex];
-      if (ref) {
-        ref.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
+  const handleThumbnailClick = useCallback((index: number) => {
+    const ref = imageRefs.current.get(index);
+    if (ref) {
+      ref.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, []);
+
+  const setImageRef = useCallback((index: number, el: HTMLDivElement | null) => {
+    if (el) {
+      imageRefs.current.set(index, el);
+    } else {
+      imageRefs.current.delete(index);
     }
   }, []);
 
@@ -135,12 +139,11 @@ const Product = memo(() => {
     );
   }
 
-  // Prepare images array with layout info
-  // Each image can have layout: 'full' (1 per row) or 'half' (2 per row)
+  // Prepare images array
   const productImages = useMemo(() => {
     const images = [
-      { src: product.image, layout: 'full' as 'full' | 'half' },
-      ...(product.hoverImage ? [{ src: product.hoverImage, layout: 'half' as 'full' | 'half' }] : [])
+      { src: product.image },
+      ...(product.hoverImage ? [{ src: product.hoverImage }] : [])
     ];
     return images;
   }, [product.image, product.hoverImage]);
@@ -149,9 +152,7 @@ const Product = memo(() => {
   const similarProducts = useMemo(() => {
     const sameBrand = products.filter((p) => p.id !== product.id && p.brand === product.brand);
     const otherProducts = products.filter((p) => p.id !== product.id && p.brand !== product.brand);
-    // Combine and repeat if needed to get 16 products
     const combined = [...sameBrand, ...otherProducts];
-    // If we have less than 16, repeat the array
     const result = [];
     while (result.length < 16 && combined.length > 0) {
       result.push(...combined);
@@ -196,87 +197,22 @@ const Product = memo(() => {
             {/* Images Gallery - scrollable */}
             <div className="flex-1">
               <div className="flex flex-col">
-                {(() => {
-                  thumbnailToRefMap.current.clear();
-                  const rows: JSX.Element[] = [];
-                  let thumbnailIndex = 0;
-                  let refIndex = 0;
-                  
-                  while (thumbnailIndex < productImages.length) {
-                    const currentImage = productImages[thumbnailIndex];
-                    
-                    if (currentImage.layout === 'full') {
-                      thumbnailToRefMap.current.set(thumbnailIndex, refIndex);
-                      rows.push(
-                        <div 
-                          key={thumbnailIndex} 
-                          ref={(el) => { imageRefs.current[refIndex] = el; }}
-                          className="w-full"
-                        >
-                          <img
-                            src={currentImage.src}
-                            alt={`${product.title} ${refIndex + 1}`}
-                            className="w-full h-auto object-cover cursor-pointer"
-                            loading="lazy"
-                            decoding="async"
-                            onClick={() => handleImageClick(currentImage.src)}
-                          />
-                        </div>
-                      );
-                      thumbnailIndex++;
-                      refIndex++;
-                    } else {
-                      const nextImage = productImages[thumbnailIndex + 1];
-                      thumbnailToRefMap.current.set(thumbnailIndex, refIndex);
-                      
-                      rows.push(
-                        <div key={thumbnailIndex} className="flex w-full">
-                          <div 
-                            className="w-1/2"
-                            ref={(el) => { imageRefs.current[refIndex] = el; }}
-                          >
-                            <img
-                              src={currentImage.src}
-                              alt={`${product.title} ${refIndex + 1}`}
-                              className="w-full h-auto object-cover cursor-pointer"
-                              loading="lazy"
-                              decoding="async"
-                              onClick={() => handleImageClick(currentImage.src)}
-                            />
-                          </div>
-                          {nextImage ? (
-                            <div 
-                              className="w-1/2"
-                              ref={(el) => { imageRefs.current[refIndex + 1] = el; }}
-                            >
-                              <img
-                                src={nextImage.src}
-                                alt={`${product.title} ${refIndex + 2}`}
-                                className="w-full h-auto object-cover cursor-pointer"
-                                loading="lazy"
-                                decoding="async"
-                                onClick={() => handleImageClick(nextImage.src)}
-                              />
-                            </div>
-                          ) : (
-                            <div className="w-1/2"></div>
-                          )}
-                        </div>
-                      );
-                      
-                      if (nextImage) {
-                        thumbnailToRefMap.current.set(thumbnailIndex + 1, refIndex + 1);
-                        thumbnailIndex += 2;
-                        refIndex += 2;
-                      } else {
-                        thumbnailIndex++;
-                        refIndex++;
-                      }
-                    }
-                  }
-                  
-                  return rows;
-                })()}
+                {productImages.map((img, index) => (
+                  <div 
+                    key={index}
+                    ref={(el) => setImageRef(index, el)}
+                    className="w-full"
+                  >
+                    <img
+                      src={img.src}
+                      alt={`${product.title} ${index + 1}`}
+                      className="w-full h-auto object-cover cursor-pointer"
+                      loading="lazy"
+                      decoding="async"
+                      onClick={() => handleImageClick(img.src)}
+                    />
+                  </div>
+                ))}
               </div>
             </div>
 
