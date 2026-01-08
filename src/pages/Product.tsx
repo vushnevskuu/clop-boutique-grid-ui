@@ -1,6 +1,6 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import Header from "@/components/Header";
-import { useState, useMemo, memo, useCallback, useRef, useEffect } from "react";
+import { useState, useMemo, memo, useCallback, useRef } from "react";
 
 import product1 from "@/assets/product-1.jpg";
 import product2 from "@/assets/product-2.jpg";
@@ -99,7 +99,6 @@ const Product = memo(() => {
   }, [navigate]);
   
   const handleImageClick = useCallback((src: string) => {
-    console.log('handleImageClick called with:', src);
     setSelectedImage(src);
   }, []);
   
@@ -108,36 +107,12 @@ const Product = memo(() => {
   }, []);
 
   const handleThumbnailClick = useCallback((thumbnailIndex: number) => {
-    console.log('Thumbnail clicked:', thumbnailIndex);
-    console.log('Map:', Array.from(thumbnailToRefMap.current.entries()));
-    console.log('Refs array length:', imageRefs.current.length);
-    console.log('All refs:', imageRefs.current);
-    
     const refIndex = thumbnailToRefMap.current.get(thumbnailIndex);
-    console.log('Ref index from map:', refIndex);
-    
     if (refIndex !== undefined) {
-      console.log('Ref index is defined, checking refs array...');
-      if (refIndex < imageRefs.current.length) {
-        const ref = imageRefs.current[refIndex];
-        console.log('Ref found:', ref);
-        
-        if (ref) {
-          console.log('Scrolling to ref...');
-          // Скроллим всю страницу к изображению
-          ref.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center',
-            inline: 'nearest'
-          });
-        } else {
-          console.log('Ref is null or undefined');
-        }
-      } else {
-        console.log('Ref index out of bounds:', refIndex, '>=', imageRefs.current.length);
+      const ref = imageRefs.current[refIndex];
+      if (ref) {
+        ref.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
-    } else {
-      console.log('No ref index found in map for thumbnail:', thumbnailIndex);
     }
   }, []);
 
@@ -184,84 +159,81 @@ const Product = memo(() => {
     return result.slice(0, 16);
   }, [product.id, product.brand]);
 
-  // Проверяем что refs установлены после рендера
-  useEffect(() => {
-    console.log('Product images:', productImages);
-    console.log('Image refs after render:', imageRefs.current);
-    console.log('Thumbnail to ref map:', Array.from(thumbnailToRefMap.current.entries()));
-  }, [productImages]);
-
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="pb-12" style={{ paddingTop: '60px' }}>
+      <main className="pt-20 pb-12">
         <div style={{ marginLeft: '30px', marginRight: '30px' }}>
-          <div className="flex gap-4 mb-20" style={{ marginTop: '60px' }}>
-            {/* Thumbnails and Images Gallery - весь блок sticky как описание */}
-            <div className="flex gap-4 flex-1 sticky top-24" style={{ alignSelf: 'flex-start' }}>
-              {/* Product Info Panel - только миниатюры слева */}
-              <div className="flex-shrink-0" style={{ width: '250px' }}>
-                <div className="sticky top-24">
-                  {/* Thumbnails */}
-                  <div className="flex flex-col gap-4">
-                    {productImages.map((img, index) => (
-                      <button
-                        key={index}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleThumbnailClick(index);
-                        }}
-                        className="w-full aspect-square overflow-hidden"
-                        style={{ 
-                          padding: 0,
-                          background: 'transparent',
-                          cursor: 'pointer',
-                          border: 'none',
-                          outline: 'none'
-                        }}
-                      >
-                        <img
-                          src={img.src}
-                          alt={`${product.title} thumbnail ${index + 1}`}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      </button>
-                    ))}
-                  </div>
-                </div>
+          <div className="flex gap-4 mb-20">
+            {/* Thumbnails - sticky left side */}
+            <div className="flex-shrink-0 sticky top-24" style={{ width: '240px', alignSelf: 'flex-start' }}>
+              <div className="flex flex-col gap-6">
+                {productImages.map((img, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleThumbnailClick(index)}
+                    className="w-full aspect-square overflow-hidden"
+                    style={{ 
+                      padding: 0,
+                      background: 'transparent',
+                      cursor: 'pointer',
+                      border: 'none',
+                      outline: 'none'
+                    }}
+                  >
+                    <img
+                      src={img.src}
+                      alt={`${product.title} thumbnail ${index + 1}`}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </button>
+                ))}
               </div>
+            </div>
 
-              {/* Images Gallery - takes remaining space */}
-              <div className="flex-1 w-full" style={{ pointerEvents: 'auto' }}>
-                <div className="flex flex-col">
-                  {(() => {
-                    // Очищаем маппинг перед созданием нового
-                    thumbnailToRefMap.current.clear();
-                    const rows: JSX.Element[] = [];
-                    let thumbnailIndex = 0; // Индекс в массиве thumbnails (productImages)
-                    let refIndex = 0; // Индекс в массиве refs
+            {/* Images Gallery - scrollable */}
+            <div className="flex-1">
+              <div className="flex flex-col">
+                {(() => {
+                  thumbnailToRefMap.current.clear();
+                  const rows: JSX.Element[] = [];
+                  let thumbnailIndex = 0;
+                  let refIndex = 0;
+                  
+                  while (thumbnailIndex < productImages.length) {
+                    const currentImage = productImages[thumbnailIndex];
                     
-                    while (thumbnailIndex < productImages.length) {
-                      const currentImage = productImages[thumbnailIndex];
+                    if (currentImage.layout === 'full') {
+                      thumbnailToRefMap.current.set(thumbnailIndex, refIndex);
+                      rows.push(
+                        <div 
+                          key={thumbnailIndex} 
+                          ref={(el) => { imageRefs.current[refIndex] = el; }}
+                          className="w-full"
+                        >
+                          <img
+                            src={currentImage.src}
+                            alt={`${product.title} ${refIndex + 1}`}
+                            className="w-full h-auto object-cover cursor-pointer"
+                            loading="lazy"
+                            decoding="async"
+                            onClick={() => handleImageClick(currentImage.src)}
+                          />
+                        </div>
+                      );
+                      thumbnailIndex++;
+                      refIndex++;
+                    } else {
+                      const nextImage = productImages[thumbnailIndex + 1];
+                      thumbnailToRefMap.current.set(thumbnailIndex, refIndex);
                       
-                      if (currentImage.layout === 'full') {
-                        // Full width image - один thumbnail соответствует одному ref
-                        thumbnailToRefMap.current.set(thumbnailIndex, refIndex);
-                        rows.push(
+                      rows.push(
+                        <div key={thumbnailIndex} className="flex w-full">
                           <div 
-                            key={thumbnailIndex} 
+                            className="w-1/2"
                             ref={(el) => { imageRefs.current[refIndex] = el; }}
-                            className="w-full"
-                            style={{ pointerEvents: 'auto', width: '100%' }}
-                            onClick={(e) => {
-                              console.log('Image container clicked:', currentImage.src);
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleImageClick(currentImage.src);
-                            }}
                           >
                             <img
                               src={currentImage.src}
@@ -269,108 +241,48 @@ const Product = memo(() => {
                               className="w-full h-auto object-cover cursor-pointer"
                               loading="lazy"
                               decoding="async"
-                              style={{ pointerEvents: 'auto', width: '100%', display: 'block', maxWidth: '100%' }}
-                              onClick={(e) => {
-                                console.log('Image clicked:', currentImage.src);
-                                e.preventDefault();
-                                e.stopPropagation();
-                                handleImageClick(currentImage.src);
-                              }}
+                              onClick={() => handleImageClick(currentImage.src)}
                             />
                           </div>
-                        );
-                        thumbnailIndex++;
-                        refIndex++;
-                      } else {
-                        // Half width - создаем строку с 2 изображениями
-                        const nextImage = productImages[thumbnailIndex + 1];
-                        
-                        // Маппинг для первого изображения в паре
-                        thumbnailToRefMap.current.set(thumbnailIndex, refIndex);
-                        
-                        rows.push(
-                          <div key={thumbnailIndex} className="flex w-full">
+                          {nextImage ? (
                             <div 
                               className="w-1/2"
-                              ref={(el) => { imageRefs.current[refIndex] = el; }}
-                              style={{ pointerEvents: 'auto' }}
-                              onClick={(e) => {
-                                console.log('Image container clicked:', currentImage.src);
-                                e.preventDefault();
-                                e.stopPropagation();
-                                handleImageClick(currentImage.src);
-                              }}
+                              ref={(el) => { imageRefs.current[refIndex + 1] = el; }}
                             >
                               <img
-                                src={currentImage.src}
-                                alt={`${product.title} ${refIndex + 1}`}
+                                src={nextImage.src}
+                                alt={`${product.title} ${refIndex + 2}`}
                                 className="w-full h-auto object-cover cursor-pointer"
                                 loading="lazy"
                                 decoding="async"
-                                style={{ pointerEvents: 'auto', width: '100%', display: 'block' }}
-                                onClick={(e) => {
-                                  console.log('Image clicked:', currentImage.src);
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  handleImageClick(currentImage.src);
-                                }}
+                                onClick={() => handleImageClick(nextImage.src)}
                               />
                             </div>
-                            {nextImage ? (
-                              <div 
-                                className="w-1/2"
-                                ref={(el) => { imageRefs.current[refIndex + 1] = el; }}
-                                style={{ pointerEvents: 'auto' }}
-                                onClick={(e) => {
-                                  console.log('Image container clicked:', nextImage.src);
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  handleImageClick(nextImage.src);
-                                }}
-                              >
-                                <img
-                                  src={nextImage.src}
-                                  alt={`${product.title} ${refIndex + 2}`}
-                                  className="w-full h-auto object-cover cursor-pointer"
-                                  loading="lazy"
-                                  decoding="async"
-                                  style={{ pointerEvents: 'auto', width: '100%', display: 'block' }}
-                                  onClick={(e) => {
-                                    console.log('Image clicked:', nextImage.src);
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    handleImageClick(nextImage.src);
-                                  }}
-                                />
-                              </div>
-                            ) : (
-                              <div className="w-1/2"></div>
-                            )}
-                          </div>
-                        );
-                        
-                        // Если есть следующее изображение, создаем маппинг и для него
-                        if (nextImage) {
-                          thumbnailToRefMap.current.set(thumbnailIndex + 1, refIndex + 1);
-                          thumbnailIndex += 2; // Пропускаем оба изображения
-                          refIndex += 2;
-                        } else {
-                          // Если следующего изображения нет, обрабатываем только текущее
-                          thumbnailIndex++;
-                          refIndex++;
-                        }
+                          ) : (
+                            <div className="w-1/2"></div>
+                          )}
+                        </div>
+                      );
+                      
+                      if (nextImage) {
+                        thumbnailToRefMap.current.set(thumbnailIndex + 1, refIndex + 1);
+                        thumbnailIndex += 2;
+                        refIndex += 2;
+                      } else {
+                        thumbnailIndex++;
+                        refIndex++;
                       }
                     }
-                    
-                    return rows;
-                  })()}
-                </div>
+                  }
+                  
+                  return rows;
+                })()}
               </div>
             </div>
 
             {/* Product Info Panel - 750px width */}
-            <div className="flex-shrink-0" style={{ width: '750px', marginLeft: '20px' }}>
-              <div className="space-y-6 sticky top-24">
+            <div className="flex-shrink-0 sticky top-24" style={{ width: '750px', marginLeft: '20px', alignSelf: 'flex-start' }}>
+              <div className="space-y-6">
                 <h1 className="font-bold uppercase tracking-tighter" style={{ fontSize: '32px' }}>
                   {product.title}
                 </h1>
@@ -476,30 +388,6 @@ const Product = memo(() => {
           )}
         </div>
       </main>
-
-      {/* Image Modal */}
-      {selectedImage && (
-        <div
-          className="fixed inset-0 z-[100] bg-black bg-opacity-90 flex items-center justify-center"
-          onClick={handleCloseModal}
-          style={{ cursor: 'pointer', pointerEvents: 'auto' }}
-        >
-          <img
-            src={selectedImage}
-            alt="Product view"
-            className="max-w-full max-h-full object-contain"
-            onClick={(e) => e.stopPropagation()}
-            style={{ cursor: 'default', pointerEvents: 'auto' }}
-          />
-          <button
-            onClick={handleCloseModal}
-            className="absolute top-4 right-4 text-white text-4xl font-bold z-[101]"
-            style={{ cursor: 'pointer', pointerEvents: 'auto' }}
-          >
-            ×
-          </button>
-        </div>
-      )}
     </div>
   );
 });
@@ -507,4 +395,3 @@ const Product = memo(() => {
 Product.displayName = 'Product';
 
 export default Product;
-
