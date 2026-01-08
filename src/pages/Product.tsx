@@ -1,89 +1,7 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import Header from "@/components/Header";
 import { useState, useMemo, memo, useCallback, useRef, useEffect } from "react";
-
-import product1 from "@/assets/product-1.jpg";
-import product2 from "@/assets/product-2.jpg";
-import product3 from "@/assets/product-3.jpg";
-import product4 from "@/assets/product-4.jpg";
-import product5 from "@/assets/product-5.jpg";
-import product6 from "@/assets/product-6.jpg";
-import product7 from "@/assets/product-7.jpg";
-import product8 from "@/assets/product-8.jpg";
-
-const products = [
-  {
-    id: 1,
-    image: product1,
-    hoverImage: product2,
-    title: "Leather jacket",
-    brand: "Vintage",
-    price: "$125",
-    size: "M",
-  },
-  {
-    id: 2,
-    image: product2,
-    hoverImage: product3,
-    title: "Classic jeans",
-    brand: "Levi's",
-    price: "$42",
-    size: "32",
-  },
-  {
-    id: 3,
-    image: product3,
-    hoverImage: product4,
-    title: "Wool sweater",
-    brand: "Handmade",
-    price: "$58",
-    size: "L",
-  },
-  {
-    id: 4,
-    image: product4,
-    hoverImage: product5,
-    title: "Leather sneakers",
-    brand: "Vintage",
-    price: "$39",
-    size: "42",
-  },
-  {
-    id: 5,
-    image: product5,
-    hoverImage: product6,
-    title: "Silk scarf",
-    brand: "Italian",
-    price: "$21",
-  },
-  {
-    id: 6,
-    image: product6,
-    hoverImage: product7,
-    title: "Corduroy pants",
-    brand: "Vintage",
-    price: "$45",
-    size: "M",
-  },
-  {
-    id: 7,
-    image: product7,
-    hoverImage: product8,
-    title: "Oversized blazer",
-    brand: "90s",
-    price: "$72",
-    size: "L",
-  },
-  {
-    id: 8,
-    image: product8,
-    hoverImage: product1,
-    title: "Basic t-shirt",
-    brand: "Premium Cotton",
-    price: "$18",
-    size: "M",
-  },
-];
+import { useProduct, useProducts } from "@/hooks/useProducts";
 
 const Product = memo(() => {
   const { id } = useParams<{ id: string }>();
@@ -92,7 +10,8 @@ const Product = memo(() => {
   const [logoWidth, setLogoWidth] = useState<number>(120);
   const imageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
-  const product = useMemo(() => products.find((p) => p.id === Number(id)), [id]);
+  const { product, loading: productLoading } = useProduct(id || "");
+  const { products: allProducts } = useProducts();
   
   const handleBackClick = useCallback(() => {
     navigate("/");
@@ -114,9 +33,22 @@ const Product = memo(() => {
   }, []);
 
 
+  if (productLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <p>Загрузка товара...</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   if (!product) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-background">
         <Header />
         <main className="flex items-center justify-center min-h-screen">
           <div className="text-center">
@@ -135,24 +67,39 @@ const Product = memo(() => {
 
   // Prepare images array
   const productImages = useMemo(() => {
-    const images = [
-      { src: product.image },
-      ...(product.hoverImage ? [{ src: product.hoverImage }] : [])
-    ];
+    if (!product) return [];
+    
+    const images = [];
+    // Основное изображение
+    if (product.image) {
+      images.push({ src: product.image });
+    }
+    // Дополнительные изображения из product_images
+    if (product.images && product.images.length > 0) {
+      product.images.forEach((img) => {
+        images.push({ src: img.image_url });
+      });
+    }
+    // Если нет дополнительных изображений, используем hover_image
+    if (images.length === 1 && product.hover_image) {
+      images.push({ src: product.hover_image });
+    }
     return images;
-  }, [product.image, product.hoverImage]);
+  }, [product]);
 
   // Find similar products (same brand first, then other products)
   const similarProducts = useMemo(() => {
-    const sameBrand = products.filter((p) => p.id !== product.id && p.brand === product.brand);
-    const otherProducts = products.filter((p) => p.id !== product.id && p.brand !== product.brand);
+    if (!product || !allProducts) return [];
+    
+    const sameBrand = allProducts.filter((p) => p.id !== product.id && p.brand === product.brand);
+    const otherProducts = allProducts.filter((p) => p.id !== product.id && p.brand !== product.brand);
     const combined = [...sameBrand, ...otherProducts];
     const result = [];
     while (result.length < 16 && combined.length > 0) {
       result.push(...combined);
     }
     return result.slice(0, 16);
-  }, [product.id, product.brand]);
+  }, [product, allProducts]);
 
   // Измеряем ширину логотипа
   useEffect(() => {
@@ -276,36 +223,50 @@ const Product = memo(() => {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>XS</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>86-90</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>66-70</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>58</td>
-                      </tr>
-                      <tr>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>S</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>90-94</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>70-74</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>60</td>
-                      </tr>
-                      <tr>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>M</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>94-98</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>74-78</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>62</td>
-                      </tr>
-                      <tr>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>L</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>98-102</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>78-82</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>64</td>
-                      </tr>
-                      <tr>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>XL</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>102-106</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>82-86</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>66</td>
-                      </tr>
+                      {product.size_charts && product.size_charts.length > 0 ? (
+                        product.size_charts.map((sizeRow, index) => (
+                          <tr key={index}>
+                            <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>{sizeRow.size_label}</td>
+                            <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>{sizeRow.chest || '-'}</td>
+                            <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>{sizeRow.waist || '-'}</td>
+                            <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>{sizeRow.length || '-'}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        // Fallback к статической таблице, если нет данных в БД
+                        <>
+                          <tr>
+                            <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>XS</td>
+                            <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>86-90</td>
+                            <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>66-70</td>
+                            <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>58</td>
+                          </tr>
+                          <tr>
+                            <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>S</td>
+                            <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>90-94</td>
+                            <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>70-74</td>
+                            <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>60</td>
+                          </tr>
+                          <tr>
+                            <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>M</td>
+                            <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>94-98</td>
+                            <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>74-78</td>
+                            <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>62</td>
+                          </tr>
+                          <tr>
+                            <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>L</td>
+                            <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>98-102</td>
+                            <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>78-82</td>
+                            <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>64</td>
+                          </tr>
+                          <tr>
+                            <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>XL</td>
+                            <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>102-106</td>
+                            <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>82-86</td>
+                            <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>66</td>
+                          </tr>
+                        </>
+                      )}
                     </tbody>
                   </table>
                 </div>
