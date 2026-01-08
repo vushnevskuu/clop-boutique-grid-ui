@@ -202,6 +202,36 @@ const Product = memo(() => {
               {/* Product Info Panel - копия описания слева */}
               <div className="flex-shrink-0" style={{ width: '750px' }}>
                 <div className="space-y-6 sticky top-24">
+                  {/* Thumbnails */}
+                  <div className="flex flex-col gap-4">
+                    {productImages.map((img, index) => (
+                      <button
+                        key={index}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleThumbnailClick(index);
+                        }}
+                        className="w-full aspect-square overflow-hidden"
+                        style={{ 
+                          padding: 0,
+                          background: 'transparent',
+                          cursor: 'pointer',
+                          border: 'none',
+                          outline: 'none'
+                        }}
+                      >
+                        <img
+                          src={img.src}
+                          alt={`${product.title} thumbnail ${index + 1}`}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </button>
+                    ))}
+                  </div>
+
                   <h1 className="font-bold uppercase tracking-tighter" style={{ fontSize: '32px' }}>
                     {product.title}
                   </h1>
