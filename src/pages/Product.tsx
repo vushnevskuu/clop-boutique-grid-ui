@@ -260,52 +260,51 @@ const Product = memo(() => {
                 {/* Size Table */}
                 <div 
                   style={{ 
-                    backgroundColor: '#f3f3f3',
                     color: '#000000',
                     padding: '20px',
                     margin: '0',
                     marginTop: '24px'
                   }}
                 >
-                  <table className="w-full" style={{ fontSize: '14px' }}>
+                  <table className="w-full" style={{ fontSize: '14px', borderCollapse: 'collapse' }}>
                     <thead>
                       <tr>
-                        <th className="text-left pb-2" style={{ fontWeight: 'normal' }}>Size</th>
-                        <th className="text-left pb-2" style={{ fontWeight: 'normal' }}>Chest</th>
-                        <th className="text-left pb-2" style={{ fontWeight: 'normal' }}>Waist</th>
-                        <th className="text-left pb-2" style={{ fontWeight: 'normal' }}>Length</th>
+                        <th className="text-left pb-2" style={{ fontWeight: 'normal', border: '1px solid #f3f3f3', padding: '8px' }}>Size</th>
+                        <th className="text-left pb-2" style={{ fontWeight: 'normal', border: '1px solid #f3f3f3', padding: '8px' }}>Chest</th>
+                        <th className="text-left pb-2" style={{ fontWeight: 'normal', border: '1px solid #f3f3f3', padding: '8px' }}>Waist</th>
+                        <th className="text-left pb-2" style={{ fontWeight: 'normal', border: '1px solid #f3f3f3', padding: '8px' }}>Length</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
-                        <td className="py-1">XS</td>
-                        <td className="py-1">86-90</td>
-                        <td className="py-1">66-70</td>
-                        <td className="py-1">58</td>
+                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>XS</td>
+                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>86-90</td>
+                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>66-70</td>
+                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>58</td>
                       </tr>
                       <tr>
-                        <td className="py-1">S</td>
-                        <td className="py-1">90-94</td>
-                        <td className="py-1">70-74</td>
-                        <td className="py-1">60</td>
+                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>S</td>
+                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>90-94</td>
+                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>70-74</td>
+                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>60</td>
                       </tr>
                       <tr>
-                        <td className="py-1">M</td>
-                        <td className="py-1">94-98</td>
-                        <td className="py-1">74-78</td>
-                        <td className="py-1">62</td>
+                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>M</td>
+                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>94-98</td>
+                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>74-78</td>
+                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>62</td>
                       </tr>
                       <tr>
-                        <td className="py-1">L</td>
-                        <td className="py-1">98-102</td>
-                        <td className="py-1">78-82</td>
-                        <td className="py-1">64</td>
+                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>L</td>
+                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>98-102</td>
+                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>78-82</td>
+                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>64</td>
                       </tr>
                       <tr>
-                        <td className="py-1">XL</td>
-                        <td className="py-1">102-106</td>
-                        <td className="py-1">82-86</td>
-                        <td className="py-1">66</td>
+                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>XL</td>
+                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>102-106</td>
+                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>82-86</td>
+                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>66</td>
                       </tr>
                     </tbody>
                   </table>
