@@ -165,58 +165,59 @@ const Product = memo(() => {
       <main className="pt-20 pb-12">
         <div style={{ marginLeft: '30px', marginRight: '30px' }}>
           <div className="flex gap-4 mb-20">
-            {/* Thumbnails - left side */}
-            <div className="flex flex-col gap-6" style={{ width: '240px', flexShrink: 0 }}>
-              {productImages.map((img, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleThumbnailClick(index)}
-                  className="w-full aspect-square overflow-hidden"
-                  style={{ 
-                    padding: 0,
-                    background: 'transparent',
-                    cursor: 'pointer',
-                    border: 'none',
-                    outline: 'none'
-                  }}
-                >
-                  <img
-                    src={img.src}
-                    alt={`${product.title} thumbnail ${index + 1}`}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </button>
-              ))}
-            </div>
+            {/* Thumbnails and Images Gallery - sticky container */}
+            <div className="flex gap-4 flex-1 sticky top-24" style={{ alignSelf: 'flex-start' }}>
+              {/* Thumbnails - left side */}
+              <div className="flex flex-col gap-6" style={{ width: '240px', flexShrink: 0 }}>
+                {productImages.map((img, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleThumbnailClick(index)}
+                    className="w-full aspect-square overflow-hidden"
+                    style={{ 
+                      padding: 0,
+                      background: 'transparent',
+                      cursor: 'pointer',
+                      border: 'none',
+                      outline: 'none'
+                    }}
+                  >
+                    <img
+                      src={img.src}
+                      alt={`${product.title} thumbnail ${index + 1}`}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </button>
+                ))}
+              </div>
 
-            {/* Images Gallery - takes remaining space */}
-            <div className="flex-1">
+              {/* Images Gallery - takes remaining space */}
+              <div className="flex-1">
               <div className="flex flex-col">
                 {(() => {
                   // Очищаем маппинг перед созданием нового
                   thumbnailToRefMap.current.clear();
                   const rows: JSX.Element[] = [];
-                  let i = 0;
-                  let imageIndex = 0; // Track actual image index for refs
+                  let thumbnailIndex = 0; // Индекс в массиве thumbnails (productImages)
+                  let refIndex = 0; // Индекс в массиве refs
                   
-                  while (i < productImages.length) {
-                    const currentImage = productImages[i];
+                  while (thumbnailIndex < productImages.length) {
+                    const currentImage = productImages[thumbnailIndex];
                     
                     if (currentImage.layout === 'full') {
-                      // Full width image
-                      // Маппинг: thumbnail индекс i -> ref индекс imageIndex
-                      thumbnailToRefMap.current.set(i, imageIndex);
+                      // Full width image - один thumbnail соответствует одному ref
+                      thumbnailToRefMap.current.set(thumbnailIndex, refIndex);
                       rows.push(
                         <div 
-                          key={i} 
-                          ref={(el) => { imageRefs.current[imageIndex] = el; }}
+                          key={thumbnailIndex} 
+                          ref={(el) => { imageRefs.current[refIndex] = el; }}
                           className="w-full"
                         >
                           <img
                             src={currentImage.src}
-                            alt={`${product.title} ${imageIndex + 1}`}
+                            alt={`${product.title} ${refIndex + 1}`}
                             className="w-full h-auto object-cover cursor-pointer"
                             loading="lazy"
                             decoding="async"
@@ -224,26 +225,24 @@ const Product = memo(() => {
                           />
                         </div>
                       );
-                      i++;
-                      imageIndex++;
+                      thumbnailIndex++;
+                      refIndex++;
                     } else {
-                      // Half width - create a row with 2 images
-                      const nextImage = productImages[i + 1];
+                      // Half width - создаем строку с 2 изображениями
+                      const nextImage = productImages[thumbnailIndex + 1];
+                      
                       // Маппинг для первого изображения в паре
-                      thumbnailToRefMap.current.set(i, imageIndex);
-                      if (nextImage) {
-                        // Маппинг для второго изображения в паре
-                        thumbnailToRefMap.current.set(i + 1, imageIndex + 1);
-                      }
+                      thumbnailToRefMap.current.set(thumbnailIndex, refIndex);
+                      
                       rows.push(
-                        <div key={i} className="flex w-full">
+                        <div key={thumbnailIndex} className="flex w-full">
                           <div 
                             className="w-1/2"
-                            ref={(el) => { imageRefs.current[imageIndex] = el; }}
+                            ref={(el) => { imageRefs.current[refIndex] = el; }}
                           >
                             <img
                               src={currentImage.src}
-                              alt={`${product.title} ${imageIndex + 1}`}
+                              alt={`${product.title} ${refIndex + 1}`}
                               className="w-full h-auto object-cover cursor-pointer"
                               loading="lazy"
                               decoding="async"
@@ -253,11 +252,11 @@ const Product = memo(() => {
                           {nextImage ? (
                             <div 
                               className="w-1/2"
-                              ref={(el) => { imageRefs.current[imageIndex + 1] = el; }}
+                              ref={(el) => { imageRefs.current[refIndex + 1] = el; }}
                             >
                               <img
                                 src={nextImage.src}
-                                alt={`${product.title} ${imageIndex + 2}`}
+                                alt={`${product.title} ${refIndex + 2}`}
                                 className="w-full h-auto object-cover cursor-pointer"
                                 loading="lazy"
                                 decoding="async"
@@ -269,8 +268,17 @@ const Product = memo(() => {
                           )}
                         </div>
                       );
-                      i += 2; // Skip next image as it's already rendered
-                      imageIndex += nextImage ? 2 : 1;
+                      
+                      // Если есть следующее изображение, создаем маппинг и для него
+                      if (nextImage) {
+                        thumbnailToRefMap.current.set(thumbnailIndex + 1, refIndex + 1);
+                        thumbnailIndex += 2; // Пропускаем оба изображения
+                        refIndex += 2;
+                      } else {
+                        // Если следующего изображения нет, обрабатываем только текущее
+                        thumbnailIndex++;
+                        refIndex++;
+                      }
                     }
                   }
                   
@@ -293,10 +301,10 @@ const Product = memo(() => {
                 
                 {/* Size Table */}
                 <div 
-                  className="p-4"
                   style={{ 
                     backgroundColor: '#f3f3f3',
-                    color: '#000000'
+                    color: '#000000',
+                    padding: '60px'
                   }}
                 >
                   <table className="w-full" style={{ fontSize: '14px' }}>
