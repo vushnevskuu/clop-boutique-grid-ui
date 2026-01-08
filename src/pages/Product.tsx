@@ -170,7 +170,7 @@ const Product = memo(() => {
 
           <div className="flex gap-4 mb-20">
             {/* Thumbnails - left side */}
-            <div className="flex flex-col gap-2" style={{ width: '80px', flexShrink: 0 }}>
+            <div className="flex flex-col gap-6" style={{ width: '240px', flexShrink: 0 }}>
               {productImages.map((img, index) => (
                 <button
                   key={index}
