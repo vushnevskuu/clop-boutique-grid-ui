@@ -99,6 +99,7 @@ const Product = memo(() => {
   }, [navigate]);
   
   const handleImageClick = useCallback((src: string) => {
+    console.log('handleImageClick called with:', src);
     setSelectedImage(src);
   }, []);
   
@@ -192,8 +193,8 @@ const Product = memo(() => {
       <main className="pt-20 pb-12">
         <div style={{ marginLeft: '30px', marginRight: '30px' }}>
           <div className="flex gap-4 mb-20">
-            {/* Thumbnails and Images Gallery - sticky container, как описание */}
-            <div className="flex gap-4 flex-1">
+            {/* Thumbnails and Images Gallery - весь блок sticky как описание */}
+            <div className="flex gap-4 flex-1 sticky top-24" style={{ alignSelf: 'flex-start' }}>
               {/* Thumbnails - left side */}
               <div className="flex flex-col gap-6" style={{ width: '240px', flexShrink: 0 }}>
                 {productImages.map((img, index) => (
@@ -224,8 +225,8 @@ const Product = memo(() => {
                 ))}
               </div>
 
-              {/* Images Gallery - takes remaining space, sticky как описание */}
-              <div className="flex-1 sticky top-24" style={{ alignSelf: 'flex-start', maxHeight: 'calc(100vh - 6rem)', overflowY: 'auto' }}>
+              {/* Images Gallery - takes remaining space */}
+              <div className="flex-1" style={{ maxHeight: 'calc(100vh - 6rem)', overflowY: 'auto', pointerEvents: 'auto' }}>
                 <div className="flex flex-col">
                   {(() => {
                     // Очищаем маппинг перед созданием нового
@@ -245,6 +246,13 @@ const Product = memo(() => {
                             key={thumbnailIndex} 
                             ref={(el) => { imageRefs.current[refIndex] = el; }}
                             className="w-full"
+                            style={{ pointerEvents: 'auto' }}
+                            onClick={(e) => {
+                              console.log('Image container clicked:', currentImage.src);
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleImageClick(currentImage.src);
+                            }}
                           >
                             <img
                               src={currentImage.src}
@@ -252,7 +260,9 @@ const Product = memo(() => {
                               className="w-full h-auto object-cover cursor-pointer"
                               loading="lazy"
                               decoding="async"
+                              style={{ pointerEvents: 'auto' }}
                               onClick={(e) => {
+                                console.log('Image clicked:', currentImage.src);
                                 e.preventDefault();
                                 e.stopPropagation();
                                 handleImageClick(currentImage.src);
@@ -274,6 +284,13 @@ const Product = memo(() => {
                             <div 
                               className="w-1/2"
                               ref={(el) => { imageRefs.current[refIndex] = el; }}
+                              style={{ pointerEvents: 'auto' }}
+                              onClick={(e) => {
+                                console.log('Image container clicked:', currentImage.src);
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleImageClick(currentImage.src);
+                              }}
                             >
                               <img
                                 src={currentImage.src}
@@ -281,7 +298,9 @@ const Product = memo(() => {
                                 className="w-full h-auto object-cover cursor-pointer"
                                 loading="lazy"
                                 decoding="async"
+                                style={{ pointerEvents: 'auto' }}
                                 onClick={(e) => {
+                                  console.log('Image clicked:', currentImage.src);
                                   e.preventDefault();
                                   e.stopPropagation();
                                   handleImageClick(currentImage.src);
@@ -292,6 +311,13 @@ const Product = memo(() => {
                               <div 
                                 className="w-1/2"
                                 ref={(el) => { imageRefs.current[refIndex + 1] = el; }}
+                                style={{ pointerEvents: 'auto' }}
+                                onClick={(e) => {
+                                  console.log('Image container clicked:', nextImage.src);
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleImageClick(nextImage.src);
+                                }}
                               >
                                 <img
                                   src={nextImage.src}
@@ -299,7 +325,9 @@ const Product = memo(() => {
                                   className="w-full h-auto object-cover cursor-pointer"
                                   loading="lazy"
                                   decoding="async"
+                                  style={{ pointerEvents: 'auto' }}
                                   onClick={(e) => {
+                                    console.log('Image clicked:', nextImage.src);
                                     e.preventDefault();
                                     e.stopPropagation();
                                     handleImageClick(nextImage.src);
@@ -443,21 +471,21 @@ const Product = memo(() => {
       {/* Image Modal */}
       {selectedImage && (
         <div
-          className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center"
+          className="fixed inset-0 z-[100] bg-black bg-opacity-90 flex items-center justify-center"
           onClick={handleCloseModal}
-          style={{ cursor: 'pointer' }}
+          style={{ cursor: 'pointer', pointerEvents: 'auto' }}
         >
           <img
             src={selectedImage}
             alt="Product view"
             className="max-w-full max-h-full object-contain"
             onClick={(e) => e.stopPropagation()}
-            style={{ cursor: 'default' }}
+            style={{ cursor: 'default', pointerEvents: 'auto' }}
           />
           <button
             onClick={handleCloseModal}
-            className="absolute top-4 right-4 text-white text-4xl font-bold"
-            style={{ cursor: 'pointer' }}
+            className="absolute top-4 right-4 text-white text-4xl font-bold z-[101]"
+            style={{ cursor: 'pointer', pointerEvents: 'auto' }}
           >
             ×
           </button>
