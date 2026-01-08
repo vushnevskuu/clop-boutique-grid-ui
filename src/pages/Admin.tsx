@@ -337,20 +337,78 @@ const Admin = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="image">Основное изображение (URL) *</Label>
-                    <Input
-                      id="image"
-                      value={formData.image}
-                      onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                    />
+                    <Label htmlFor="image">Основное изображение *</Label>
+                    <div className="flex gap-2 items-end">
+                      <Input
+                        id="image"
+                        value={formData.image}
+                        onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                        placeholder="URL или загрузите файл"
+                        className="flex-1"
+                      />
+                      <label className="px-4 py-2 border border-gray-300 rounded cursor-pointer hover:bg-gray-50">
+                        <span className="text-sm">Загрузить</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              try {
+                                const url = await uploadImage(file);
+                                setFormData({ ...formData, image: url });
+                                toast.success("Изображение загружено");
+                              } catch (error: any) {
+                                toast.error(`Ошибка: ${error.message}`);
+                              }
+                            }
+                          }}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                    {formData.image && (
+                      <div className="mt-2">
+                        <img src={formData.image} alt="Preview" className="w-32 h-32 object-cover border" />
+                      </div>
+                    )}
                   </div>
                   <div>
-                    <Label htmlFor="hover_image">Изображение при наведении (URL)</Label>
-                    <Input
-                      id="hover_image"
-                      value={formData.hover_image}
-                      onChange={(e) => setFormData({ ...formData, hover_image: e.target.value })}
-                    />
+                    <Label htmlFor="hover_image">Изображение при наведении</Label>
+                    <div className="flex gap-2 items-end">
+                      <Input
+                        id="hover_image"
+                        value={formData.hover_image}
+                        onChange={(e) => setFormData({ ...formData, hover_image: e.target.value })}
+                        placeholder="URL или загрузите файл"
+                        className="flex-1"
+                      />
+                      <label className="px-4 py-2 border border-gray-300 rounded cursor-pointer hover:bg-gray-50">
+                        <span className="text-sm">Загрузить</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              try {
+                                const url = await uploadImage(file);
+                                setFormData({ ...formData, hover_image: url });
+                                toast.success("Изображение загружено");
+                              } catch (error: any) {
+                                toast.error(`Ошибка: ${error.message}`);
+                              }
+                            }
+                          }}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                    {formData.hover_image && (
+                      <div className="mt-2">
+                        <img src={formData.hover_image} alt="Preview" className="w-32 h-32 object-cover border" />
+                      </div>
+                    )}
                   </div>
                 </div>
 
