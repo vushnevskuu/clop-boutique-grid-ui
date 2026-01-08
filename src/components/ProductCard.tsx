@@ -75,7 +75,7 @@ const ProductCard = memo(({ id, image, hoverImage, title, price, size, brand }: 
           >
             {title}
           </h3>
-          {brand && <p className="text-muted-foreground" style={{ fontSize: '14px' }}>{brand}</p>}
+          {brand && <p className="text-muted-foreground lowercase" style={{ fontSize: '14px' }}>{brand}</p>}
           <div className="mt-2">
             <p className="font-bold" style={{ fontSize: '14px' }}>{price}</p>
           </div>

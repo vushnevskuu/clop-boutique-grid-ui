@@ -90,6 +90,7 @@ const Product = memo(() => {
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const thumbnailToRefMap = useRef<Map<number, number>>(new Map());
 
   const product = useMemo(() => products.find((p) => p.id === Number(id)), [id]);
   
@@ -105,10 +106,13 @@ const Product = memo(() => {
     setSelectedImage(null);
   }, []);
 
-  const handleThumbnailClick = useCallback((index: number) => {
-    const ref = imageRefs.current[index];
-    if (ref) {
-      ref.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const handleThumbnailClick = useCallback((thumbnailIndex: number) => {
+    const refIndex = thumbnailToRefMap.current.get(thumbnailIndex);
+    if (refIndex !== undefined) {
+      const ref = imageRefs.current[refIndex];
+      if (ref) {
+        ref.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
     }
   }, []);
 
@@ -160,14 +164,6 @@ const Product = memo(() => {
       <Header />
       <main className="pt-20 pb-12">
         <div style={{ marginLeft: '30px', marginRight: '30px' }}>
-          <button
-            onClick={handleBackClick}
-            className="mb-8 text-foreground hover:text-accent transition-colors"
-            style={{ fontSize: '14px' }}
-          >
-            ← Back to catalog
-          </button>
-
           <div className="flex gap-4 mb-20">
             {/* Thumbnails - left side */}
             <div className="flex flex-col gap-6" style={{ width: '240px', flexShrink: 0 }}>
@@ -199,6 +195,8 @@ const Product = memo(() => {
             <div className="flex-1">
               <div className="flex flex-col">
                 {(() => {
+                  // Очищаем маппинг перед созданием нового
+                  thumbnailToRefMap.current.clear();
                   const rows: JSX.Element[] = [];
                   let i = 0;
                   let imageIndex = 0; // Track actual image index for refs
@@ -208,6 +206,8 @@ const Product = memo(() => {
                     
                     if (currentImage.layout === 'full') {
                       // Full width image
+                      // Маппинг: thumbnail индекс i -> ref индекс imageIndex
+                      thumbnailToRefMap.current.set(i, imageIndex);
                       rows.push(
                         <div 
                           key={i} 
@@ -229,6 +229,12 @@ const Product = memo(() => {
                     } else {
                       // Half width - create a row with 2 images
                       const nextImage = productImages[i + 1];
+                      // Маппинг для первого изображения в паре
+                      thumbnailToRefMap.current.set(i, imageIndex);
+                      if (nextImage) {
+                        // Маппинг для второго изображения в паре
+                        thumbnailToRefMap.current.set(i + 1, imageIndex + 1);
+                      }
                       rows.push(
                         <div key={i} className="flex w-full">
                           <div 
@@ -276,14 +282,14 @@ const Product = memo(() => {
             {/* Product Info Panel - 750px width */}
             <div className="flex-shrink-0" style={{ width: '750px', marginLeft: '20px' }}>
               <div className="space-y-6 sticky top-24">
-                {product.brand && (
-                  <p className="text-muted-foreground uppercase tracking-widest" style={{ fontSize: '14px' }}>
-                    {product.brand}
-                  </p>
-                )}
                 <h1 className="font-bold uppercase tracking-tighter" style={{ fontSize: '32px' }}>
                   {product.title}
                 </h1>
+                {product.brand && (
+                  <p className="text-muted-foreground lowercase tracking-widest" style={{ fontSize: '14px' }}>
+                    {product.brand}
+                  </p>
+                )}
                 
                 {/* Size Table */}
                 <div 
@@ -296,10 +302,10 @@ const Product = memo(() => {
                   <table className="w-full" style={{ fontSize: '14px' }}>
                     <thead>
                       <tr>
-                        <th className="text-left pb-2" style={{ fontWeight: 'normal' }}>Размер</th>
-                        <th className="text-left pb-2" style={{ fontWeight: 'normal' }}>Грудь</th>
-                        <th className="text-left pb-2" style={{ fontWeight: 'normal' }}>Талия</th>
-                        <th className="text-left pb-2" style={{ fontWeight: 'normal' }}>Длина</th>
+                        <th className="text-left pb-2" style={{ fontWeight: 'normal' }}>Size</th>
+                        <th className="text-left pb-2" style={{ fontWeight: 'normal' }}>Chest</th>
+                        <th className="text-left pb-2" style={{ fontWeight: 'normal' }}>Waist</th>
+                        <th className="text-left pb-2" style={{ fontWeight: 'normal' }}>Length</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -338,30 +344,15 @@ const Product = memo(() => {
                 </div>
                 
                 <p className="font-bold" style={{ fontSize: '14px' }}>{product.price}</p>
-                
-                {product.size && (
-                  <div>
-                    <p className="text-muted-foreground mb-2" style={{ fontSize: '14px' }}>Size</p>
-                    <p style={{ fontSize: '14px' }}>{product.size}</p>
-                  </div>
-                )}
 
                 <div className="pt-8">
                   <button 
                     className="px-8 py-4 w-full transition-all duration-200"
                     style={{ 
-                      backgroundColor: '#f3f3f3', 
-                      color: '#000000',
+                      backgroundColor: '#000000', 
+                      color: '#ffffff',
                       fontSize: '14px',
                       fontWeight: 'normal'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#000000';
-                      e.currentTarget.style.color = '#ffffff';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = '#f3f3f3';
-                      e.currentTarget.style.color = '#000000';
                     }}
                   >
                     message us
