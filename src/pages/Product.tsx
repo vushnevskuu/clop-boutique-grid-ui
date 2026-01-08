@@ -263,7 +263,8 @@ const Product = memo(() => {
                     backgroundColor: '#f3f3f3',
                     color: '#000000',
                     padding: '10px',
-                    margin: '0'
+                    margin: '0',
+                    marginTop: '24px'
                   }}
                 >
                   <table className="w-full" style={{ fontSize: '14px' }}>
