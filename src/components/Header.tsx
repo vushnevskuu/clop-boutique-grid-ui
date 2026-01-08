@@ -1,9 +1,12 @@
 import { Menu, X } from "lucide-react";
 import { useState, useEffect, useMemo, useCallback, memo } from "react";
+import { useLocation } from "react-router-dom";
 
 const Header = memo(() => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const location = useLocation();
+  const isProductPage = location.pathname.startsWith('/product');
 
   const handleScroll = useCallback(() => {
     const windowHeight = window.innerHeight;
@@ -14,15 +17,21 @@ const Header = memo(() => {
   }, []);
 
   useEffect(() => {
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
+    if (!isProductPage) {
+      window.addEventListener("scroll", handleScroll, { passive: true });
+      handleScroll();
 
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [handleScroll]);
+      return () => window.removeEventListener("scroll", handleScroll);
+    }
+  }, [handleScroll, isProductPage]);
 
   // Memoize calculations
   const heroLogoOpacity = useMemo(() => Math.max(0, 1 - scrollProgress * 3), [scrollProgress]);
-  const showHeaderLogo = useMemo(() => heroLogoOpacity <= 0, [heroLogoOpacity]);
+  const showHeaderLogo = useMemo(() => {
+    // На странице продукта всегда показываем логотип и кнопку каталога
+    if (isProductPage) return true;
+    return heroLogoOpacity <= 0;
+  }, [heroLogoOpacity, isProductPage]);
   
   const toggleMenu = useCallback(() => setIsMenuOpen(prev => !prev), []);
 
