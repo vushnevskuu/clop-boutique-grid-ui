@@ -1,6 +1,6 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import Header from "@/components/Header";
-import { useState, useMemo, memo, useCallback, useRef } from "react";
+import { useState, useMemo, memo, useCallback, useRef, useEffect } from "react";
 
 import product1 from "@/assets/product-1.jpg";
 import product2 from "@/assets/product-2.jpg";
@@ -89,10 +89,8 @@ const Product = memo(() => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [logoWidth, setLogoWidth] = useState<number>(120); // Дефолтная ширина
-  const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const thumbnailToRefMap = useRef<Map<number, number>>(new Map());
-  const logoRef = useRef<HTMLImageElement | null>(null);
+  const [logoWidth, setLogoWidth] = useState<number>(120);
+  const imageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
   const product = useMemo(() => products.find((p) => p.id === Number(id)), [id]);
   
@@ -115,13 +113,6 @@ const Product = memo(() => {
     }
   }, []);
 
-  const setImageRef = useCallback((index: number, el: HTMLDivElement | null) => {
-    if (el) {
-      imageRefs.current.set(index, el);
-    } else {
-      imageRefs.current.delete(index);
-    }
-  }, []);
 
   if (!product) {
     return (
@@ -163,13 +154,6 @@ const Product = memo(() => {
     return result.slice(0, 16);
   }, [product.id, product.brand]);
 
-  // Проверяем что refs установлены после рендера
-  useEffect(() => {
-    console.log('Product images:', productImages);
-    console.log('Image refs after render:', imageRefs.current);
-    console.log('Thumbnail to ref map:', Array.from(thumbnailToRefMap.current.entries()));
-  }, [productImages]);
-
   // Измеряем ширину логотипа
   useEffect(() => {
     const logo = document.querySelector('header img[alt="CLOP Logo"]') as HTMLImageElement;
@@ -189,7 +173,6 @@ const Product = memo(() => {
     }
   }, []);
 
->>>>>>> 9112cc2 (Ширина миниатюр и фотографий в секции You may also like равна ширине логотипа)
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -232,27 +215,33 @@ const Product = memo(() => {
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Images Gallery - scrollable */}
-            <div className="flex-1">
-              <div className="flex flex-col">
-                {productImages.map((img, index) => (
-                  <div 
-                    key={index}
-                    ref={(el) => setImageRef(index, el)}
-                    className="w-full"
-                  >
-                    <img
-                      src={img.src}
-                      alt={`${product.title} ${index + 1}`}
-                      className="w-full h-auto object-cover cursor-pointer"
-                      loading="lazy"
-                      decoding="async"
-                      onClick={() => handleImageClick(img.src)}
-                    />
-                  </div>
-                ))}
+              {/* Images Gallery - scrollable */}
+              <div className="flex-1">
+                <div className="flex flex-col">
+                  {productImages.map((img, index) => (
+                    <div 
+                      key={index}
+                      ref={(el) => {
+                        if (el) {
+                          imageRefs.current.set(index, el);
+                        } else {
+                          imageRefs.current.delete(index);
+                        }
+                      }}
+                      className="w-full"
+                    >
+                      <img
+                        src={img.src}
+                        alt={`${product.title} ${index + 1}`}
+                        className="w-full h-auto object-cover cursor-pointer"
+                        loading="lazy"
+                        decoding="async"
+                        onClick={() => handleImageClick(img.src)}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -364,6 +353,30 @@ const Product = memo(() => {
           )}
         </div>
       </main>
+
+      {/* Image Modal */}
+      {selectedImage && (
+        <div
+          className="fixed inset-0 z-[100] bg-black bg-opacity-90 flex items-center justify-center"
+          onClick={handleCloseModal}
+          style={{ cursor: 'pointer', pointerEvents: 'auto' }}
+        >
+          <img
+            src={selectedImage}
+            alt="Product view"
+            className="max-w-full max-h-full object-contain"
+            onClick={(e) => e.stopPropagation()}
+            style={{ cursor: 'default', pointerEvents: 'auto' }}
+          />
+          <button
+            onClick={handleCloseModal}
+            className="absolute top-4 right-4 text-white text-4xl font-bold z-[101]"
+            style={{ cursor: 'pointer', pointerEvents: 'auto' }}
+          >
+            ×
+          </button>
+        </div>
+      )}
     </div>
   );
 });
