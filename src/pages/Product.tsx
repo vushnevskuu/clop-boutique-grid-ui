@@ -1,6 +1,6 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import Header from "@/components/Header";
-import { useState, useMemo, memo, useCallback, useRef } from "react";
+import { useState, useMemo, memo, useCallback, useRef, useEffect } from "react";
 
 import product1 from "@/assets/product-1.jpg";
 import product2 from "@/assets/product-2.jpg";
@@ -108,19 +108,36 @@ const Product = memo(() => {
   }, []);
 
   const handleThumbnailClick = useCallback((thumbnailIndex: number) => {
-    const refIndex = thumbnailToRefMap.current.get(thumbnailIndex);
+    console.log('Thumbnail clicked:', thumbnailIndex);
+    console.log('Map:', Array.from(thumbnailToRefMap.current.entries()));
+    console.log('Refs array length:', imageRefs.current.length);
+    console.log('All refs:', imageRefs.current);
     
-    if (refIndex !== undefined && refIndex < imageRefs.current.length) {
-      const ref = imageRefs.current[refIndex];
-      
-      if (ref) {
-        // Скроллим всю страницу к изображению
-        ref.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'center',
-          inline: 'nearest'
-        });
+    const refIndex = thumbnailToRefMap.current.get(thumbnailIndex);
+    console.log('Ref index from map:', refIndex);
+    
+    if (refIndex !== undefined) {
+      console.log('Ref index is defined, checking refs array...');
+      if (refIndex < imageRefs.current.length) {
+        const ref = imageRefs.current[refIndex];
+        console.log('Ref found:', ref);
+        
+        if (ref) {
+          console.log('Scrolling to ref...');
+          // Скроллим всю страницу к изображению
+          ref.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center',
+            inline: 'nearest'
+          });
+        } else {
+          console.log('Ref is null or undefined');
+        }
+      } else {
+        console.log('Ref index out of bounds:', refIndex, '>=', imageRefs.current.length);
       }
+    } else {
+      console.log('No ref index found in map for thumbnail:', thumbnailIndex);
     }
   }, []);
 
@@ -166,6 +183,13 @@ const Product = memo(() => {
     }
     return result.slice(0, 16);
   }, [product.id, product.brand]);
+
+  // Проверяем что refs установлены после рендера
+  useEffect(() => {
+    console.log('Product images:', productImages);
+    console.log('Image refs after render:', imageRefs.current);
+    console.log('Thumbnail to ref map:', Array.from(thumbnailToRefMap.current.entries()));
+  }, [productImages]);
 
   return (
     <div className="min-h-screen bg-background">
