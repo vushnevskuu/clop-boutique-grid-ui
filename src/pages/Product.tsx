@@ -111,7 +111,16 @@ const Product = memo(() => {
     if (refIndex !== undefined) {
       const ref = imageRefs.current[refIndex];
       if (ref) {
-        ref.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Вычисляем позицию элемента относительно документа
+        const elementTop = ref.getBoundingClientRect().top + window.pageYOffset;
+        const elementHeight = ref.getBoundingClientRect().height;
+        const windowHeight = window.innerHeight;
+        const offset = (windowHeight - elementHeight) / 2;
+        
+        window.scrollTo({
+          top: elementTop - offset,
+          behavior: 'smooth'
+        });
       }
     }
   }, []);
@@ -396,6 +405,30 @@ const Product = memo(() => {
           )}
         </div>
       </main>
+
+      {/* Image Modal */}
+      {selectedImage && (
+        <div
+          className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center"
+          onClick={handleCloseModal}
+          style={{ cursor: 'pointer' }}
+        >
+          <img
+            src={selectedImage}
+            alt="Product view"
+            className="max-w-full max-h-full object-contain"
+            onClick={(e) => e.stopPropagation()}
+            style={{ cursor: 'default' }}
+          />
+          <button
+            onClick={handleCloseModal}
+            className="absolute top-4 right-4 text-white text-4xl font-bold"
+            style={{ cursor: 'pointer' }}
+          >
+            ×
+          </button>
+        </div>
+      )}
     </div>
   );
 });
