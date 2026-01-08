@@ -89,7 +89,10 @@ const Product = memo(() => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const imageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+  const [logoWidth, setLogoWidth] = useState<number>(120); // Дефолтная ширина
+  const imageRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const thumbnailToRefMap = useRef<Map<number, number>>(new Map());
+  const logoRef = useRef<HTMLImageElement | null>(null);
 
   const product = useMemo(() => products.find((p) => p.id === Number(id)), [id]);
   
@@ -160,37 +163,74 @@ const Product = memo(() => {
     return result.slice(0, 16);
   }, [product.id, product.brand]);
 
+  // Проверяем что refs установлены после рендера
+  useEffect(() => {
+    console.log('Product images:', productImages);
+    console.log('Image refs after render:', imageRefs.current);
+    console.log('Thumbnail to ref map:', Array.from(thumbnailToRefMap.current.entries()));
+  }, [productImages]);
+
+  // Измеряем ширину логотипа
+  useEffect(() => {
+    const logo = document.querySelector('header img[alt="CLOP Logo"]') as HTMLImageElement;
+    if (logo) {
+      const updateLogoWidth = () => {
+        const width = logo.offsetWidth || logo.clientWidth;
+        if (width > 0) {
+          setLogoWidth(width);
+        }
+      };
+      
+      updateLogoWidth();
+      
+      // Обновляем при изменении размера окна
+      window.addEventListener('resize', updateLogoWidth);
+      return () => window.removeEventListener('resize', updateLogoWidth);
+    }
+  }, []);
+
+>>>>>>> 9112cc2 (Ширина миниатюр и фотографий в секции You may also like равна ширине логотипа)
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="pt-20 pb-12">
+      <main className="pb-12" style={{ paddingTop: '60px' }}>
         <div style={{ marginLeft: '30px', marginRight: '30px' }}>
-          <div className="flex gap-4 mb-20">
-            {/* Thumbnails - sticky left side */}
-            <div className="flex-shrink-0 sticky top-24" style={{ width: '240px', alignSelf: 'flex-start' }}>
-              <div className="flex flex-col gap-6">
-                {productImages.map((img, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleThumbnailClick(index)}
-                    className="w-full aspect-square overflow-hidden"
-                    style={{ 
-                      padding: 0,
-                      background: 'transparent',
-                      cursor: 'pointer',
-                      border: 'none',
-                      outline: 'none'
-                    }}
-                  >
-                    <img
-                      src={img.src}
-                      alt={`${product.title} thumbnail ${index + 1}`}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </button>
-                ))}
+          <div className="flex gap-4 mb-20" style={{ marginTop: '60px' }}>
+            {/* Thumbnails and Images Gallery - весь блок sticky как описание */}
+            <div className="flex gap-4 flex-1 sticky top-24" style={{ alignSelf: 'flex-start' }}>
+              {/* Product Info Panel - только миниатюры слева */}
+              <div className="flex-shrink-0" style={{ width: `${logoWidth}px` }}>
+                <div className="sticky top-24">
+                  {/* Thumbnails */}
+                  <div className="flex flex-col gap-4">
+                    {productImages.map((img, index) => (
+                      <button
+                        key={index}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleThumbnailClick(index);
+                        }}
+                        className="w-full aspect-square overflow-hidden"
+                        style={{ 
+                          padding: 0,
+                          background: 'transparent',
+                          cursor: 'pointer',
+                          border: 'none',
+                          outline: 'none'
+                        }}
+                      >
+                        <img
+                          src={img.src}
+                          alt={`${product.title} thumbnail ${index + 1}`}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -305,9 +345,9 @@ const Product = memo(() => {
               <h2 className="font-bold uppercase mb-8" style={{ fontSize: '14px' }}>
                 You may also like
               </h2>
-              <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-10">
+              <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-10" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${logoWidth}px, 1fr))` }}>
                 {similarProducts.map((item) => (
-                  <Link key={item.id} to={`/product/${item.id}`} className="block">
+                  <Link key={item.id} to={`/product/${item.id}`} className="block" style={{ width: `${logoWidth}px` }}>
                     <div className="aspect-[4/5] overflow-hidden bg-gray-100">
                       <img
                         src={item.image}
