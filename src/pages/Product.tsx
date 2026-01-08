@@ -199,9 +199,9 @@ const Product = memo(() => {
           <div className="flex gap-4 mb-20" style={{ marginTop: '60px' }}>
             {/* Thumbnails and Images Gallery - весь блок sticky как описание */}
             <div className="flex gap-4 flex-1 sticky top-24" style={{ alignSelf: 'flex-start' }}>
-              {/* Product Info Panel - копия описания слева */}
-              <div className="flex-shrink-0" style={{ width: '750px' }}>
-                <div className="space-y-6 sticky top-24">
+              {/* Product Info Panel - только миниатюры слева */}
+              <div className="flex-shrink-0" style={{ width: '250px' }}>
+                <div className="sticky top-24">
                   {/* Thumbnails */}
                   <div className="flex flex-col gap-4">
                     {productImages.map((img, index) => (
@@ -230,83 +230,6 @@ const Product = memo(() => {
                         />
                       </button>
                     ))}
-                  </div>
-
-                  <h1 className="font-bold uppercase tracking-tighter" style={{ fontSize: '32px' }}>
-                    {product.title}
-                  </h1>
-                  {product.brand && (
-                    <p className="text-muted-foreground lowercase tracking-widest" style={{ fontSize: '14px' }}>
-                      {product.brand}
-                    </p>
-                  )}
-                  
-                  {/* Size Table */}
-                  <div 
-                    style={{ 
-                      backgroundColor: '#f3f3f3',
-                      color: '#000000',
-                      padding: '60px'
-                    }}
-                  >
-                    <table className="w-full" style={{ fontSize: '14px' }}>
-                      <thead>
-                        <tr>
-                          <th className="text-left pb-2" style={{ fontWeight: 'normal' }}>Size</th>
-                          <th className="text-left pb-2" style={{ fontWeight: 'normal' }}>Chest</th>
-                          <th className="text-left pb-2" style={{ fontWeight: 'normal' }}>Waist</th>
-                          <th className="text-left pb-2" style={{ fontWeight: 'normal' }}>Length</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td className="py-1">XS</td>
-                          <td className="py-1">86-90</td>
-                          <td className="py-1">66-70</td>
-                          <td className="py-1">58</td>
-                        </tr>
-                        <tr>
-                          <td className="py-1">S</td>
-                          <td className="py-1">90-94</td>
-                          <td className="py-1">70-74</td>
-                          <td className="py-1">60</td>
-                        </tr>
-                        <tr>
-                          <td className="py-1">M</td>
-                          <td className="py-1">94-98</td>
-                          <td className="py-1">74-78</td>
-                          <td className="py-1">62</td>
-                        </tr>
-                        <tr>
-                          <td className="py-1">L</td>
-                          <td className="py-1">98-102</td>
-                          <td className="py-1">78-82</td>
-                          <td className="py-1">64</td>
-                        </tr>
-                        <tr>
-                          <td className="py-1">XL</td>
-                          <td className="py-1">102-106</td>
-                          <td className="py-1">82-86</td>
-                          <td className="py-1">66</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                  
-                  <p className="font-bold" style={{ fontSize: '14px' }}>{product.price}</p>
-
-                  <div className="pt-8">
-                    <button 
-                      className="px-8 py-4 w-full transition-all duration-200"
-                      style={{ 
-                        backgroundColor: '#000000', 
-                        color: '#ffffff',
-                        fontSize: '14px',
-                        fontWeight: 'normal'
-                      }}
-                    >
-                      message us
-                    </button>
                   </div>
                 </div>
               </div>
