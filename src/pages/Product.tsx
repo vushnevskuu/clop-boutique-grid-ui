@@ -285,6 +285,7 @@ const Product = memo(() => {
                   return rows;
                 })()}
               </div>
+              </div>
             </div>
 
             {/* Product Info Panel - 750px width */}
