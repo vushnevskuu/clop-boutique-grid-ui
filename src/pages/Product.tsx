@@ -108,55 +108,19 @@ const Product = memo(() => {
   }, []);
 
   const handleThumbnailClick = useCallback((thumbnailIndex: number) => {
-    console.log('Thumbnail clicked:', thumbnailIndex);
     const refIndex = thumbnailToRefMap.current.get(thumbnailIndex);
-    console.log('Ref index:', refIndex, 'Map:', Array.from(thumbnailToRefMap.current.entries()));
     
-    if (refIndex !== undefined) {
+    if (refIndex !== undefined && refIndex < imageRefs.current.length) {
       const ref = imageRefs.current[refIndex];
-      console.log('Ref found:', ref);
       
       if (ref) {
-        // Находим родительский контейнер с overflow-y-auto по inline стилю
-        let scrollContainer: HTMLElement | null = ref.parentElement;
-        while (scrollContainer) {
-          const style = window.getComputedStyle(scrollContainer);
-          if (style.overflowY === 'auto' || style.overflowY === 'scroll') {
-            break;
-          }
-          scrollContainer = scrollContainer.parentElement;
-        }
-        
-        console.log('Scroll container found:', scrollContainer);
-        
-        if (scrollContainer) {
-          // Скроллим внутри контейнера
-          const containerRect = scrollContainer.getBoundingClientRect();
-          const elementRect = ref.getBoundingClientRect();
-          const scrollTop = scrollContainer.scrollTop;
-          const elementTop = elementRect.top - containerRect.top + scrollTop;
-          const containerHeight = scrollContainer.clientHeight;
-          const elementHeight = elementRect.height;
-          const scrollPosition = elementTop - (containerHeight / 2) + (elementHeight / 2);
-          
-          console.log('Scrolling to:', scrollPosition);
-          
-          scrollContainer.scrollTo({
-            top: scrollPosition,
-            behavior: 'smooth'
-          });
-        } else {
-          // Если контейнера нет, используем обычный scrollIntoView
-          console.log('No scroll container, using scrollIntoView');
-          ref.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center',
-            inline: 'nearest'
-          });
-        }
+        // Скроллим всю страницу к изображению
+        ref.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center',
+          inline: 'nearest'
+        });
       }
-    } else {
-      console.log('No ref index found for thumbnail:', thumbnailIndex);
     }
   }, []);
 
@@ -208,7 +172,7 @@ const Product = memo(() => {
       <Header />
       <main className="pb-12" style={{ paddingTop: '60px' }}>
         <div style={{ marginLeft: '30px', marginRight: '30px' }}>
-          <div className="flex gap-4 mb-20">
+          <div className="flex gap-4 mb-20" style={{ marginTop: '60px' }}>
             {/* Thumbnails and Images Gallery - весь блок sticky как описание */}
             <div className="flex gap-4 flex-1 sticky top-24" style={{ alignSelf: 'flex-start' }}>
               {/* Thumbnails - left side */}
@@ -242,7 +206,7 @@ const Product = memo(() => {
               </div>
 
               {/* Images Gallery - takes remaining space */}
-              <div className="flex-1" style={{ maxHeight: 'calc(100vh - 6rem)', overflowY: 'auto', pointerEvents: 'auto' }}>
+              <div className="flex-1 w-full" style={{ pointerEvents: 'auto' }}>
                 <div className="flex flex-col">
                   {(() => {
                     // Очищаем маппинг перед созданием нового
@@ -262,7 +226,7 @@ const Product = memo(() => {
                             key={thumbnailIndex} 
                             ref={(el) => { imageRefs.current[refIndex] = el; }}
                             className="w-full"
-                            style={{ pointerEvents: 'auto' }}
+                            style={{ pointerEvents: 'auto', width: '100%' }}
                             onClick={(e) => {
                               console.log('Image container clicked:', currentImage.src);
                               e.preventDefault();
@@ -276,7 +240,7 @@ const Product = memo(() => {
                               className="w-full h-auto object-cover cursor-pointer"
                               loading="lazy"
                               decoding="async"
-                              style={{ pointerEvents: 'auto', width: '100%', display: 'block' }}
+                              style={{ pointerEvents: 'auto', width: '100%', display: 'block', maxWidth: '100%' }}
                               onClick={(e) => {
                                 console.log('Image clicked:', currentImage.src);
                                 e.preventDefault();
