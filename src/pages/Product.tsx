@@ -108,15 +108,26 @@ const Product = memo(() => {
   }, []);
 
   const handleThumbnailClick = useCallback((thumbnailIndex: number) => {
+    console.log('Thumbnail clicked:', thumbnailIndex);
     const refIndex = thumbnailToRefMap.current.get(thumbnailIndex);
+    console.log('Ref index:', refIndex, 'Map:', Array.from(thumbnailToRefMap.current.entries()));
+    
     if (refIndex !== undefined) {
       const ref = imageRefs.current[refIndex];
+      console.log('Ref found:', ref);
+      
       if (ref) {
-        // Находим родительский контейнер с overflow
-        let scrollContainer = ref.parentElement;
-        while (scrollContainer && !scrollContainer.classList.contains('overflow-y-auto')) {
+        // Находим родительский контейнер с overflow-y-auto по inline стилю
+        let scrollContainer: HTMLElement | null = ref.parentElement;
+        while (scrollContainer) {
+          const style = window.getComputedStyle(scrollContainer);
+          if (style.overflowY === 'auto' || style.overflowY === 'scroll') {
+            break;
+          }
           scrollContainer = scrollContainer.parentElement;
         }
+        
+        console.log('Scroll container found:', scrollContainer);
         
         if (scrollContainer) {
           // Скроллим внутри контейнера
@@ -128,12 +139,15 @@ const Product = memo(() => {
           const elementHeight = elementRect.height;
           const scrollPosition = elementTop - (containerHeight / 2) + (elementHeight / 2);
           
+          console.log('Scrolling to:', scrollPosition);
+          
           scrollContainer.scrollTo({
             top: scrollPosition,
             behavior: 'smooth'
           });
         } else {
           // Если контейнера нет, используем обычный scrollIntoView
+          console.log('No scroll container, using scrollIntoView');
           ref.scrollIntoView({ 
             behavior: 'smooth', 
             block: 'center',
@@ -141,6 +155,8 @@ const Product = memo(() => {
           });
         }
       }
+    } else {
+      console.log('No ref index found for thumbnail:', thumbnailIndex);
     }
   }, []);
 
@@ -190,13 +206,13 @@ const Product = memo(() => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="pt-20 pb-12">
+      <main className="pb-12" style={{ paddingTop: '60px' }}>
         <div style={{ marginLeft: '30px', marginRight: '30px' }}>
           <div className="flex gap-4 mb-20">
             {/* Thumbnails and Images Gallery - весь блок sticky как описание */}
             <div className="flex gap-4 flex-1 sticky top-24" style={{ alignSelf: 'flex-start' }}>
               {/* Thumbnails - left side */}
-              <div className="flex flex-col gap-6" style={{ width: '240px', flexShrink: 0 }}>
+              <div className="flex flex-col gap-4" style={{ width: '240px', flexShrink: 0 }}>
                 {productImages.map((img, index) => (
                   <button
                     key={index}
@@ -260,7 +276,7 @@ const Product = memo(() => {
                               className="w-full h-auto object-cover cursor-pointer"
                               loading="lazy"
                               decoding="async"
-                              style={{ pointerEvents: 'auto' }}
+                              style={{ pointerEvents: 'auto', width: '100%', display: 'block' }}
                               onClick={(e) => {
                                 console.log('Image clicked:', currentImage.src);
                                 e.preventDefault();
@@ -298,7 +314,7 @@ const Product = memo(() => {
                                 className="w-full h-auto object-cover cursor-pointer"
                                 loading="lazy"
                                 decoding="async"
-                                style={{ pointerEvents: 'auto' }}
+                                style={{ pointerEvents: 'auto', width: '100%', display: 'block' }}
                                 onClick={(e) => {
                                   console.log('Image clicked:', currentImage.src);
                                   e.preventDefault();
@@ -325,7 +341,7 @@ const Product = memo(() => {
                                   className="w-full h-auto object-cover cursor-pointer"
                                   loading="lazy"
                                   decoding="async"
-                                  style={{ pointerEvents: 'auto' }}
+                                  style={{ pointerEvents: 'auto', width: '100%', display: 'block' }}
                                   onClick={(e) => {
                                     console.log('Image clicked:', nextImage.src);
                                     e.preventDefault();
