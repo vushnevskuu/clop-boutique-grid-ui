@@ -261,7 +261,7 @@ const Product = memo(() => {
                 <div 
                   style={{ 
                     color: '#000000',
-                    padding: '20px',
+                    padding: '0',
                     margin: '0',
                     marginTop: '24px'
                   }}
