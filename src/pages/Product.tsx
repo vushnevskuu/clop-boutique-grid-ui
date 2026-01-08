@@ -262,7 +262,7 @@ const Product = memo(() => {
                   style={{ 
                     backgroundColor: '#f3f3f3',
                     color: '#000000',
-                    padding: '10px',
+                    padding: '20px',
                     margin: '0',
                     marginTop: '24px'
                   }}
