@@ -284,6 +284,59 @@ const Product = memo(() => {
                 <h1 className="font-bold uppercase tracking-tighter" style={{ fontSize: '32px' }}>
                   {product.title}
                 </h1>
+                
+                {/* Size Table */}
+                <div 
+                  className="p-4"
+                  style={{ 
+                    backgroundColor: '#f3f3f3',
+                    color: '#000000'
+                  }}
+                >
+                  <table className="w-full" style={{ fontSize: '14px' }}>
+                    <thead>
+                      <tr>
+                        <th className="text-left pb-2" style={{ fontWeight: 'normal' }}>Размер</th>
+                        <th className="text-left pb-2" style={{ fontWeight: 'normal' }}>Грудь</th>
+                        <th className="text-left pb-2" style={{ fontWeight: 'normal' }}>Талия</th>
+                        <th className="text-left pb-2" style={{ fontWeight: 'normal' }}>Длина</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="py-1">XS</td>
+                        <td className="py-1">86-90</td>
+                        <td className="py-1">66-70</td>
+                        <td className="py-1">58</td>
+                      </tr>
+                      <tr>
+                        <td className="py-1">S</td>
+                        <td className="py-1">90-94</td>
+                        <td className="py-1">70-74</td>
+                        <td className="py-1">60</td>
+                      </tr>
+                      <tr>
+                        <td className="py-1">M</td>
+                        <td className="py-1">94-98</td>
+                        <td className="py-1">74-78</td>
+                        <td className="py-1">62</td>
+                      </tr>
+                      <tr>
+                        <td className="py-1">L</td>
+                        <td className="py-1">98-102</td>
+                        <td className="py-1">78-82</td>
+                        <td className="py-1">64</td>
+                      </tr>
+                      <tr>
+                        <td className="py-1">XL</td>
+                        <td className="py-1">102-106</td>
+                        <td className="py-1">82-86</td>
+                        <td className="py-1">66</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                
                 <p className="font-bold" style={{ fontSize: '14px' }}>{product.price}</p>
                 
                 {product.size && (
