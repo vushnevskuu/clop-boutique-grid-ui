@@ -56,8 +56,8 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
   const gravity = -0.012;
   const damping = 0.995; // Сопротивление воздуха
   const bounceDamping = 0.3; // Затухание при отскоке (уменьшено для более быстрого затухания)
-  const groundY = -4; // Уровень "земли" (за футером, ниже начальной позиции -3)
-  const maxHeight = 8; // Максимальная высота полета (примерно 1000px в 3D пространстве, от -3 до 8 = 11 единиц)
+  const groundY = 0; // Уровень "земли" = 0 (футер, точка исчезновения)
+  const maxHeight = 10; // Максимальная высота полета = 10 единиц (примерно 1000px, 1 единица = 100px)
 
   useFrame(() => {
     if (!groupRef.current) return;
@@ -127,12 +127,11 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
     groupRef.current.position.set(newX, finalY, newZ);
     groupRef.current.rotation.set(rotation[0], rotation[1], rotation[2]);
 
-    // Удаляем если упал слишком низко или далеко, или если скорость очень мала и он на земле
-    // Убеждаемся, что ботинок всегда падает за футер (groundY = -5)
+    // Удаляем если вернулся к Y = 0 (футер) или упал слишком низко/далеко
     if (finalY <= groundY && (Math.abs(finalVy) < 0.01 && Math.abs(newVx) < 0.02 && Math.abs(newVz) < 0.02)) {
-      // Ботинок остановился на земле - удаляем
+      // Ботинок остановился на Y = 0 (футер) - удаляем
       onRemove();
-    } else if (finalY < groundY - 2 || Math.abs(newX) > 8 || Math.abs(newZ) > 8) {
+    } else if (finalY < groundY - 1 || Math.abs(newX) > 8 || Math.abs(newZ) > 8) {
       // Ботинок упал слишком низко или далеко - удаляем
       onRemove();
     }
@@ -141,7 +140,7 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
   // Применяем начальную позицию при первом рендере
   useEffect(() => {
     if (groupRef.current) {
-      // Убеждаемся, что ботинок стартует снизу (startY должен быть отрицательным)
+      // Убеждаемся, что ботинок стартует в точке Y = 0 (футер)
       groupRef.current.position.set(startPosition[0], startPosition[1], startPosition[2]);
       // Убеждаемся, что начальная скорость направлена вверх
       if (velocity[1] <= 0) {
