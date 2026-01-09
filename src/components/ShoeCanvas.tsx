@@ -79,11 +79,12 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
       }}
     >
       <Canvas
-        camera={{ position: [0, 2, 8], fov: 60 }}
+        camera={{ position: [0, 1, 10], fov: 75 }}
         style={{ width: '100%', height: '100%' }}
         gl={{ alpha: true, antialias: true }}
-        onCreated={({ gl, scene }) => {
+        onCreated={({ gl, scene, camera }) => {
           console.log("ShoeCanvas created, shoes count:", shoes.length);
+          console.log("Camera position:", camera.position);
         }}
       >
         <ambientLight intensity={0.8} />
