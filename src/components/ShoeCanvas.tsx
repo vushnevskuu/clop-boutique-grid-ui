@@ -25,38 +25,30 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
   const lastAutoShoeTime = useRef(0);
 
   const createShoe = useCallback(() => {
-    // Получаем реальные координаты футера
+    console.log('createShoe called');
+    
+    // Упрощенная логика координат:
+    // Canvas имеет position: fixed, bottom: 0, height: 1000px
+    // В 3D координатах: Y=0 это низ Canvas (низ viewport)
+    // Футер находится внизу страницы, его низ примерно на уровне низа viewport когда доскроллили
+    
+    // Получаем реальные координаты футера для X
     const footer = document.querySelector('footer');
-    if (!footer) {
-      console.warn('Footer not found');
-      return;
+    let offsetX3D = 0;
+    
+    if (footer) {
+      const footerRect = footer.getBoundingClientRect();
+      const footerCenterX = footerRect.left + footerRect.width / 2;
+      const viewportCenterX = window.innerWidth / 2;
+      // Переводим пиксели в 3D координаты (1 единица 3D = 100px)
+      offsetX3D = (footerCenterX - viewportCenterX) / 100;
     }
     
-    const footerRect = footer.getBoundingClientRect();
-    
-    // Canvas имеет position: fixed, bottom: 0, height: 1000px
-    // Низ Canvas в viewport = window.innerHeight
-    // Низ футера в viewport = footerRect.bottom
-    
-    // Вычисляем смещение: если футер виден, footerRect.bottom <= window.innerHeight
-    // Если футер ниже viewport, footerRect.bottom > window.innerHeight
-    const viewportBottom = window.innerHeight;
-    const footerBottomInViewport = footerRect.bottom;
-    
-    // Переводим в 3D координаты:
-    // В 3D: Y=0 должен быть на уровне низа футера
-    // Если футер виден: footerBottomInViewport < viewportBottom, значит Y должен быть положительным в 3D
-    // Масштаб: 1 единица 3D = 100px
-    const offsetY3D = (viewportBottom - footerBottomInViewport) / 100;
-    
-    // Центр футера по X
-    const footerCenterX = footerRect.left + footerRect.width / 2;
-    const viewportCenterX = window.innerWidth / 2;
-    const offsetX3D = (footerCenterX - viewportCenterX) / 100;
-    
     // Ботинок стартует ИЗ-ПОД футера
-    // В 3D координатах: Y=0 это низ футера, Y<0 это под футером
-    const startY3D = offsetY3D - 2; // offsetY3D (уровень футера) - 2 (под футером)
+    // В 3D: Y=0 это низ Canvas (низ viewport)
+    // Canvas имеет height: 1000px, поэтому ботинок виден даже если Y немного отрицательный
+    // Стартуем чуть ниже футера, но в видимой области
+    const startY3D = -0.5; // Стартуем чуть ниже футера (Y=-0.5), но в видимой области
     
     // Случайная позиция по X относительно центра футера
     const randomX = offsetX3D + (Math.random() - 0.5) * 1.5;
@@ -92,12 +84,10 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
     };
     
     console.log('Shoe created:', { 
-      footerBottom: footerRect.bottom, 
-      viewportBottom, 
-      offsetY3D, 
       startY3D,
       offsetX3D,
-      randomX 
+      randomX,
+      velocity: velocity[1] // Скорость по Y
     });
     
     console.log('Creating shoe:', newShoe);

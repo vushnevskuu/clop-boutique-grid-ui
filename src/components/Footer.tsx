@@ -61,9 +61,15 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
     const now = Date.now();
     
     // Создаём ботинок при входе мыши на футер (с задержкой между выбросами)
-    if (now - lastHoverTime > 300 && createShoeRef.current) {
-      setLastHoverTime(now);
-      createShoeRef.current();
+    console.log('Footer hover - createShoeRef.current:', createShoeRef.current);
+    if (now - lastHoverTime > 300) {
+      if (createShoeRef.current) {
+        setLastHoverTime(now);
+        console.log('Calling createShoe from Footer hover');
+        createShoeRef.current();
+      } else {
+        console.warn('createShoeRef.current is null!');
+      }
     }
   }, [lastHoverTime]);
 
