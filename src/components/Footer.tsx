@@ -154,7 +154,7 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
           objectFit: 'contain',
           transform: transform,
           transformOrigin: 'center center',
-          transition: 'transform 0.1s ease-out',
+          transition: 'transform 0.3s ease-in',
           willChange: 'transform',
           zIndex: 26,
         }}
