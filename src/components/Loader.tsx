@@ -1,6 +1,10 @@
 import { useState, useEffect, memo } from "react";
 
-const Loader = memo(() => {
+interface LoaderProps {
+  onLoadComplete?: () => void;
+}
+
+const Loader = memo(({ onLoadComplete }: LoaderProps) => {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -114,6 +118,7 @@ const Loader = memo(() => {
         // Wait a bit to ensure everything is ready, then hide loader
         setTimeout(() => {
           setIsLoaded(true);
+          onLoadComplete?.();
           setTimeout(() => {
             document.body.style.overflow = '';
             document.documentElement.style.overflow = '';
@@ -152,6 +157,7 @@ const Loader = memo(() => {
       setLoadingProgress(100);
       setTimeout(() => {
         setIsLoaded(true);
+        onLoadComplete?.();
         document.body.style.overflow = '';
         document.documentElement.style.overflow = '';
       }, 300);
