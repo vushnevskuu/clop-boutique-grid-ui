@@ -22,139 +22,64 @@ interface ShoeCanvasProps {
 const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
   const [shoes, setShoes] = useState<ShoeInstance[]>([]);
   const shoeIdCounter = useRef(0);
-  const lastAutoShoeTime = useRef(0);
 
   const createShoe = useCallback(() => {
-    console.log('createShoe called');
+    // Случайная позиция вылета снизу футера
+    const randomX = (Math.random() - 0.5) * 4; // От -2 до 2
+    const randomZ = Math.random() * 2 - 1; // От -1 до 1
+    const startY = -2; // Начальная позиция снизу (за футером)
     
-    // Упрощенная логика координат:
-    // Canvas имеет position: fixed, bottom: 0, height: 1000px
-    // В 3D координатах: Y=0 это низ Canvas (низ viewport)
-    // Футер находится внизу страницы, его низ примерно на уровне низа viewport когда доскроллили
-    
-    // Получаем реальные координаты футера для X
-    const footer = document.querySelector('footer');
-    let offsetX3D = 0;
-    
-    if (footer) {
-      const footerRect = footer.getBoundingClientRect();
-      const footerCenterX = footerRect.left + footerRect.width / 2;
-      const viewportCenterX = window.innerWidth / 2;
-      // Переводим пиксели в 3D координаты (1 единица 3D = 100px)
-      offsetX3D = (footerCenterX - viewportCenterX) / 100;
-    }
-    
-    // Ботинок стартует ИЗ-ПОД футера
-    // В 3D: Y=0 это низ Canvas (низ viewport)
-    // Canvas имеет height: 1000px, поэтому ботинок виден даже если Y немного отрицательный
-    // Стартуем чуть ниже футера, но в видимой области
-    const startY3D = -0.5; // Стартуем чуть ниже футера (Y=-0.5), но в видимой области
-    
-    // Случайная позиция по X относительно центра футера
-    const randomX = offsetX3D + (Math.random() - 0.5) * 1.5;
-    const randomZ = (Math.random() - 0.5) * 0.5;
-    
-    // Случайная скорость вылета (как будто кинули) - для полета на 1000px ВВЕРХ по оси Y
-    // ВАЖНО: angleY должен быть положительным для вылета ВВЕРХ по оси Y
-    // Масштаб: 1 единица 3D = 100 пикселей, поэтому для 1000px нужно 10 единиц
-    // Траектория должна быть дугообразной (как на рисунке)
-    const throwPower = 1.0 + Math.random() * 0.5; // От 1.0 до 1.5 (увеличено для видимого вылета)
-    const angleX = (Math.random() - 0.5) * 0.4; // Угол по X (горизонталь) - небольшой для дуги
-    const angleY = 0.8 + Math.random() * 0.3; // Угол ВВЕРХ по Y (вертикаль/скролл, всегда положительный, увеличен)
-    const angleZ = (Math.random() - 0.5) * 0.2; // Угол по Z (глубина) - для дугообразной траектории
+    // Случайная скорость вылета (как будто кинули) - уменьшена в 2 раза
+    const throwPower = (0.5 + Math.random() * 0.5) / 2; // От 0.25 до 0.5 (было 0.5-1.0)
+    const angleX = (Math.random() - 0.5) * 0.8; // Угол по X
+    const angleY = 0.4 + Math.random() * 0.3; // Угол вверх (увеличен)
+    const angleZ = (Math.random() - 0.5) * 0.3; // Небольшой угол по Z
     
     const velocity: [number, number, number] = [
       angleX * throwPower,
-      angleY * throwPower, // Положительная скорость Y = вылет ВВЕРХ
+      angleY * throwPower,
       angleZ * throwPower
     ];
     
-    // Случайная угловая скорость (вращение) - уменьшена в 2 раза
+    // Случайная угловая скорость (вращение)
     const angularVelocity: [number, number, number] = [
-      (Math.random() - 0.5) * 0.15,
-      (Math.random() - 0.5) * 0.15,
-      (Math.random() - 0.5) * 0.15
+      (Math.random() - 0.5) * 0.3,
+      (Math.random() - 0.5) * 0.3,
+      (Math.random() - 0.5) * 0.3
     ];
     
     const newShoe: ShoeInstance = {
       id: shoeIdCounter.current++,
-      startPosition: [randomX, startY3D, randomZ], // X (горизонталь), Y (вертикаль/скролл - ОСЬ ДВИЖЕНИЯ), Z (глубина)
+      startPosition: [randomX, startY, randomZ],
       velocity,
       angularVelocity
     };
     
-    console.log('Shoe created:', { 
-      startY3D,
-      offsetX3D,
-      randomX,
-      velocity: velocity[1] // Скорость по Y
-    });
-    
-    console.log('Creating shoe:', newShoe);
-    setShoes(prev => {
-      console.log('Current shoes count:', prev.length, 'Adding new shoe');
-      return [...prev, newShoe];
-    });
+    setShoes(prev => [...prev, newShoe]);
   }, []);
 
   const removeShoe = useCallback((id: number) => {
     setShoes(prev => prev.filter(shoe => shoe.id !== id));
   }, []);
 
-  // Автоматический вылет ботинка при достижении конца страницы
-  useEffect(() => {
-    const handleScroll = () => {
-      const windowHeight = window.innerHeight;
-      const scrollY = window.scrollY;
-      const documentHeight = document.documentElement.scrollHeight;
-      
-      // Проверяем, доскроллил ли пользователь до конца (с небольшим запасом в 100px)
-      const isAtBottom = scrollY + windowHeight >= documentHeight - 100;
-      
-      if (isAtBottom) {
-        const now = Date.now();
-        // Создаем ботинок автоматически с задержкой минимум 1 секунда между выбросами
-        if (now - lastAutoShoeTime.current > 1000) {
-          lastAutoShoeTime.current = now;
-          console.log('Creating auto shoe at bottom of page');
-          createShoe();
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    // Проверяем сразу при загрузке
-    handleScroll();
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [createShoe]);
-  
-  // Отладочная информация
-  useEffect(() => {
-    console.log('ShoeCanvas: shoes count:', shoes.length);
-  }, [shoes.length]);
-
   useEffect(() => {
     onShoeCreate(createShoe);
-  }, [onShoeCreate, createShoe]);
+  }, [onShoeCreate]);
 
   return (
     <div
-      data-shoe-canvas
       style={{
         position: 'fixed',
         bottom: 0,
         left: 0,
         width: '100%',
-        height: '1000px',
+        height: '600px',
         zIndex: 20,
         pointerEvents: 'none',
       }}
     >
       <Canvas
-        camera={{ position: [0, 0, 10], fov: 75, near: 0.1, far: 100 }}
+        camera={{ position: [0, 2, 8], fov: 60 }}
         style={{ width: '100%', height: '100%' }}
         gl={{ alpha: true, antialias: true }}
       >

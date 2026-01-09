@@ -61,15 +61,9 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
     const now = Date.now();
     
     // Создаём ботинок при входе мыши на футер (с задержкой между выбросами)
-    console.log('Footer hover - createShoeRef.current:', createShoeRef.current);
-    if (now - lastHoverTime > 300) {
-      if (createShoeRef.current) {
-        setLastHoverTime(now);
-        console.log('Calling createShoe from Footer hover');
-        createShoeRef.current();
-      } else {
-        console.warn('createShoeRef.current is null!');
-      }
+    if (now - lastHoverTime > 300 && createShoeRef.current) {
+      setLastHoverTime(now);
+      createShoeRef.current();
     }
   }, [lastHoverTime]);
 
@@ -113,7 +107,7 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
     const rotateY = -mousePosition.x * 0.1;
     const translateZ = (Math.abs(mousePosition.x) * 5 + Math.abs(mousePosition.y) * 5) * 0.05;
     const isHovered = mousePosition.x !== 0 || mousePosition.y !== 0;
-    const scale = isHovered ? 1.01 : 1;
+    const scale = isHovered ? 1.05 : 1;
     return `perspective(1000px) scale(${scale}) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(${translateZ}px)`;
   }, [mousePosition.x, mousePosition.y]);
 
@@ -160,7 +154,7 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
           objectFit: 'contain',
           transform: transform,
           transformOrigin: 'center center',
-          transition: 'transform 0.3s ease-in',
+          transition: 'transform 0.1s ease-out',
           willChange: 'transform',
           zIndex: 26,
         }}
