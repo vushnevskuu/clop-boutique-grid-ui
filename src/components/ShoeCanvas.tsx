@@ -33,10 +33,11 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
     // Случайная скорость вылета (как будто кинули) - для полета на 1000px вверх по оси Y
     // ВАЖНО: angleY должен быть положительным для вылета ВВЕРХ по оси Y (скролл)
     // Масштаб: 1 единица 3D = 100 пикселей, поэтому для 1000px нужно 10 единиц
-    const throwPower = 1.0 + Math.random() * 0.5; // От 1.0 до 1.5 (для полета на 1000px)
-    const angleX = (Math.random() - 0.5) * 0.6; // Угол по X (горизонталь)
-    const angleY = 0.7 + Math.random() * 0.3; // Угол вверх по Y (вертикаль/скролл, всегда положительный)
-    const angleZ = (Math.random() - 0.5) * 0.2; // Небольшой угол по Z (глубина)
+    // Траектория должна быть дугообразной (как на рисунке)
+    const throwPower = 1.2 + Math.random() * 0.4; // От 1.2 до 1.6 (для полета на 1000px с дугой)
+    const angleX = (Math.random() - 0.5) * 0.8; // Угол по X (горизонталь) - больше для дуги
+    const angleY = 0.8 + Math.random() * 0.2; // Угол вверх по Y (вертикаль/скролл, всегда положительный)
+    const angleZ = (Math.random() - 0.5) * 0.3; // Угол по Z (глубина) - для дугообразной траектории
     
     const velocity: [number, number, number] = [
       angleX * throwPower,

@@ -53,9 +53,9 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
   const [rotation, setRotation] = useState<[number, number, number]>([0, 0, 0]);
   const [currentAngularVelocity, setCurrentAngularVelocity] = useState<[number, number, number]>(angularVelocity);
   
-  const gravity = -0.012;
-  const damping = 0.995; // Сопротивление воздуха
-  const bounceDamping = 0.3; // Затухание при отскоке (уменьшено для более быстрого затухания)
+  const gravity = -0.015; // Гравитация для дугообразной траектории
+  const damping = 0.998; // Сопротивление воздуха (немного увеличено для более плавной дуги)
+  const bounceDamping = 0.2; // Затухание при отскоке (уменьшено, чтобы ботинок исчезал в футере)
   const groundY = 0; // Уровень "земли" = 0 (футер, точка исчезновения)
   const maxHeight = 10; // Максимальная высота полета = 10 единиц (примерно 1000px, 1 единица = 100px)
 
