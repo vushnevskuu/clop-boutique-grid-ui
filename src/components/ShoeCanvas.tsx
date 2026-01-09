@@ -22,12 +22,13 @@ interface ShoeCanvasProps {
 const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
   const [shoes, setShoes] = useState<ShoeInstance[]>([]);
   const shoeIdCounter = useRef(0);
+  const lastAutoShoeTime = useRef(0);
 
   const createShoe = useCallback(() => {
     // Случайная позиция вылета снизу футера
     const randomX = (Math.random() - 0.5) * 4; // От -2 до 2
     const randomZ = Math.random() * 2 - 1; // От -1 до 1
-    const startY = -200; // Начальная позиция снизу (за футером, вылетает вверх)
+    const startY = -20; // Начальная позиция снизу (за футером, вылетает вверх)
     
     // Случайная скорость вылета (как будто кинули) - уменьшена в 2 раза
     // ВАЖНО: angleY должен быть положительным для вылета ВВЕРХ
@@ -63,9 +64,38 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
     setShoes(prev => prev.filter(shoe => shoe.id !== id));
   }, []);
 
+  // Автоматический вылет ботинка при достижении конца страницы
+  useEffect(() => {
+    const handleScroll = () => {
+      const windowHeight = window.innerHeight;
+      const scrollY = window.scrollY;
+      const documentHeight = document.documentElement.scrollHeight;
+      
+      // Проверяем, доскроллил ли пользователь до конца (с небольшим запасом в 100px)
+      const isAtBottom = scrollY + windowHeight >= documentHeight - 100;
+      
+      if (isAtBottom) {
+        const now = Date.now();
+        // Создаем ботинок автоматически с задержкой минимум 1 секунда между выбросами
+        if (now - lastAutoShoeTime.current > 1000) {
+          lastAutoShoeTime.current = now;
+          createShoe();
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    // Проверяем сразу при загрузке
+    handleScroll();
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [createShoe]);
+
   useEffect(() => {
     onShoeCreate(createShoe);
-  }, [onShoeCreate]);
+  }, [onShoeCreate, createShoe]);
 
   return (
     <div
