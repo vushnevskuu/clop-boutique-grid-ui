@@ -62,22 +62,17 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
   useFrame(() => {
     if (!groupRef.current) return;
 
-    // Обновляем позицию (начинаем с начальной позиции)
+    // Обновляем позицию напрямую из текущей позиции группы
     // X = горизонтальная ось (влево-вправо)
-    // Y = вертикальная ось (скролл страницы, вверх-вниз)
+    // Y = вертикальная ось (скролл страницы, вверх-вниз) - ЭТО ОСЬ ДВИЖЕНИЯ
     // Z = ось глубины (ближе-дальше от камеры)
+    const currentPos = groupRef.current.position;
     const [vx, vy, vz] = currentVelocity;
-    const newX = position[0] + vx; // X - горизонталь
-    const newY = position[1] + vy; // Y - вертикаль (скролл)
-    const newZ = position[2] + vz; // Z - глубина
     
-    // Убеждаемся, что ботинок не появляется сверху - если Y > 0 и скорость вниз, значит что-то не так
-    if (position[1] > 0 && currentVelocity[1] < 0) {
-      // Сбрасываем на правильную начальную позицию
-      setPosition(startPosition);
-      setCurrentVelocity(velocity);
-      return;
-    }
+    // Вычисляем новую позицию
+    const newX = currentPos.x + vx; // X - горизонталь
+    const newY = currentPos.y + vy; // Y - вертикаль (скролл) - ОСЬ ДВИЖЕНИЯ
+    const newZ = currentPos.z + vz; // Z - глубина
 
     // Применяем гравитацию - всегда работает, чтобы ботинок падал
     const newVy = vy + gravity;
@@ -100,24 +95,20 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
         finalVy = 0;
       }
     }
-    
-    // Гарантируем, что если ботинок выше groundY и скорость вниз, он продолжает падать
-    if (finalY > groundY && finalVy > -0.001) {
-      // Если скорость почти нулевая, но ботинок еще не на земле, продолжаем применять гравитацию
-      finalVy = Math.min(finalVy, gravity * 2); // Усиливаем гравитацию если скорость слишком мала
-    }
 
     // Обновляем скорость с затуханием
     const newVx = vx * damping;
     const newVz = vz * damping;
 
+    // Обновляем состояние для логики удаления
     setPosition([newX, finalY, newZ]);
     setCurrentVelocity([newVx, finalVy, newVz]);
 
     // Обновляем вращение
     const [rx, ry, rz] = rotation;
     const [avx, avy, avz] = currentAngularVelocity;
-    setRotation([rx + avx, ry + avy, rz + avz]);
+    const newRotation: [number, number, number] = [rx + avx, ry + avy, rz + avz];
+    setRotation(newRotation);
     
     // Затухание угловой скорости
     setCurrentAngularVelocity([
@@ -126,9 +117,9 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
       avz * damping
     ]);
 
-    // Применяем к группе: X (горизонталь), Y (вертикаль/скролл), Z (глубина)
+    // ПРИМЕНЯЕМ К ГРУППЕ НЕМЕДЛЕННО: X (горизонталь), Y (вертикаль/скролл), Z (глубина)
     groupRef.current.position.set(newX, finalY, newZ);
-    groupRef.current.rotation.set(rotation[0], rotation[1], rotation[2]);
+    groupRef.current.rotation.set(newRotation[0], newRotation[1], newRotation[2]);
 
     // Удаляем если вернулся к Y = 0 (футер) или упал слишком низко/далеко
     if (finalY <= groundY && (Math.abs(finalVy) < 0.01 && Math.abs(newVx) < 0.02 && Math.abs(newVz) < 0.02)) {
@@ -144,13 +135,16 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
   useEffect(() => {
     if (groupRef.current) {
       // Убеждаемся, что ботинок стартует в точке Y = 0 (футер)
+      // X (горизонталь), Y (вертикаль/скролл), Z (глубина)
       groupRef.current.position.set(startPosition[0], startPosition[1], startPosition[2]);
-      // Убеждаемся, что начальная скорость направлена вверх
+      // Убеждаемся, что начальная скорость направлена вверх по Y
       if (velocity[1] <= 0) {
-        console.warn('Shoe velocity Y should be positive for upward flight');
+        console.warn('Shoe velocity Y should be positive for upward flight, got:', velocity[1]);
+      } else {
+        console.log('Shoe created at Y=', startPosition[1], 'with velocity Y=', velocity[1]);
       }
     }
-  }, [startPosition, velocity]);
+  }, []);
 
   return (
     <group ref={groupRef} scale={scale}>
