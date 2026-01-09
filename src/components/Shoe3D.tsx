@@ -63,10 +63,13 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
     if (!groupRef.current) return;
 
     // Обновляем позицию (начинаем с начальной позиции)
+    // X = горизонтальная ось (влево-вправо)
+    // Y = вертикальная ось (скролл страницы, вверх-вниз)
+    // Z = ось глубины (ближе-дальше от камеры)
     const [vx, vy, vz] = currentVelocity;
-    const newX = position[0] + vx;
-    const newY = position[1] + vy;
-    const newZ = position[2] + vz;
+    const newX = position[0] + vx; // X - горизонталь
+    const newY = position[1] + vy; // Y - вертикаль (скролл)
+    const newZ = position[2] + vz; // Z - глубина
     
     // Убеждаемся, что ботинок не появляется сверху - если Y > 0 и скорость вниз, значит что-то не так
     if (position[1] > 0 && currentVelocity[1] < 0) {
@@ -123,7 +126,7 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
       avz * damping
     ]);
 
-    // Применяем к группе
+    // Применяем к группе: X (горизонталь), Y (вертикаль/скролл), Z (глубина)
     groupRef.current.position.set(newX, finalY, newZ);
     groupRef.current.rotation.set(rotation[0], rotation[1], rotation[2]);
 
