@@ -130,8 +130,7 @@ const Footer = memo(() => {
           transform: transform,
           transformOrigin: 'center center',
           transition: 'transform 0.1s ease-out',
-          willChange: 'transform',
-          filter: 'drop-shadow(0 -10px 30px rgba(0, 0, 0, 0.1))'
+          willChange: 'transform'
         }}
         loading="lazy"
         decoding="async"
