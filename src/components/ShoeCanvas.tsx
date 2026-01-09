@@ -25,24 +25,24 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
   const lastAutoShoeTime = useRef(0);
 
   const createShoe = useCallback(() => {
-    // Случайная позиция вылета снизу футера
-    const randomX = (Math.random() - 0.5) * 4; // От -2 до 2 (X - горизонталь)
-    const randomY = Math.random() * 2 - 1; // От -1 до 1 (Y - вертикаль)
-    const startZ = -1; // Z = -1 (ниже футера, точка вылета) - Z это ось движения
+    // Случайная позиция вылета ИЗ-ПОД футера
+    const randomX = (Math.random() - 0.5) * 2; // От -1 до 1 (X - горизонталь, небольшой разброс)
+    const startY = -1; // Y = -1 (ИЗ-ПОД футера, точка вылета) - Y это ось скролла/вертикаль
+    const randomZ = (Math.random() - 0.5) * 1; // От -0.5 до 0.5 (Z - глубина, небольшой разброс)
     
-    // Случайная скорость вылета (как будто кинули) - для полета на 1000px вверх по оси Z
-    // ВАЖНО: angleZ должен быть положительным для вылета ВВЕРХ по оси Z
+    // Случайная скорость вылета (как будто кинули) - для полета на 1000px ВВЕРХ по оси Y
+    // ВАЖНО: angleY должен быть положительным для вылета ВВЕРХ по оси Y
     // Масштаб: 1 единица 3D = 100 пикселей, поэтому для 1000px нужно 10 единиц
     // Траектория должна быть дугообразной (как на рисунке)
-    const throwPower = 1.2 + Math.random() * 0.4; // От 1.2 до 1.6 (для полета на 1000px с дугой)
-    const angleX = (Math.random() - 0.5) * 0.8; // Угол по X (горизонталь) - больше для дуги
-    const angleY = (Math.random() - 0.5) * 0.3; // Угол по Y (вертикаль) - для дугообразной траектории
-    const angleZ = 0.8 + Math.random() * 0.2; // Угол вверх по Z (ось движения, всегда положительный)
+    const throwPower = 0.6 + Math.random() * 0.3; // От 0.6 до 0.9 (для плавного полета)
+    const angleX = (Math.random() - 0.5) * 0.4; // Угол по X (горизонталь) - небольшой для дуги
+    const angleY = 0.7 + Math.random() * 0.2; // Угол ВВЕРХ по Y (вертикаль/скролл, всегда положительный)
+    const angleZ = (Math.random() - 0.5) * 0.2; // Угол по Z (глубина) - для дугообразной траектории
     
     const velocity: [number, number, number] = [
       angleX * throwPower,
-      angleY * throwPower,
-      angleZ * throwPower // Положительная скорость Z = вылет вверх
+      angleY * throwPower, // Положительная скорость Y = вылет ВВЕРХ
+      angleZ * throwPower
     ];
     
     // Случайная угловая скорость (вращение) - уменьшена в 2 раза
@@ -54,7 +54,7 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
     
     const newShoe: ShoeInstance = {
       id: shoeIdCounter.current++,
-      startPosition: [randomX, randomY, startZ], // X (горизонталь), Y (вертикаль), Z (ось движения)
+      startPosition: [randomX, startY, randomZ], // X (горизонталь), Y (вертикаль/скролл - ОСЬ ДВИЖЕНИЯ), Z (глубина)
       velocity,
       angularVelocity
     };
