@@ -82,20 +82,27 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
         camera={{ position: [0, 2, 8], fov: 60 }}
         style={{ width: '100%', height: '100%' }}
         gl={{ alpha: true, antialias: true }}
+        onCreated={({ gl, scene }) => {
+          console.log("ShoeCanvas created, shoes count:", shoes.length);
+        }}
       >
         <ambientLight intensity={0.8} />
         <directionalLight position={[5, 5, 5]} intensity={1} />
         <directionalLight position={[-5, 5, 5]} intensity={0.8} />
         <Suspense fallback={null}>
-          {shoes.map((shoe) => (
-            <Shoe3D
-              key={shoe.id}
-              startPosition={shoe.startPosition}
-              velocity={shoe.velocity}
-              angularVelocity={shoe.angularVelocity}
-              onRemove={() => removeShoe(shoe.id)}
-            />
-          ))}
+          {shoes.length > 0 && (
+            <>
+              {shoes.map((shoe) => (
+                <Shoe3D
+                  key={shoe.id}
+                  startPosition={shoe.startPosition}
+                  velocity={shoe.velocity}
+                  angularVelocity={shoe.angularVelocity}
+                  onRemove={() => removeShoe(shoe.id)}
+                />
+              ))}
+            </>
+          )}
         </Suspense>
       </Canvas>
     </div>

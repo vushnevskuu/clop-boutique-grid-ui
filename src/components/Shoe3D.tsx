@@ -16,13 +16,27 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
   
   // Клонируем и центрируем модель
   const { clonedScene, scale } = useMemo(() => {
+    if (!scene) {
+      console.warn("Shoe model scene is empty");
+      return { clonedScene: new THREE.Group(), scale: 1 };
+    }
+    
     const cloned = scene.clone();
     const box = new THREE.Box3().setFromObject(cloned);
+    
+    if (box.isEmpty()) {
+      console.warn("Shoe model bounding box is empty");
+      return { clonedScene: new THREE.Group(), scale: 1 };
+    }
+    
     const center = box.getCenter(new THREE.Vector3());
     cloned.position.sub(center);
     const size = box.getSize(new THREE.Vector3());
     const maxDim = Math.max(size.x, size.y, size.z);
     const scaleValue = maxDim > 0 ? 1.5 / maxDim : 3; // Масштаб для ботинка (увеличен в 3 раза)
+    
+    console.log("Shoe model loaded:", { size, maxDim, scaleValue });
+    
     return { clonedScene: cloned, scale: scaleValue };
   }, [scene]);
 
@@ -111,6 +125,26 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
       onRemove();
     }
   });
+
+  // Проверяем, что модель загрузилась
+  useEffect(() => {
+    if (clonedScene && clonedScene.children.length > 0) {
+      console.log("Shoe3D rendered with model, children count:", clonedScene.children.length);
+    } else {
+      console.warn("Shoe3D: model not loaded or empty");
+    }
+  }, [clonedScene]);
+
+  if (!clonedScene || clonedScene.children.length === 0) {
+    // Fallback если модель не загрузилась
+    console.warn("Using fallback geometry for shoe");
+    return (
+      <mesh ref={groupRef} position={startPosition}>
+        <boxGeometry args={[0.5, 0.5, 0.5]} />
+        <meshStandardMaterial color="#2c2c2c" />
+      </mesh>
+    );
+  }
 
   return (
     <group ref={groupRef} position={startPosition} scale={scale}>
