@@ -29,10 +29,10 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
     const randomZ = Math.random() * 2 - 1; // От -1 до 1
     const startY = -2; // Начальная позиция снизу (за футером)
     
-    // Случайная скорость вылета (как будто кинули) - увеличенная для полета на 600px
-    const throwPower = 0.5 + Math.random() * 0.5; // От 0.5 до 1.0
+    // Случайная скорость вылета (как будто кинули) - уменьшена в 2 раза
+    const throwPower = (0.5 + Math.random() * 0.5) / 2; // От 0.25 до 0.5 (уменьшено в 2 раза)
     const angleX = (Math.random() - 0.5) * 0.8; // Угол по X
-    const angleY = 0.4 + Math.random() * 0.3; // Угол вверх (увеличен)
+    const angleY = 0.4 + Math.random() * 0.3; // Угол вверх
     const angleZ = (Math.random() - 0.5) * 0.3; // Небольшой угол по Z
     
     const velocity: [number, number, number] = [
@@ -41,11 +41,11 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
       angleZ * throwPower
     ];
     
-    // Случайная угловая скорость (вращение)
+    // Случайная угловая скорость (вращение) - уменьшена в 2 раза
     const angularVelocity: [number, number, number] = [
-      (Math.random() - 0.5) * 0.3,
-      (Math.random() - 0.5) * 0.3,
-      (Math.random() - 0.5) * 0.3
+      (Math.random() - 0.5) * 0.15,
+      (Math.random() - 0.5) * 0.15,
+      (Math.random() - 0.5) * 0.15
     ];
     
     const newShoe: ShoeInstance = {
