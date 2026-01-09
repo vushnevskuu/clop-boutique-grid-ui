@@ -41,8 +41,15 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
       });
     };
   }, [clonedScene]);
+  // Инициализируем позицию и скорость из пропсов
   const [position, setPosition] = useState<[number, number, number]>(startPosition);
   const [currentVelocity, setCurrentVelocity] = useState<[number, number, number]>(velocity);
+  
+  // Сбрасываем позицию и скорость при изменении пропсов
+  useEffect(() => {
+    setPosition(startPosition);
+    setCurrentVelocity(velocity);
+  }, [startPosition, velocity]);
   const [rotation, setRotation] = useState<[number, number, number]>([0, 0, 0]);
   const [currentAngularVelocity, setCurrentAngularVelocity] = useState<[number, number, number]>(angularVelocity);
   
@@ -55,11 +62,19 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
   useFrame(() => {
     if (!groupRef.current) return;
 
-    // Обновляем позицию
+    // Обновляем позицию (начинаем с начальной позиции)
     const [vx, vy, vz] = currentVelocity;
     const newX = position[0] + vx;
     const newY = position[1] + vy;
     const newZ = position[2] + vz;
+    
+    // Убеждаемся, что ботинок не появляется сверху - если Y > 0 и скорость вниз, значит что-то не так
+    if (position[1] > 0 && currentVelocity[1] < 0) {
+      // Сбрасываем на правильную начальную позицию
+      setPosition(startPosition);
+      setCurrentVelocity(velocity);
+      return;
+    }
 
     // Применяем гравитацию - всегда работает, чтобы ботинок падал
     const newVy = vy + gravity;
@@ -123,8 +138,20 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
     }
   });
 
+  // Применяем начальную позицию при первом рендере
+  useEffect(() => {
+    if (groupRef.current) {
+      // Убеждаемся, что ботинок стартует снизу (startY должен быть отрицательным)
+      groupRef.current.position.set(startPosition[0], startPosition[1], startPosition[2]);
+      // Убеждаемся, что начальная скорость направлена вверх
+      if (velocity[1] <= 0) {
+        console.warn('Shoe velocity Y should be positive for upward flight');
+      }
+    }
+  }, [startPosition, velocity]);
+
   return (
-    <group ref={groupRef} position={startPosition} scale={scale}>
+    <group ref={groupRef} scale={scale}>
       <primitive object={clonedScene} />
     </group>
   );
