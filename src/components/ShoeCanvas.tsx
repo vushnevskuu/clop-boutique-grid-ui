@@ -25,48 +25,14 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
   const lastAutoShoeTime = useRef(0);
 
   const createShoe = useCallback(() => {
-    // Получаем реальные координаты футера на странице
-    const footer = document.querySelector('footer');
-    if (!footer) {
-      console.warn('Footer not found, using default coordinates');
-      return;
-    }
-    
-    const footerRect = footer.getBoundingClientRect();
-    const canvasRect = document.querySelector('[data-shoe-canvas]')?.getBoundingClientRect();
-    
-    if (!canvasRect) {
-      console.warn('Canvas not found, using default coordinates');
-      return;
-    }
-    
-    // Canvas имеет position: fixed, bottom: 0, height: 1000px
-    // Вычисляем, где находится низ футера относительно Canvas
-    // Низ Canvas = window.innerHeight (так как bottom: 0)
-    // Низ футера = footerRect.bottom
-    // Разница = window.innerHeight - footerRect.bottom (положительное если футер выше низа экрана)
-    
-    const canvasBottom = window.innerHeight; // Низ Canvas (viewport)
-    const footerBottom = footerRect.bottom; // Низ футера в пикселях от верха viewport
-    const footerCenterX = footerRect.left + footerRect.width / 2; // Центр футера по X
-    const canvasCenterX = window.innerWidth / 2; // Центр Canvas по X
-    
-    // Переводим в координаты 3D:
-    // - X: горизонтальное смещение от центра (1 единица 3D = примерно 100px)
-    // - Y: вертикальное смещение от низа Canvas (1 единица 3D = примерно 100px)
-    //   Если футер виден, то footerBottom < canvasBottom, значит Y должен быть положительным
-    //   Но нам нужно, чтобы Y=0 был на уровне низа футера
-    
-    const offsetY = canvasBottom - footerBottom; // Положительное = футер выше низа Canvas
-    const offsetX = (footerCenterX - canvasCenterX) / 100; // Переводим пиксели в единицы 3D
-    
-    // В 3D координатах: Y=0 это низ футера
+    // ТОЧКА ОТСЧЕТА (0,0,0) = самый низ футера по центру
+    // Canvas теперь position: absolute после футера, поэтому координаты 3D естественно синхронизированы
+    // Y=0 в 3D = низ футера (bottom: 0 в Canvas)
     // Ботинок должен стартовать ИЗ-ПОД футера, значит Y должен быть отрицательным
-    const startY3D = -2; // Y = -2 (ИЗ-ПОД футера в 3D координатах)
     
-    // Случайная позиция по X относительно центра футера
-    const randomX = offsetX + (Math.random() - 0.5) * 1.5; // От центра футера с небольшим разбросом
-    const randomZ = (Math.random() - 0.5) * 0.5; // От -0.25 до 0.25 (Z - глубина)
+    const randomX = (Math.random() - 0.5) * 1.5; // От -0.75 до 0.75 (X - горизонталь, небольшой разброс от центра)
+    const startY = -2; // Y = -2 (ИЗ-ПОД футера, точка вылета) - Y это ось скролла/вертикаль, НИЖЕ футера
+    const randomZ = (Math.random() - 0.5) * 0.5; // От -0.25 до 0.25 (Z - глубина, небольшой разброс от центра)
     
     // Случайная скорость вылета (как будто кинули) - для полета на 1000px ВВЕРХ по оси Y
     // ВАЖНО: angleY должен быть положительным для вылета ВВЕРХ по оси Y
@@ -92,12 +58,10 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
     
     const newShoe: ShoeInstance = {
       id: shoeIdCounter.current++,
-      startPosition: [randomX, startY3D, randomZ], // X (горизонталь), Y (вертикаль/скролл - ОСЬ ДВИЖЕНИЯ), Z (глубина)
+      startPosition: [randomX, startY, randomZ], // X (горизонталь), Y (вертикаль/скролл - ОСЬ ДВИЖЕНИЯ), Z (глубина)
       velocity,
       angularVelocity
     };
-    
-    console.log('Footer coords:', { footerBottom, canvasBottom, offsetY, offsetX, startY3D });
     
     console.log('Creating shoe:', newShoe);
     setShoes(prev => {
@@ -153,11 +117,12 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
     <div
       data-shoe-canvas
       style={{
-        position: 'fixed',
-        bottom: 0,
+        position: 'absolute',
+        top: '100%', // Начинается сразу после футера
         left: 0,
         width: '100%',
         height: '1000px',
+        marginTop: '-1000px', // Покрываем область от футера вверх на 1000px
         zIndex: 20,
         pointerEvents: 'none',
       }}
