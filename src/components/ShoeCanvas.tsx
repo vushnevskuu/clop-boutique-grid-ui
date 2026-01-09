@@ -27,7 +27,7 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
     // Случайная позиция вылета снизу футера
     const randomX = (Math.random() - 0.5) * 4; // От -2 до 2
     const randomZ = Math.random() * 2 - 1; // От -1 до 1
-    const startY = -2; // Начальная позиция снизу (за футером)
+    const startY = -2; // Начальная позиция (равна координате приземления)
     
     // Случайная скорость вылета (как будто кинули) - уменьшена в 2 раза
     const throwPower = (0.5 + Math.random() * 0.5) / 2; // От 0.25 до 0.5 (было 0.5-1.0)
