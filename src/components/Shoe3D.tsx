@@ -48,8 +48,8 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
   
   const gravity = -0.012;
   const damping = 0.995; // Сопротивление воздуха
-  const bounceDamping = 0.5; // Затухание при отскоке
-  const groundY = -4; // Уровень "земли" (за футером, ниже)
+  const bounceDamping = 0.3; // Затухание при отскоке (уменьшено для более быстрого затухания)
+  const groundY = -5; // Уровень "земли" (за футером, ниже - увеличен зазор)
   const maxHeight = 4; // Максимальная высота полета (примерно 600px)
 
   useFrame(() => {
@@ -61,18 +61,19 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
     const newY = position[1] + vy;
     const newZ = position[2] + vz;
 
-    // Применяем гравитацию
+    // Применяем гравитацию - всегда работает, чтобы ботинок падал
     const newVy = vy + gravity;
 
     // Проверяем столкновение с "землёй" и максимальную высоту
     let finalY = newY;
     let finalVy = newVy;
     
-    // Ограничиваем максимальную высоту
-    if (newY > maxHeight) {
+    // Ограничиваем максимальную высоту только на подъеме
+    if (newY > maxHeight && newVy > 0) {
       finalY = maxHeight;
       finalVy = 0; // Останавливаем на вершине
     } else if (newY <= groundY) {
+      // Ботинок достиг земли - всегда останавливаем на groundY
       finalY = groundY;
       finalVy = -newVy * bounceDamping; // Отскок с затуханием
       
@@ -80,6 +81,12 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
       if (Math.abs(finalVy) < 0.01) {
         finalVy = 0;
       }
+    }
+    
+    // Гарантируем, что если ботинок выше groundY и скорость вниз, он продолжает падать
+    if (finalY > groundY && finalVy > -0.001) {
+      // Если скорость почти нулевая, но ботинок еще не на земле, продолжаем применять гравитацию
+      finalVy = Math.min(finalVy, gravity * 2); // Усиливаем гравитацию если скорость слишком мала
     }
 
     // Обновляем скорость с затуханием
@@ -106,8 +113,12 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
     groupRef.current.rotation.set(rotation[0], rotation[1], rotation[2]);
 
     // Удаляем если упал слишком низко или далеко, или если скорость очень мала и он на земле
-    if (finalY < groundY - 3 || Math.abs(newX) > 8 || Math.abs(newZ) > 8 || 
-        (finalY <= groundY && Math.abs(finalVy) < 0.005 && Math.abs(newVx) < 0.01 && Math.abs(newVz) < 0.01)) {
+    // Убеждаемся, что ботинок всегда падает за футер (groundY = -5)
+    if (finalY <= groundY && (Math.abs(finalVy) < 0.01 && Math.abs(newVx) < 0.02 && Math.abs(newVz) < 0.02)) {
+      // Ботинок остановился на земле - удаляем
+      onRemove();
+    } else if (finalY < groundY - 2 || Math.abs(newX) > 8 || Math.abs(newZ) > 8) {
+      // Ботинок упал слишком низко или далеко - удаляем
       onRemove();
     }
   });
