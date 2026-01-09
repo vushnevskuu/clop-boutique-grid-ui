@@ -25,10 +25,11 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
   const lastAutoShoeTime = useRef(0);
 
   const createShoe = useCallback(() => {
+    // ТОЧКА ОТСЧЕТА (0,0,0) = самый низ футера по центру
     // Случайная позиция вылета ИЗ-ПОД футера
-    const randomX = (Math.random() - 0.5) * 2; // От -1 до 1 (X - горизонталь, небольшой разброс)
-    const startY = -2; // Y = -2 (ИЗ-ПОД футера, точка вылета) - Y это ось скролла/вертикаль
-    const randomZ = (Math.random() - 0.5) * 1; // От -0.5 до 0.5 (Z - глубина, небольшой разброс)
+    const randomX = (Math.random() - 0.5) * 1.5; // От -0.75 до 0.75 (X - горизонталь, небольшой разброс от центра)
+    const startY = -1.5; // Y = -1.5 (ИЗ-ПОД футера, точка вылета) - Y это ось скролла/вертикаль
+    const randomZ = (Math.random() - 0.5) * 0.5; // От -0.25 до 0.25 (Z - глубина, небольшой разброс от центра)
     
     // Случайная скорость вылета (как будто кинули) - для полета на 1000px ВВЕРХ по оси Y
     // ВАЖНО: angleY должен быть положительным для вылета ВВЕРХ по оси Y
@@ -122,7 +123,7 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
       }}
     >
       <Canvas
-        camera={{ position: [0, 0, 10], fov: 75, near: 0.1, far: 100 }}
+        camera={{ position: [0, 2, 10], fov: 75, near: 0.1, far: 100 }}
         style={{ width: '100%', height: '100%' }}
         gl={{ alpha: true, antialias: true }}
       >
