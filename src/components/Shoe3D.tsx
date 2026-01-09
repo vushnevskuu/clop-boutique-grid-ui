@@ -53,56 +53,56 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
   const [rotation, setRotation] = useState<[number, number, number]>([0, 0, 0]);
   const [currentAngularVelocity, setCurrentAngularVelocity] = useState<[number, number, number]>(angularVelocity);
   
-  const gravity = -0.5; // Гравитация для дугообразной траектории
+  const gravity = -0.5; // Гравитация для дугообразной траектории (применяется к Z)
   const damping = 0.998; // Сопротивление воздуха (немного увеличено для более плавной дуги)
   const bounceDamping = 0.2; // Затухание при отскоке (уменьшено, чтобы ботинок исчезал в футере)
-  const groundY = 0; // Уровень "земли" = 0 (футер, точка исчезновения)
-  const maxHeight = 10; // Максимальная высота полета = 10 единиц (примерно 1000px, 1 единица = 100px)
+  const groundZ = 0; // Уровень "земли" = 0 (футер, точка исчезновения) - по оси Z
+  const maxHeight = 10; // Максимальная высота полета = 10 единиц (примерно 1000px, 1 единица = 100px) - по оси Z
 
   useFrame(() => {
     if (!groupRef.current) return;
 
     // Обновляем позицию напрямую из текущей позиции группы
     // X = горизонтальная ось (влево-вправо)
-    // Y = вертикальная ось (скролл страницы, вверх-вниз) - ЭТО ОСЬ ДВИЖЕНИЯ
-    // Z = ось глубины (ближе-дальше от камеры)
+    // Y = вертикальная ось (скролл страницы, вверх-вниз)
+    // Z = ось движения (вылет из футера, полет вверх, падение вниз)
     const currentPos = groupRef.current.position;
     const [vx, vy, vz] = currentVelocity;
     
     // Вычисляем новую позицию
     const newX = currentPos.x + vx; // X - горизонталь
-    const newY = currentPos.y + vy; // Y - вертикаль (скролл) - ОСЬ ДВИЖЕНИЯ
-    const newZ = currentPos.z + vz; // Z - глубина
+    const newY = currentPos.y + vy; // Y - вертикаль
+    const newZ = currentPos.z + vz; // Z - ОСЬ ДВИЖЕНИЯ (вылет, полет, падение)
 
-    // Применяем гравитацию - всегда работает, чтобы ботинок падал
-    const newVy = vy + gravity;
+    // Применяем гравитацию к оси Z - всегда работает, чтобы ботинок падал
+    const newVz = vz + gravity;
 
-    // Проверяем столкновение с "землёй" и максимальную высоту
-    let finalY = newY;
-    let finalVy = newVy;
+    // Проверяем столкновение с "землёй" и максимальную высоту по оси Z
+    let finalZ = newZ;
+    let finalVz = newVz;
     
     // Ограничиваем максимальную высоту только на подъеме
-    if (newY > maxHeight && newVy > 0) {
-      finalY = maxHeight;
-      finalVy = 0; // Останавливаем на вершине
-    } else if (newY <= groundY) {
-      // Ботинок достиг земли - всегда останавливаем на groundY
-      finalY = groundY;
-      finalVy = -newVy * bounceDamping; // Отскок с затуханием
+    if (newZ > maxHeight && newVz > 0) {
+      finalZ = maxHeight;
+      finalVz = 0; // Останавливаем на вершине
+    } else if (newZ <= groundZ) {
+      // Ботинок достиг земли - всегда останавливаем на groundZ
+      finalZ = groundZ;
+      finalVz = -newVz * bounceDamping; // Отскок с затуханием
       
       // Если скорость очень мала, останавливаем
-      if (Math.abs(finalVy) < 0.01) {
-        finalVy = 0;
+      if (Math.abs(finalVz) < 0.01) {
+        finalVz = 0;
       }
     }
 
     // Обновляем скорость с затуханием
     const newVx = vx * damping;
-    const newVz = vz * damping;
+    const newVy = vy * damping;
 
     // Обновляем состояние для логики удаления
-    setPosition([newX, finalY, newZ]);
-    setCurrentVelocity([newVx, finalVy, newVz]);
+    setPosition([newX, newY, finalZ]);
+    setCurrentVelocity([newVx, newVy, finalVz]);
 
     // Обновляем вращение
     const [rx, ry, rz] = rotation;
@@ -117,15 +117,15 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
       avz * damping
     ]);
 
-    // ПРИМЕНЯЕМ К ГРУППЕ НЕМЕДЛЕННО: X (горизонталь), Y (вертикаль/скролл), Z (глубина)
-    groupRef.current.position.set(newX, finalY, newZ);
+    // ПРИМЕНЯЕМ К ГРУППЕ НЕМЕДЛЕННО: X (горизонталь), Y (вертикаль), Z (ось движения)
+    groupRef.current.position.set(newX, newY, finalZ);
     groupRef.current.rotation.set(newRotation[0], newRotation[1], newRotation[2]);
 
-    // Удаляем если вернулся к Y = 0 (футер) или упал слишком низко/далеко
-    if (finalY <= groundY && (Math.abs(finalVy) < 0.01 && Math.abs(newVx) < 0.02 && Math.abs(newVz) < 0.02)) {
-      // Ботинок остановился на Y = 0 (футер) - удаляем
+    // Удаляем если вернулся к Z = 0 (футер) или упал слишком низко/далеко
+    if (finalZ <= groundZ && (Math.abs(finalVz) < 0.01 && Math.abs(newVx) < 0.02 && Math.abs(newVy) < 0.02)) {
+      // Ботинок остановился на Z = 0 (футер) - удаляем
       onRemove();
-    } else if (finalY < groundY - 1 || Math.abs(newX) > 8 || Math.abs(newZ) > 8) {
+    } else if (finalZ < groundZ - 1 || Math.abs(newX) > 8 || Math.abs(newY) > 8) {
       // Ботинок упал слишком низко или далеко - удаляем
       onRemove();
     }
@@ -134,14 +134,14 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
   // Применяем начальную позицию при первом рендере
   useEffect(() => {
     if (groupRef.current) {
-      // Убеждаемся, что ботинок стартует в точке Y = 0 (футер)
-      // X (горизонталь), Y (вертикаль/скролл), Z (глубина)
+      // Убеждаемся, что ботинок стартует в точке Z = 0 (футер)
+      // X (горизонталь), Y (вертикаль), Z (ось движения)
       groupRef.current.position.set(startPosition[0], startPosition[1], startPosition[2]);
-      // Убеждаемся, что начальная скорость направлена вверх по Y
-      if (velocity[1] <= 0) {
-        console.warn('Shoe velocity Y should be positive for upward flight, got:', velocity[1]);
+      // Убеждаемся, что начальная скорость направлена вверх по Z
+      if (velocity[2] <= 0) {
+        console.warn('Shoe velocity Z should be positive for upward flight, got:', velocity[2]);
       } else {
-        console.log('Shoe created at Y=', startPosition[1], 'with velocity Y=', velocity[1]);
+        console.log('Shoe created at Z=', startPosition[2], 'with velocity Z=', velocity[2]);
       }
     }
   }, []);
