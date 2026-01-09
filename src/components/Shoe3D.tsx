@@ -1,5 +1,6 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
+import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
 interface Shoe3DProps {
@@ -10,7 +11,36 @@ interface Shoe3DProps {
 }
 
 const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DProps) => {
-  const meshRef = useRef<THREE.Mesh>(null);
+  const groupRef = useRef<THREE.Group>(null);
+  const { scene } = useGLTF("/shoe.glb", true);
+  
+  // Клонируем и центрируем модель
+  const { clonedScene, scale } = useMemo(() => {
+    const cloned = scene.clone();
+    const box = new THREE.Box3().setFromObject(cloned);
+    const center = box.getCenter(new THREE.Vector3());
+    cloned.position.sub(center);
+    const size = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const scaleValue = maxDim > 0 ? 0.5 / maxDim : 1; // Масштаб для ботинка
+    return { clonedScene: cloned, scale: scaleValue };
+  }, [scene]);
+
+  // Очистка ресурсов
+  useEffect(() => {
+    return () => {
+      clonedScene.traverse((child) => {
+        if (child instanceof THREE.Mesh) {
+          child.geometry?.dispose();
+          if (Array.isArray(child.material)) {
+            child.material.forEach((mat) => mat.dispose());
+          } else {
+            child.material?.dispose();
+          }
+        }
+      });
+    };
+  }, [clonedScene]);
   const [position, setPosition] = useState<[number, number, number]>(startPosition);
   const [currentVelocity, setCurrentVelocity] = useState<[number, number, number]>(velocity);
   const [rotation, setRotation] = useState<[number, number, number]>([0, 0, 0]);
@@ -23,7 +53,7 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
   const maxHeight = 4; // Максимальная высота полета (примерно 600px)
 
   useFrame(() => {
-    if (!meshRef.current) return;
+    if (!groupRef.current) return;
 
     // Обновляем позицию
     const [vx, vy, vz] = currentVelocity;
@@ -71,9 +101,9 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
       avz * damping
     ]);
 
-    // Применяем к мешу
-    meshRef.current.position.set(newX, finalY, newZ);
-    meshRef.current.rotation.set(rotation[0], rotation[1], rotation[2]);
+    // Применяем к группе
+    groupRef.current.position.set(newX, finalY, newZ);
+    groupRef.current.rotation.set(rotation[0], rotation[1], rotation[2]);
 
     // Удаляем если упал слишком низко или далеко, или если скорость очень мала и он на земле
     if (finalY < groundY - 3 || Math.abs(newX) > 8 || Math.abs(newZ) > 8 || 
@@ -83,36 +113,9 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
   });
 
   return (
-    <mesh ref={meshRef} position={startPosition}>
-      {/* Создаём простую модель ботинка из нескольких box геометрий */}
-      <group>
-        {/* Подошва */}
-        <mesh position={[0, -0.15, 0]}>
-          <boxGeometry args={[0.8, 0.1, 0.4]} />
-          <meshStandardMaterial color="#2c2c2c" />
-        </mesh>
-        {/* Основная часть */}
-        <mesh position={[0, 0, 0]}>
-          <boxGeometry args={[0.7, 0.4, 0.35]} />
-          <meshStandardMaterial color="#3a3a3a" />
-        </mesh>
-        {/* Носок */}
-        <mesh position={[0.25, 0.05, 0]}>
-          <boxGeometry args={[0.3, 0.2, 0.3]} />
-          <meshStandardMaterial color="#2c2c2c" />
-        </mesh>
-        {/* Пятка */}
-        <mesh position={[-0.25, 0.1, 0]}>
-          <boxGeometry args={[0.2, 0.3, 0.3]} />
-          <meshStandardMaterial color="#2c2c2c" />
-        </mesh>
-        {/* Шнурки (декоративные линии) */}
-        <mesh position={[0, 0.15, 0.18]}>
-          <boxGeometry args={[0.5, 0.05, 0.02]} />
-          <meshStandardMaterial color="#1a1a1a" />
-        </mesh>
-      </group>
-    </mesh>
+    <group ref={groupRef} position={startPosition} scale={scale}>
+      <primitive object={clonedScene} />
+    </group>
   );
 };
 

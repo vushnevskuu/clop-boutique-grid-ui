@@ -1,6 +1,12 @@
 import { useState, useRef, useCallback, memo, Suspense, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
+import { useGLTF } from "@react-three/drei";
 import Shoe3D from "./Shoe3D";
+
+// Preload shoe model for faster loading
+if (typeof window !== 'undefined') {
+  useGLTF.preload("/shoe.glb");
+}
 
 interface ShoeInstance {
   id: number;
