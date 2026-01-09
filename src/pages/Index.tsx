@@ -8,7 +8,7 @@ const Index = memo(() => {
   return (
     <div className="min-h-screen" style={{ margin: 0, padding: 0 }}>
       <Header />
-      <main style={{ margin: 0, padding: 0 }}>
+      <main style={{ margin: 0, padding: 0, marginBottom: '60px' }}>
         <Hero />
         <ProductGrid />
       </main>
