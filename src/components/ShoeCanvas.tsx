@@ -28,14 +28,14 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
     // Случайная позиция вылета снизу футера
     const randomX = (Math.random() - 0.5) * 4; // От -2 до 2
     const randomZ = Math.random() * 2 - 1; // От -1 до 1
-      const startY = -1; // Начальная позиция снизу (за футером, вылетает вверх)
+      const startY = -3; // Начальная позиция СНИЗУ футера (отрицательная = под футером)
     
-    // Случайная скорость вылета (как будто кинули) - уменьшена в 2 раза
+    // Случайная скорость вылета (как будто кинули) - для полета на 1000px вверх
     // ВАЖНО: angleY должен быть положительным для вылета ВВЕРХ
-    const throwPower = (0.5 + Math.random() * 0.5) / 2; // От 0.25 до 0.5 (уменьшено в 2 раза)
-    const angleX = (Math.random() - 0.5) * 0.8; // Угол по X
-    const angleY = 0.5 + Math.random() * 0.4; // Угол вверх (увеличен, всегда положительный)
-    const angleZ = (Math.random() - 0.5) * 0.3; // Небольшой угол по Z
+    const throwPower = 0.8 + Math.random() * 0.4; // От 0.8 до 1.2 (увеличено для полета на 1000px)
+    const angleX = (Math.random() - 0.5) * 0.6; // Угол по X
+    const angleY = 0.6 + Math.random() * 0.3; // Угол вверх (увеличен, всегда положительный)
+    const angleZ = (Math.random() - 0.5) * 0.2; // Небольшой угол по Z
     
     const velocity: [number, number, number] = [
       angleX * throwPower,

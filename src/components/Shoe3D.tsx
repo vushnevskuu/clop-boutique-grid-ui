@@ -56,8 +56,8 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
   const gravity = -0.012;
   const damping = 0.995; // Сопротивление воздуха
   const bounceDamping = 0.3; // Затухание при отскоке (уменьшено для более быстрого затухания)
-  const groundY = -2; // Уровень "земли" (за футером, ниже начальной позиции)
-  const maxHeight = 10; // Максимальная высота полета (примерно 1000px в 3D пространстве)
+  const groundY = -4; // Уровень "земли" (за футером, ниже начальной позиции -3)
+  const maxHeight = 8; // Максимальная высота полета (примерно 1000px в 3D пространстве, от -3 до 8 = 11 единиц)
 
   useFrame(() => {
     if (!groupRef.current) return;
