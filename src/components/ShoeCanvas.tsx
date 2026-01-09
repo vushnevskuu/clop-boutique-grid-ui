@@ -28,7 +28,7 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
     // Случайная позиция вылета снизу футера
     const randomX = (Math.random() - 0.5) * 4; // От -2 до 2
     const randomZ = Math.random() * 2 - 1; // От -1 до 1
-    const startY = -20; // Начальная позиция снизу (за футером, вылетает вверх)
+      const startY = -1; // Начальная позиция снизу (за футером, вылетает вверх)
     
     // Случайная скорость вылета (как будто кинули) - уменьшена в 2 раза
     // ВАЖНО: angleY должен быть положительным для вылета ВВЕРХ
@@ -120,7 +120,7 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
       }}
     >
       <Canvas
-        camera={{ position: [0, 2, 8], fov: 60 }}
+        camera={{ position: [0, 0, 10], fov: 75 }}
         style={{ width: '100%', height: '100%' }}
         gl={{ alpha: true, antialias: true }}
       >
