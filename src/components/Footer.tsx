@@ -80,7 +80,9 @@ const Footer = memo(() => {
     const rotateX = mousePosition.y * 0.1;
     const rotateY = -mousePosition.x * 0.1;
     const translateZ = (Math.abs(mousePosition.x) * 5 + Math.abs(mousePosition.y) * 5) * 0.05;
-    return `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(${translateZ}px)`;
+    const isHovered = mousePosition.x !== 0 || mousePosition.y !== 0;
+    const scale = isHovered ? 1.05 : 1;
+    return `perspective(1000px) scale(${scale}) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(${translateZ}px)`;
   }, [mousePosition.x, mousePosition.y]);
 
   const handleImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
