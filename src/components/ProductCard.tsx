@@ -2,7 +2,7 @@ import { useState, memo, useCallback } from "react";
 import { Link } from "react-router-dom";
 
 interface ProductCardProps {
-  id: string | number;
+  id: number;
   image: string;
   hoverImage?: string;
   title: string;
