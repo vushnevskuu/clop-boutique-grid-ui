@@ -51,10 +51,10 @@ const Footer = memo(() => {
     const randomZ = Math.random() * 2 - 1; // От -1 до 1
     const startY = -1.5; // Начальная позиция снизу
     
-    // Случайная скорость вылета (как будто кинули)
-    const throwPower = 0.3 + Math.random() * 0.4; // От 0.3 до 0.7
+    // Случайная скорость вылета (как будто кинули) - увеличенная для полета на 600px
+    const throwPower = 0.5 + Math.random() * 0.5; // От 0.5 до 1.0
     const angleX = (Math.random() - 0.5) * 0.8; // Угол по X
-    const angleY = 0.3 + Math.random() * 0.4; // Угол вверх
+    const angleY = 0.4 + Math.random() * 0.3; // Угол вверх (увеличен)
     const angleZ = (Math.random() - 0.5) * 0.3; // Небольшой угол по Z
     
     const velocity: [number, number, number] = [
@@ -65,9 +65,9 @@ const Footer = memo(() => {
     
     // Случайная угловая скорость (вращение)
     const angularVelocity: [number, number, number] = [
-      (Math.random() - 0.5) * 0.2,
-      (Math.random() - 0.5) * 0.2,
-      (Math.random() - 0.5) * 0.2
+      (Math.random() - 0.5) * 0.3,
+      (Math.random() - 0.5) * 0.3,
+      (Math.random() - 0.5) * 0.3
     ];
     
     const newShoe: ShoeInstance = {
@@ -98,7 +98,7 @@ const Footer = memo(() => {
     const now = Date.now();
     
     // Создаём ботинок при входе мыши на футер (с задержкой между выбросами)
-    if (now - lastHoverTime > 500) {
+    if (now - lastHoverTime > 300) {
       setLastHoverTime(now);
       createShoe();
     }
@@ -186,13 +186,13 @@ const Footer = memo(() => {
           bottom: 0,
           left: 0,
           width: '100%',
-          height: '400px',
-          zIndex: 0,
+          height: '600px',
+          zIndex: 10,
           pointerEvents: 'none',
         }}
       >
         <Canvas
-          camera={{ position: [0, 0, 6], fov: 60 }}
+          camera={{ position: [0, 2, 8], fov: 60 }}
           style={{ width: '100%', height: '100%' }}
           gl={{ alpha: true, antialias: true }}
         >

@@ -16,10 +16,11 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
   const [rotation, setRotation] = useState<[number, number, number]>([0, 0, 0]);
   const [currentAngularVelocity, setCurrentAngularVelocity] = useState<[number, number, number]>(angularVelocity);
   
-  const gravity = -0.015;
-  const damping = 0.99; // Сопротивление воздуха
+  const gravity = -0.012;
+  const damping = 0.995; // Сопротивление воздуха
   const bounceDamping = 0.5; // Затухание при отскоке
   const groundY = -3; // Уровень "земли" (за футером)
+  const maxHeight = 4; // Максимальная высота полета (примерно 600px)
 
   useFrame(() => {
     if (!meshRef.current) return;
@@ -33,11 +34,15 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
     // Применяем гравитацию
     const newVy = vy + gravity;
 
-    // Проверяем столкновение с "землёй"
+    // Проверяем столкновение с "землёй" и максимальную высоту
     let finalY = newY;
     let finalVy = newVy;
     
-    if (newY <= groundY) {
+    // Ограничиваем максимальную высоту
+    if (newY > maxHeight) {
+      finalY = maxHeight;
+      finalVy = 0; // Останавливаем на вершине
+    } else if (newY <= groundY) {
       finalY = groundY;
       finalVy = -newVy * bounceDamping; // Отскок с затуханием
       
