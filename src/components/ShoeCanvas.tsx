@@ -57,7 +57,11 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
       angularVelocity
     };
     
-    setShoes(prev => [...prev, newShoe]);
+    console.log('Creating shoe:', newShoe);
+    setShoes(prev => {
+      console.log('Current shoes count:', prev.length, 'Adding new shoe');
+      return [...prev, newShoe];
+    });
   }, []);
 
   const removeShoe = useCallback((id: number) => {
@@ -79,6 +83,7 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
         // Создаем ботинок автоматически с задержкой минимум 1 секунда между выбросами
         if (now - lastAutoShoeTime.current > 1000) {
           lastAutoShoeTime.current = now;
+          console.log('Creating auto shoe at bottom of page');
           createShoe();
         }
       }
@@ -92,6 +97,11 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, [createShoe]);
+  
+  // Отладочная информация
+  useEffect(() => {
+    console.log('ShoeCanvas: shoes count:', shoes.length);
+  }, [shoes.length]);
 
   useEffect(() => {
     onShoeCreate(createShoe);
