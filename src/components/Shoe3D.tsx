@@ -22,7 +22,7 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
     cloned.position.sub(center);
     const size = box.getSize(new THREE.Vector3());
     const maxDim = Math.max(size.x, size.y, size.z);
-    const scaleValue = maxDim > 0 ? 1.5 / maxDim : 3; // Масштаб для ботинка (увеличен в 3 раза)
+    const scaleValue = maxDim > 0 ? 3.0 / maxDim : 6; // Масштаб для ботинка (увеличен в 6 раз = 3*2)
     return { clonedScene: cloned, scale: scaleValue };
   }, [scene]);
 
