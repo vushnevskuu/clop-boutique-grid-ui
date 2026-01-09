@@ -109,6 +109,7 @@ const Footer = memo(() => {
         touchAction: 'none',
         overscrollBehavior: 'none',
         backgroundColor: 'transparent',
+        background: 'none',
       }}
     >
       <img 
