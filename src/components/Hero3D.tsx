@@ -113,9 +113,7 @@ const Hero3D = ({ modelPath, scrollProgress, mousePosition = { x: 0, y: 0 } }: H
         
         {/* Hemisphere light for natural sky/ground lighting */}
         <hemisphereLight 
-          skyColor={0xffffff} 
-          groundColor={0xffffff} 
-          intensity={0.8} 
+          args={[0xffffff, 0xffffff, 0.8]} 
         />
         
         {/* Main directional lights from multiple angles */}

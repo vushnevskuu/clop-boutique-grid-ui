@@ -146,10 +146,12 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
     // Fallback если модель не загрузилась
     console.warn("Using fallback geometry for shoe");
     return (
-      <mesh ref={groupRef} position={startPosition}>
-        <boxGeometry args={[0.5, 0.5, 0.5]} />
-        <meshStandardMaterial color="#2c2c2c" />
-      </mesh>
+      <group ref={groupRef} position={startPosition}>
+        <mesh>
+          <boxGeometry args={[0.5, 0.5, 0.5]} />
+          <meshStandardMaterial color="#2c2c2c" />
+        </mesh>
+      </group>
     );
   }
 
