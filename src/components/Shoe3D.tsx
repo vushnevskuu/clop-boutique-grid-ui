@@ -73,7 +73,8 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
     const [vx, vy, vz] = currentVelocity;
     const newX = position[0] + vx;
     const newY = position[1] + vy;
-    const newZ = position[2] + vz;
+    // Z координата фиксирована, не изменяется
+    const fixedZ = position[2]; // Сохраняем изначальную Z координату
 
     // Применяем гравитацию
     const newVy = vy + gravity;
@@ -96,11 +97,11 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
       }
     }
 
-    // Обновляем скорость с затуханием
+    // Обновляем скорость с затуханием (Z скорость всегда 0, так как глубина фиксирована)
     const newVx = vx * damping;
-    const newVz = vz * damping;
+    const newVz = 0; // Z скорость всегда 0, глубина фиксирована
 
-    setPosition([newX, finalY, newZ]);
+    setPosition([newX, finalY, fixedZ]); // Z всегда остается изначальной
     setCurrentVelocity([newVx, finalVy, newVz]);
 
     // Обновляем вращение
@@ -120,8 +121,9 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
     groupRef.current.rotation.set(rotation[0], rotation[1], rotation[2]);
 
     // Удаляем если упал слишком низко или далеко, или если скорость очень мала и он на земле
-    if (finalY < groundY - 3 || Math.abs(newX) > 8 || Math.abs(newZ) > 8 || 
-        (finalY <= groundY && Math.abs(finalVy) < 0.005 && Math.abs(newVx) < 0.01 && Math.abs(newVz) < 0.01)) {
+    // Z координата не проверяется, так как она фиксирована
+    if (finalY < groundY - 3 || Math.abs(newX) > 8 || 
+        (finalY <= groundY && Math.abs(finalVy) < 0.005 && Math.abs(newVx) < 0.01)) {
       onRemove();
     }
   });

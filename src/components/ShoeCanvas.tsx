@@ -33,12 +33,13 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
     const throwPower = (0.5 + Math.random() * 0.5) / 2; // От 0.25 до 0.5 (было 0.5-1.0)
     const angleX = (Math.random() - 0.5) * 0.8; // Угол по X
     const angleY = 0.4 + Math.random() * 0.3; // Угол вверх (увеличен)
-    const angleZ = (Math.random() - 0.5) * 0.3; // Небольшой угол по Z
+    // Z скорость всегда 0, так как глубина фиксирована
+    const angleZ = 0;
     
     const velocity: [number, number, number] = [
       angleX * throwPower,
       angleY * throwPower,
-      angleZ * throwPower
+      angleZ // Всегда 0
     ];
     
     // Случайная угловая скорость (вращение)
