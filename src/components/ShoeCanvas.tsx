@@ -56,7 +56,11 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
       angularVelocity
     };
     
-    setShoes(prev => [...prev, newShoe]);
+    console.log("Creating shoe:", { startPosition: [randomX, startY, startZ], velocity, angularVelocity });
+    setShoes(prev => {
+      console.log("Total shoes after adding:", prev.length + 1);
+      return [...prev, newShoe];
+    });
   }, []);
 
   const removeShoe = useCallback((id: number) => {
@@ -80,12 +84,13 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
       }}
     >
       <Canvas
-        camera={{ position: [0, 1, 10], fov: 75 }}
+        camera={{ position: [0, 0, 8], fov: 75 }}
         style={{ width: '100%', height: '100%' }}
         gl={{ alpha: true, antialias: true }}
         onCreated={({ gl, scene, camera }) => {
           console.log("ShoeCanvas created, shoes count:", shoes.length);
           console.log("Camera position:", camera.position);
+          camera.lookAt(0, 0, 0);
         }}
       >
         <ambientLight intensity={0.8} />
