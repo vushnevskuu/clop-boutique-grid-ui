@@ -117,7 +117,7 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
     ]);
 
     // Применяем к группе
-    groupRef.current.position.set(newX, finalY, newZ);
+    groupRef.current.position.set(newX, finalY, fixedZ);
     groupRef.current.rotation.set(rotation[0], rotation[1], rotation[2]);
 
     // Удаляем если упал слишком низко или далеко, или если скорость очень мала и он на земле
