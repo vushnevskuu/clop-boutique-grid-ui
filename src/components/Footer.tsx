@@ -7,6 +7,7 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
   const footerRef = useRef<HTMLElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const createShoeRef = useRef<(() => void) | null>(null);
+  const autoShoeLaunchedRef = useRef(false); // Флаг для отслеживания автоматического запуска
 
   // Memoized handlers to prevent recreation
   const handleWheel = useCallback((e: WheelEvent) => {
@@ -42,6 +43,39 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
       });
     }
   }, [onShoeCreate]);
+
+  // Автоматический запуск ботинка при доскролле до футера
+  useEffect(() => {
+    const footer = footerRef.current;
+    if (!footer || !createShoeRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          // Если футер виден и автоматический ботинок еще не был запущен
+          if (entry.isIntersecting && !autoShoeLaunchedRef.current && createShoeRef.current) {
+            autoShoeLaunchedRef.current = true;
+            // Небольшая задержка для более плавного эффекта
+            setTimeout(() => {
+              if (createShoeRef.current) {
+                createShoeRef.current();
+              }
+            }, 300);
+          }
+        });
+      },
+      {
+        threshold: 0.3, // Футер должен быть виден минимум на 30%
+        rootMargin: '0px'
+      }
+    );
+
+    observer.observe(footer);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [createShoeRef.current]);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!footerRef.current) return;
