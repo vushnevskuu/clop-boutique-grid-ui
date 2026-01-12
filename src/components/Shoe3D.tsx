@@ -68,7 +68,7 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
   const isLandedRef = useRef(false);
   
   const gravity = -0.012;
-  const damping = 0.995; // Сопротивление воздуха
+  const damping = 0.997; // Сопротивление воздуха (увеличено для более медленного движения)
   const bounceDamping = 0.5; // Затухание при отскоке
   const groundY = -5; // Уровень "земли" (за футером, ниже)
   const maxHeight = 10; // Максимальная высота полета
