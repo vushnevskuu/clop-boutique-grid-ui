@@ -93,6 +93,7 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
   }, []);
 
   const handleMouseEnter = useCallback(() => {
+    if (isMobile) return; // На мобильных не используем hover
     setIsHovered(true);
     const now = Date.now();
     
@@ -101,12 +102,24 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
       setLastHoverTime(now);
       createShoeRef.current(false); // Остальные ботинки вылетают из случайных позиций
     }
-  }, [lastHoverTime]);
+  }, [lastHoverTime, isMobile]);
 
   const handleMouseLeave = useCallback(() => {
+    if (isMobile) return; // На мобильных не используем hover
     setMousePosition({ x: 0, y: 0 });
     setIsHovered(false);
-  }, []);
+  }, [isMobile]);
+
+  const handleClick = useCallback(() => {
+    if (!isMobile) return; // Только на мобильных
+    const now = Date.now();
+    
+    // Создаём ботинок при клике на футер (с задержкой между выбросами)
+    if (now - lastHoverTime > 300 && createShoeRef.current) {
+      setLastHoverTime(now);
+      createShoeRef.current(false); // Ботинки вылетают из случайных позиций
+    }
+  }, [lastHoverTime, isMobile]);
 
 
   // Prevent overscroll/bounce effect when scrolled to footer
@@ -123,19 +136,27 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
   useEffect(() => {
     const footer = footerRef.current;
     if (footer) {
-      footer.addEventListener('mousemove', handleMouseMove);
-      footer.addEventListener('mouseenter', handleMouseEnter);
-      footer.addEventListener('mouseleave', handleMouseLeave);
+      if (!isMobile) {
+        // На десктопе используем hover события
+        footer.addEventListener('mousemove', handleMouseMove);
+        footer.addEventListener('mouseenter', handleMouseEnter);
+        footer.addEventListener('mouseleave', handleMouseLeave);
+      }
+      // На мобильных используем клик
+      footer.addEventListener('click', handleClick);
     }
 
     return () => {
       if (footer) {
-        footer.removeEventListener('mousemove', handleMouseMove);
-        footer.removeEventListener('mouseenter', handleMouseEnter);
-        footer.removeEventListener('mouseleave', handleMouseLeave);
+        if (!isMobile) {
+          footer.removeEventListener('mousemove', handleMouseMove);
+          footer.removeEventListener('mouseenter', handleMouseEnter);
+          footer.removeEventListener('mouseleave', handleMouseLeave);
+        }
+        footer.removeEventListener('click', handleClick);
       }
     };
-  }, [handleMouseMove, handleMouseEnter, handleMouseLeave]);
+  }, [handleMouseMove, handleMouseEnter, handleMouseLeave, handleClick, isMobile]);
 
   // Memoize 3D transform calculations
   const transform = useMemo(() => {
@@ -178,11 +199,12 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
         zIndex: 25,
         overflow: 'hidden',
         width: '100%',
-        touchAction: 'none',
+        touchAction: isMobile ? 'auto' : 'none',
         overscrollBehavior: 'none',
         backgroundColor: 'transparent',
         background: 'none',
         minHeight: isMobile ? '200px' : 'auto',
+        cursor: isMobile ? 'pointer' : 'default',
       }}
     >
       <div
@@ -191,6 +213,9 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
           width: '100%',
           height: '100%',
           overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
         <img 
@@ -206,14 +231,13 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
             maxHeight: isMobile ? 'none' : 'none',
             margin: 0, 
             marginLeft: isMobile ? '-25%' : 0,
-            marginTop: isMobile ? '0' : 0,
             padding: 0,
             objectFit: isMobile ? 'cover' : 'contain',
             objectPosition: 'center center',
-            transform: transform,
+            transform: isMobile ? 'none' : transform, // На мобильных убираем 3D трансформации
             transformOrigin: 'center center',
-            transition: 'transform 0.1s ease-out',
-            willChange: 'transform',
+            transition: isMobile ? 'none' : 'transform 0.1s ease-out',
+            willChange: isMobile ? 'auto' : 'transform',
             zIndex: 26,
           }}
           loading="lazy"
