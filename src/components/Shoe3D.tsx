@@ -34,9 +34,9 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
       cloned.position.sub(center);
       const size = box.getSize(new THREE.Vector3());
       const maxDim = Math.max(size.x, size.y, size.z);
-      const scaleValue = maxDim > 0 ? 1.5 / maxDim : 3; // Масштаб для ботинка (увеличен в 3 раза)
+      const scaleValue = maxDim > 0 ? 2.5 / maxDim : 5; // Масштаб для ботинка (увеличен для видимости)
       
-      console.log("Shoe model loaded:", { size, maxDim, scaleValue });
+      console.log("Shoe model loaded:", { size, maxDim, scaleValue, center: box.getCenter(new THREE.Vector3()) });
       
       return { clonedScene: cloned, scale: scaleValue };
     } catch (error) {
@@ -170,6 +170,11 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
     );
   }
 
+  // Инициализация счетчика кадров для логирования
+  if (groupRef.current && !groupRef.current.userData.frameCount) {
+    groupRef.current.userData.frameCount = 0;
+  }
+  
   return (
     <group ref={groupRef} position={startPosition} scale={scale}>
       <primitive object={clonedScene} />
