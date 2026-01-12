@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
+import { useIsMobile } from "@/hooks/use-mobile";
 import * as THREE from "three";
 
 interface Shoe3DProps {
@@ -13,6 +14,7 @@ interface Shoe3DProps {
 const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DProps) => {
   const groupRef = useRef<THREE.Group>(null);
   const { scene } = useGLTF("/shoe.glb", true);
+  const isMobile = useIsMobile();
   
   // Клонируем и центрируем модель
   const { clonedScene, scale } = useMemo(() => {
@@ -34,16 +36,18 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
       cloned.position.sub(center);
       const size = box.getSize(new THREE.Vector3());
       const maxDim = Math.max(size.x, size.y, size.z);
-      const scaleValue = maxDim > 0 ? 1.5 / maxDim : 3; // Масштаб для ботинка (увеличен в 3 раза)
+      // На мобильных уменьшаем масштаб в 2 раза
+      const baseScale = maxDim > 0 ? 1.5 / maxDim : 3;
+      const scaleValue = isMobile ? baseScale * 0.5 : baseScale; // Масштаб для ботинка (меньше на мобильных)
       
-      console.log("Shoe model loaded:", { size, maxDim, scaleValue });
+      console.log("Shoe model loaded:", { size, maxDim, scaleValue, isMobile });
       
       return { clonedScene: cloned, scale: scaleValue };
     } catch (error) {
       console.error("Error processing shoe model:", error);
       return { clonedScene: new THREE.Group(), scale: 1 };
     }
-  }, [scene]);
+  }, [scene, isMobile]);
 
   // Очистка ресурсов
   useEffect(() => {

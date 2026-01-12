@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo, useCallback, memo } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () => void) => void) => void }) => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -8,6 +9,7 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
   const imgRef = useRef<HTMLImageElement>(null);
   const createShoeRef = useRef<((fromCenter?: boolean) => void) | null>(null);
   const autoShoeLaunchedRef = useRef(false); // Флаг для отслеживания автоматического запуска
+  const isMobile = useIsMobile();
 
   // Memoized handlers to prevent recreation
   const handleWheel = useCallback((e: WheelEvent) => {
@@ -147,13 +149,20 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
 
   const handleImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
     const img = e.currentTarget;
-    if (footerRef.current && img.naturalHeight) {
+    if (footerRef.current && img.naturalHeight && !isMobile) {
+      // На мобильных не устанавливаем фиксированную высоту, так как используем cover
       const aspectRatio = img.naturalWidth / img.naturalHeight;
       const containerWidth = footerRef.current.offsetWidth;
       const calculatedHeight = containerWidth / aspectRatio;
       footerRef.current.style.height = `${calculatedHeight}px`;
+    } else if (footerRef.current && isMobile) {
+      // На мобильных устанавливаем высоту для увеличенного изображения
+      const aspectRatio = img.naturalWidth / img.naturalHeight;
+      const containerWidth = footerRef.current.offsetWidth;
+      const calculatedHeight = (containerWidth * 1.5) / aspectRatio;
+      footerRef.current.style.height = `${calculatedHeight}px`;
     }
-  }, []);
+  }, [isMobile]);
 
   return (
     <footer 
@@ -177,15 +186,18 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
         ref={imgRef}
         src="/footer.webp" 
         alt="Footer" 
-        className="w-full h-auto object-cover"
+        className="w-full h-auto"
         style={{ 
           display: 'block', 
           position: 'relative',
-          width: '100%', 
-          height: 'auto', 
+          width: isMobile ? '150%' : '100%', 
+          height: isMobile ? '150%' : 'auto', 
           margin: 0, 
+          marginLeft: isMobile ? '-25%' : 0,
+          marginTop: isMobile ? '-25%' : 0,
           padding: 0,
-          objectFit: 'contain',
+          objectFit: isMobile ? 'cover' : 'contain',
+          objectPosition: 'center center',
           transform: transform,
           transformOrigin: 'center center',
           transition: 'transform 0.1s ease-out',
