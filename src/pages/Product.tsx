@@ -347,7 +347,7 @@ const Product = memo(() => {
       {/* Image Modal */}
       {selectedImage && (
         <div
-          className="fixed inset-0 z-[100] bg-black bg-opacity-90 flex items-center justify-center"
+          className="fixed inset-0 z-[100] bg-black bg-opacity-90 flex items-center justify-center p-4"
           onClick={handleCloseModal}
           style={{ cursor: 'pointer', pointerEvents: 'auto' }}
         >
@@ -360,7 +360,7 @@ const Product = memo(() => {
           />
           <button
             onClick={handleCloseModal}
-            className="absolute top-4 right-4 text-white text-4xl font-bold z-[101]"
+            className="absolute top-2 right-2 md:top-4 md:right-4 text-white text-3xl md:text-4xl font-bold z-[101] p-2"
             style={{ cursor: 'pointer', pointerEvents: 'auto' }}
           >
             ×
