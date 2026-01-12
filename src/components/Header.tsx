@@ -1,6 +1,6 @@
 import { Menu, X } from "lucide-react";
 import { useState, useEffect, useMemo, useCallback, memo } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 
 const Header = memo(() => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -61,13 +61,14 @@ const Header = memo(() => {
             transition: 'opacity 0.3s ease-out'
           }}
         >
-          <a 
-            href="#shop" 
+          <Link 
+            to={isProductPage ? "/#shop" : "#shop"}
             className="px-4 py-2 uppercase font-normal transition-all duration-200"
             style={{ 
               fontSize: '14px', 
               backgroundColor: '#f3f3f3', 
-              color: '#000000'
+              color: '#000000',
+              textDecoration: 'none'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = '#000000';
@@ -79,7 +80,7 @@ const Header = memo(() => {
             }}
           >
             Catalog
-          </a>
+          </Link>
         </nav>
 
         <button
@@ -96,13 +97,14 @@ const Header = memo(() => {
 
       {isMenuOpen && (
         <nav className="md:hidden bg-transparent">
-          <a 
-            href="#shop" 
+          <Link 
+            to={isProductPage ? "/#shop" : "#shop"}
             className="block px-6 py-4 uppercase font-normal transition-all duration-200"
             style={{ 
               fontSize: '14px', 
               backgroundColor: '#f3f3f3', 
-              color: '#000000'
+              color: '#000000',
+              textDecoration: 'none'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = '#000000';
@@ -112,9 +114,10 @@ const Header = memo(() => {
               e.currentTarget.style.backgroundColor = '#f3f3f3';
               e.currentTarget.style.color = '#000000';
             }}
+            onClick={() => setIsMenuOpen(false)}
           >
             Catalog
-          </a>
+          </Link>
         </nav>
       )}
     </header>
