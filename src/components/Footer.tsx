@@ -235,7 +235,7 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
             padding: 0,
             objectFit: isMobile ? 'cover' : 'contain',
             objectPosition: 'center center',
-            transform: isMobile ? 'translateX(-16.666%)' : transform, // Центрируем увеличенное изображение: -25% от 150% = -16.666%
+            transform: isMobile ? 'translateX(-25%)' : transform, // Центрируем увеличенное изображение (150% ширины)
             transformOrigin: 'center center',
             transition: isMobile ? 'none' : 'transform 0.1s ease-out',
             willChange: isMobile ? 'auto' : 'transform',
