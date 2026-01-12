@@ -170,11 +170,6 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
     );
   }
 
-  // Инициализация счетчика кадров для логирования
-  if (groupRef.current && !groupRef.current.userData.frameCount) {
-    groupRef.current.userData.frameCount = 0;
-  }
-  
   return (
     <group ref={groupRef} position={startPosition} scale={scale}>
       <primitive object={clonedScene} />
