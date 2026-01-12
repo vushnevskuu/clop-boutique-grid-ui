@@ -107,7 +107,7 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
     const rotateY = -mousePosition.x * 0.1;
     const translateZ = (Math.abs(mousePosition.x) * 5 + Math.abs(mousePosition.y) * 5) * 0.05;
     const isHovered = mousePosition.x !== 0 || mousePosition.y !== 0;
-    const scale = isHovered ? 1.05 : 1;
+    const scale = isHovered ? 1.005 : 1;
     return `perspective(1000px) scale(${scale}) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(${translateZ}px)`;
   }, [mousePosition.x, mousePosition.y]);
 
