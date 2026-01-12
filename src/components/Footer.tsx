@@ -6,7 +6,7 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
   const [lastHoverTime, setLastHoverTime] = useState(0);
   const footerRef = useRef<HTMLElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
-  const createShoeRef = useRef<(() => void) | null>(null);
+  const createShoeRef = useRef<((fromCenter?: boolean) => void) | null>(null);
   const autoShoeLaunchedRef = useRef(false); // Флаг для отслеживания автоматического запуска
 
   // Memoized handlers to prevent recreation
@@ -38,7 +38,7 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
 
   useEffect(() => {
     if (onShoeCreate) {
-      onShoeCreate((createShoe: () => void) => {
+      onShoeCreate((createShoe: (fromCenter?: boolean) => void) => {
         createShoeRef.current = createShoe;
       });
     }
@@ -58,7 +58,7 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
             // Небольшая задержка для более плавного эффекта
             setTimeout(() => {
               if (createShoeRef.current) {
-                createShoeRef.current();
+                createShoeRef.current(true); // Первый ботинок вылетает из центра
               }
             }, 300);
           }
@@ -97,7 +97,7 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
     // Создаём ботинок при входе мыши на футер (с задержкой между выбросами)
     if (now - lastHoverTime > 300 && createShoeRef.current) {
       setLastHoverTime(now);
-      createShoeRef.current();
+      createShoeRef.current(false); // Остальные ботинки вылетают из случайных позиций
     }
   }, [lastHoverTime]);
 

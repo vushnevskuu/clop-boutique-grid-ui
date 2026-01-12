@@ -16,16 +16,18 @@ interface ShoeInstance {
 }
 
 interface ShoeCanvasProps {
-  onShoeCreate: (createShoe: () => void) => void;
+  onShoeCreate: (createShoe: (fromCenter?: boolean) => void) => void;
 }
 
 const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
   const [shoes, setShoes] = useState<ShoeInstance[]>([]);
   const shoeIdCounter = useRef(0);
 
-  const createShoe = useCallback(() => {
-    // Случайная позиция вылета снизу футера
-    const randomX = (Math.random() - 0.5) * 16; // От -8 до 8 (как при удалении)
+  const createShoe = useCallback((fromCenter: boolean = false) => {
+    // Позиция вылета снизу футера
+    // Если fromCenter === true, вылетает из центра (X = 0)
+    // Иначе - случайная позиция
+    const randomX = fromCenter ? 0 : (Math.random() - 0.5) * 16; // От -8 до 8 (как при удалении) или 0 для центра
     const startZ = 4; // Фиксированная глубина
     const startY = -2; // Начальная позиция (поднята выше)
     
