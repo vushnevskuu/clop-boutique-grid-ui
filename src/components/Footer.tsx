@@ -149,18 +149,20 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
 
   const handleImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
     const img = e.currentTarget;
-    if (footerRef.current && img.naturalHeight && !isMobile) {
-      // На мобильных не устанавливаем фиксированную высоту, так как используем cover
+    if (footerRef.current && img.naturalHeight) {
       const aspectRatio = img.naturalWidth / img.naturalHeight;
       const containerWidth = footerRef.current.offsetWidth;
-      const calculatedHeight = containerWidth / aspectRatio;
-      footerRef.current.style.height = `${calculatedHeight}px`;
-    } else if (footerRef.current && isMobile) {
-      // На мобильных устанавливаем высоту для увеличенного изображения
-      const aspectRatio = img.naturalWidth / img.naturalHeight;
-      const containerWidth = footerRef.current.offsetWidth;
-      const calculatedHeight = (containerWidth * 1.5) / aspectRatio;
-      footerRef.current.style.height = `${calculatedHeight}px`;
+      
+      if (isMobile) {
+        // На мобильных: изображение увеличено до 150%, высота рассчитывается с учетом этого
+        // Но видимая часть остается в пределах контейнера благодаря overflow: hidden
+        const calculatedHeight = containerWidth / aspectRatio;
+        footerRef.current.style.height = `${calculatedHeight}px`;
+      } else {
+        // На десктопе: обычная высота
+        const calculatedHeight = containerWidth / aspectRatio;
+        footerRef.current.style.height = `${calculatedHeight}px`;
+      }
     }
   }, [isMobile]);
 
@@ -180,38 +182,49 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
         overscrollBehavior: 'none',
         backgroundColor: 'transparent',
         background: 'none',
+        minHeight: isMobile ? '200px' : 'auto',
       }}
     >
-      <img 
-        ref={imgRef}
-        src="/footer.webp" 
-        alt="Footer" 
-        className="w-full h-auto"
-        style={{ 
-          display: 'block', 
+      <div
+        style={{
           position: 'relative',
-          width: isMobile ? '150%' : '100%', 
-          height: isMobile ? '150%' : 'auto', 
-          margin: 0, 
-          marginLeft: isMobile ? '-25%' : 0,
-          marginTop: isMobile ? '-25%' : 0,
-          padding: 0,
-          objectFit: isMobile ? 'cover' : 'contain',
-          objectPosition: 'center center',
-          transform: transform,
-          transformOrigin: 'center center',
-          transition: 'transform 0.1s ease-out',
-          willChange: 'transform',
-          zIndex: 26,
+          width: '100%',
+          height: '100%',
+          overflow: 'hidden',
         }}
-        loading="lazy"
-        decoding="async"
-        fetchPriority="low"
-        onError={(e) => {
-          console.error('Footer image failed to load:', e);
-        }}
-        onLoad={handleImageLoad}
-      />
+      >
+        <img 
+          ref={imgRef}
+          src="/footer.webp" 
+          alt="Footer" 
+          className="w-full h-auto"
+          style={{ 
+            display: 'block', 
+            position: 'relative',
+            width: isMobile ? '150%' : '100%', 
+            height: isMobile ? 'auto' : 'auto', 
+            maxHeight: isMobile ? 'none' : 'none',
+            margin: 0, 
+            marginLeft: isMobile ? '-25%' : 0,
+            marginTop: isMobile ? '0' : 0,
+            padding: 0,
+            objectFit: isMobile ? 'cover' : 'contain',
+            objectPosition: 'center center',
+            transform: transform,
+            transformOrigin: 'center center',
+            transition: 'transform 0.1s ease-out',
+            willChange: 'transform',
+            zIndex: 26,
+          }}
+          loading="lazy"
+          decoding="async"
+          fetchPriority="low"
+          onError={(e) => {
+            console.error('Footer image failed to load:', e);
+          }}
+          onLoad={handleImageLoad}
+        />
+      </div>
     </footer>
   );
 });
