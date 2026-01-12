@@ -245,8 +245,8 @@ const Product = memo(() => {
               </div>
             </div>
 
-            {/* Product Info Panel - 750px width */}
-            <div className="flex-shrink-0 sticky top-24" style={{ width: '750px', marginLeft: '20px', alignSelf: 'flex-start' }}>
+            {/* Product Info Panel - 300px width */}
+            <div className="flex-shrink-0 sticky top-24" style={{ width: '300px', marginLeft: '20px', alignSelf: 'flex-start' }}>
               <div className="space-y-6">
                 <h1 className="font-bold uppercase tracking-tighter" style={{ fontSize: '32px' }}>
                   {product.title}
