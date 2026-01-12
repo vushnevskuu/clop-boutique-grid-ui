@@ -1,4 +1,5 @@
-import { memo } from "react";
+import { memo, useState, useEffect, useCallback, useRef } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import ProductCard from "./ProductCard";
 
 import product1 from "@/assets/product-1.jpg";
@@ -192,6 +193,60 @@ const products = [
 ];
 
 const ProductGrid = memo(() => {
+  const isMobile = useIsMobile();
+  const [displayedProducts, setDisplayedProducts] = useState(products);
+  const [isLoading, setIsLoading] = useState(false);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const pageRef = useRef(1);
+
+  // Функция для загрузки дополнительных товаров
+  const loadMoreProducts = useCallback(() => {
+    if (isLoading) return;
+    
+    setIsLoading(true);
+    
+    // Симулируем задержку загрузки
+    setTimeout(() => {
+      // Генерируем больше товаров, повторяя существующие с новыми ID
+      const newProducts = products.map((product, index) => ({
+        ...product,
+        id: products.length * pageRef.current + index + 1,
+      }));
+      
+      setDisplayedProducts(prev => [...prev, ...newProducts]);
+      pageRef.current += 1;
+      setIsLoading(false);
+    }, 500);
+  }, [isLoading]);
+
+  // Настройка Intersection Observer для бесконечного скролла на мобильных
+  useEffect(() => {
+    if (!isMobile || !loadMoreRef.current) return;
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        const target = entries[0];
+        if (target.isIntersecting && !isLoading) {
+          loadMoreProducts();
+        }
+      },
+      {
+        root: null,
+        rootMargin: '200px', // Начинаем загрузку за 200px до конца
+        threshold: 0.1,
+      }
+    );
+
+    observerRef.current.observe(loadMoreRef.current);
+
+    return () => {
+      if (observerRef.current && loadMoreRef.current) {
+        observerRef.current.unobserve(loadMoreRef.current);
+      }
+    };
+  }, [isMobile, isLoading, loadMoreProducts]);
+
   return (
     <section 
       id="shop" 
@@ -201,7 +256,7 @@ const ProductGrid = memo(() => {
       }}
     >
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-5">
-        {products.map((product) => (
+        {displayedProducts.map((product) => (
           <ProductCard
             key={product.id}
             id={product.id}
@@ -214,6 +269,19 @@ const ProductGrid = memo(() => {
           />
         ))}
       </div>
+      
+      {/* Элемент-триггер для загрузки новых товаров на мобильных */}
+      {isMobile && (
+        <div 
+          ref={loadMoreRef}
+          className="w-full h-20 flex items-center justify-center"
+          style={{ minHeight: '80px' }}
+        >
+          {isLoading && (
+            <div className="text-sm text-gray-500">Загрузка...</div>
+          )}
+        </div>
+      )}
     </section>
   );
 });

@@ -1,5 +1,6 @@
 import { memo, useRef, useCallback, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import ProductGrid from "@/components/ProductGrid";
@@ -9,6 +10,7 @@ import ShoeCanvas from "@/components/ShoeCanvas";
 const Index = memo(() => {
   const createShoeRef = useRef<(() => void) | null>(null);
   const location = useLocation();
+  const isMobile = useIsMobile();
 
   const handleShoeCreate = useCallback((createFn: () => void) => {
     createShoeRef.current = createFn;
@@ -41,7 +43,7 @@ const Index = memo(() => {
         <ProductGrid />
       </main>
       <ShoeCanvas onShoeCreate={handleShoeCreate} />
-      <Footer onShoeCreate={handleFooterShoeCreate} />
+      {!isMobile && <Footer onShoeCreate={handleFooterShoeCreate} />}
     </div>
   );
 });
