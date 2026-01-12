@@ -195,14 +195,12 @@ const ProductGrid = memo(() => {
   return (
     <section 
       id="shop" 
-      className="scroll-mt-20 relative z-30" 
+      className="scroll-mt-20 relative z-30 px-4 md:px-8 lg:px-[30px] pb-0" 
       style={{ 
-        padding: '30px', 
-        paddingBottom: '0', 
         backgroundColor: 'transparent'
       }}
     >
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6" style={{ rowGap: '20px', columnGap: '20px' }}>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-5">
         {products.map((product) => (
           <ProductCard
             key={product.id}

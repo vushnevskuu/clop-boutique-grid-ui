@@ -65,19 +65,16 @@ const ProductCard = memo(({ id, image, hoverImage, title, price, size, brand }: 
           message us
         </button>
       </div>
-      <div className="p-4" style={{ backgroundColor: '#ffffff' }}>
+      <div className="p-3 md:p-4 bg-white">
         <div className="flex flex-col gap-1">
           <h3 
-            className="font-normal uppercase tracking-wide" 
-            style={{ 
-              fontSize: '12px'
-            }}
+            className="font-normal uppercase tracking-wide text-[10px] md:text-xs break-words" 
           >
             {title}
           </h3>
-          {brand && <p className="text-muted-foreground lowercase" style={{ fontSize: '14px' }}>{brand}</p>}
-          <div className="mt-2">
-            <p className="font-bold" style={{ fontSize: '14px' }}>{price}</p>
+          {brand && <p className="text-muted-foreground lowercase text-xs md:text-sm break-words">{brand}</p>}
+          <div className="mt-1 md:mt-2">
+            <p className="font-bold text-xs md:text-sm break-words">{price}</p>
           </div>
         </div>
       </div>

@@ -118,12 +118,12 @@ const Product = memo(() => {
     return (
       <div className="min-h-screen">
         <Header />
-        <main className="flex items-center justify-center min-h-screen">
+        <main className="flex items-center justify-center min-h-screen px-4">
           <div className="text-center">
-            <h1 className="font-bold mb-4" style={{ fontSize: '32px' }}>Product not found</h1>
+            <h1 className="font-bold mb-4 break-words" style={{ fontSize: 'clamp(20px, 5vw, 32px)' }}>Product not found</h1>
             <button
               onClick={handleBackClick}
-              className="btn-brutal"
+              className="btn-brutal px-4 py-2 text-sm md:text-base"
             >
               Back to catalog
             </button>
@@ -176,13 +176,13 @@ const Product = memo(() => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="pb-12" style={{ paddingTop: '60px' }}>
-        <div style={{ marginLeft: '30px', marginRight: '30px' }}>
-          <div className="flex gap-4 mb-20" style={{ marginTop: '60px' }}>
+      <main className="pb-12 pt-16 md:pt-[60px]">
+        <div className="px-4 md:px-8 lg:px-[30px]">
+          <div className="flex flex-col md:flex-row gap-4 mb-12 md:mb-20 mt-5 md:mt-[60px]">
             {/* Thumbnails and Images Gallery - весь блок sticky как описание */}
-            <div className="flex gap-4 flex-1 sticky top-24" style={{ alignSelf: 'flex-start' }}>
-              {/* Product Info Panel - только миниатюры слева */}
-              <div className="flex-shrink-0" style={{ width: `${logoWidth}px` }}>
+            <div className="flex flex-col md:flex-row gap-4 flex-1 md:sticky md:top-24" style={{ alignSelf: 'flex-start' }}>
+              {/* Product Info Panel - только миниатюры слева - скрыто на мобильных */}
+              <div className="hidden md:block flex-shrink-0" style={{ width: `${logoWidth}px` }}>
                 <div className="sticky top-24">
                   {/* Thumbnails */}
                   <div className="flex flex-col gap-4">
@@ -217,7 +217,7 @@ const Product = memo(() => {
               </div>
 
               {/* Images Gallery - scrollable */}
-              <div className="flex-1">
+              <div className="flex-1 w-full">
                 <div className="flex flex-col">
                   {productImages.map((img, index) => (
                     <div 
@@ -245,82 +245,71 @@ const Product = memo(() => {
               </div>
             </div>
 
-            {/* Product Info Panel - 300px width */}
-            <div className="flex-shrink-0 sticky top-24" style={{ width: '300px', marginLeft: '20px', alignSelf: 'flex-start' }}>
-              <div className="space-y-6">
-                <h1 className="font-bold uppercase tracking-tighter" style={{ fontSize: '32px' }}>
+            {/* Product Info Panel - адаптивная ширина */}
+            <div className="flex-shrink-0 w-full md:w-[300px] md:sticky md:top-24 md:ml-5 self-start">
+              <div className="space-y-4 md:space-y-6">
+                <h1 className="font-bold uppercase tracking-tighter break-words text-[20px] md:text-[32px] leading-tight">
                   {product.title}
                 </h1>
                 {product.brand && (
-                  <p className="text-muted-foreground lowercase tracking-widest" style={{ fontSize: '14px' }}>
+                  <p className="text-muted-foreground lowercase tracking-widest break-words text-xs md:text-sm">
                     {product.brand}
                   </p>
                 )}
                 
                 {/* Size Table */}
-                <div 
-                  style={{ 
-                    color: '#000000',
-                    padding: '0',
-                    margin: '0',
-                    marginTop: '24px'
-                  }}
-                >
-                  <table className="w-full" style={{ fontSize: '14px', borderCollapse: 'collapse' }}>
-                    <thead>
-                      <tr>
-                        <th className="text-left pb-2" style={{ fontWeight: 'normal', border: '1px solid #f3f3f3', padding: '8px' }}>Size</th>
-                        <th className="text-left pb-2" style={{ fontWeight: 'normal', border: '1px solid #f3f3f3', padding: '8px' }}>Chest</th>
-                        <th className="text-left pb-2" style={{ fontWeight: 'normal', border: '1px solid #f3f3f3', padding: '8px' }}>Waist</th>
-                        <th className="text-left pb-2" style={{ fontWeight: 'normal', border: '1px solid #f3f3f3', padding: '8px' }}>Length</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>XS</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>86-90</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>66-70</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>58</td>
-                      </tr>
-                      <tr>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>S</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>90-94</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>70-74</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>60</td>
-                      </tr>
-                      <tr>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>M</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>94-98</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>74-78</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>62</td>
-                      </tr>
-                      <tr>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>L</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>98-102</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>78-82</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>64</td>
-                      </tr>
-                      <tr>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>XL</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>102-106</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>82-86</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>66</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                <div className="text-black p-0 m-0 mt-4 md:mt-6">
+                  <div className="overflow-x-auto -mx-4 md:mx-0 px-4 md:px-0">
+                    <table className="w-full min-w-[280px] text-[11px] md:text-sm" style={{ borderCollapse: 'collapse' }}>
+                      <thead>
+                        <tr>
+                          <th className="text-left pb-2 whitespace-nowrap font-normal border border-[#f3f3f3] p-1.5 md:p-2">Size</th>
+                          <th className="text-left pb-2 whitespace-nowrap font-normal border border-[#f3f3f3] p-1.5 md:p-2">Chest</th>
+                          <th className="text-left pb-2 whitespace-nowrap font-normal border border-[#f3f3f3] p-1.5 md:p-2">Waist</th>
+                          <th className="text-left pb-2 whitespace-nowrap font-normal border border-[#f3f3f3] p-1.5 md:p-2">Length</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">XS</td>
+                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">86-90</td>
+                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">66-70</td>
+                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">58</td>
+                        </tr>
+                        <tr>
+                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">S</td>
+                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">90-94</td>
+                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">70-74</td>
+                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">60</td>
+                        </tr>
+                        <tr>
+                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">M</td>
+                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">94-98</td>
+                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">74-78</td>
+                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">62</td>
+                        </tr>
+                        <tr>
+                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">L</td>
+                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">98-102</td>
+                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">78-82</td>
+                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">64</td>
+                        </tr>
+                        <tr>
+                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">XL</td>
+                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">102-106</td>
+                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">82-86</td>
+                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">66</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
                 
-                <p className="font-bold" style={{ fontSize: '14px' }}>{product.price}</p>
+                <p className="font-bold break-words text-xs md:text-sm">{product.price}</p>
 
-                <div className="pt-8">
+                <div className="pt-4 md:pt-8">
                   <button 
-                    className="px-8 py-4 w-full transition-all duration-200"
-                    style={{ 
-                      backgroundColor: '#000000', 
-                      color: '#ffffff',
-                      fontSize: '14px',
-                      fontWeight: 'normal'
-                    }}
+                    className="px-4 md:px-8 py-3 md:py-4 w-full transition-all duration-200 bg-black text-white text-xs md:text-sm font-normal"
                   >
                     message us
                   </button>
@@ -331,13 +320,13 @@ const Product = memo(() => {
 
           {/* You may also like section */}
           {similarProducts.length > 0 && (
-            <section className="mt-20">
-              <h2 className="font-bold uppercase mb-8" style={{ fontSize: '14px' }}>
+            <section className="mt-12 md:mt-20">
+              <h2 className="font-bold uppercase mb-4 md:mb-8 break-words" style={{ fontSize: 'clamp(12px, 3vw, 14px)' }}>
                 You may also like
               </h2>
-              <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-10" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${logoWidth}px, 1fr))` }}>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-10 gap-4 md:gap-6">
                 {similarProducts.map((item) => (
-                  <Link key={item.id} to={`/product/${item.id}`} className="block" style={{ width: `${logoWidth}px` }}>
+                  <Link key={item.id} to={`/product/${item.id}`} className="block w-full">
                     <div className="aspect-[4/5] overflow-hidden bg-gray-100">
                       <img
                         src={item.image}

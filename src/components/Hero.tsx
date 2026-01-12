@@ -139,19 +139,18 @@ const Hero = () => {
 
         {/* Text - appears after logo starts disappearing */}
         <div
-          className="absolute inset-0 flex items-center justify-center px-6"
+          className="absolute inset-0 flex items-center justify-center px-4 md:px-6"
           style={{
             opacity: textOpacity,
             transition: "opacity 0.3s ease-out"
           }}
         >
-          <div className="max-w-4xl text-left px-6">
+          <div className="max-w-4xl text-left px-4 md:px-6">
             <p 
+              className="text-xs md:text-sm leading-[110%] text-white text-left break-words"
               style={{
-                fontSize: '14px',
-                lineHeight: '110%',
-                color: 'white',
-                textAlign: 'left'
+                fontSize: 'clamp(11px, 2.5vw, 14px)',
+                lineHeight: '110%'
               }}
             >
               We once thought about launching our own brand,
