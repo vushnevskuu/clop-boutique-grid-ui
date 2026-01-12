@@ -42,7 +42,7 @@ const Index = memo(() => {
         <Hero />
         <ProductGrid />
       </main>
-      <ShoeCanvas onShoeCreate={handleShoeCreate} />
+      {!isMobile && <ShoeCanvas onShoeCreate={handleShoeCreate} />}
       {!isMobile && <Footer onShoeCreate={handleFooterShoeCreate} />}
     </div>
   );
