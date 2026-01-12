@@ -24,10 +24,10 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
   const shoeIdCounter = useRef(0);
 
   const createShoe = useCallback(() => {
-    // Случайная позиция вылета снизу футера (координаты равны приземлению)
+    // Случайная позиция вылета снизу футера
     const randomX = (Math.random() - 0.5) * 16; // От -8 до 8 (как при удалении)
     const startZ = 4; // Фиксированная глубина
-    const startY = -4; // Начальная позиция = groundY (координата приземления)
+    const startY = -2; // Начальная позиция (поднята выше)
     
     // Случайная скорость вылета (как будто кинули) - увеличена для более высокого полета
     const throwPower = (0.6 + Math.random() * 0.4) / 2; // От 0.3 до 0.5 (увеличена для высоты)
@@ -93,9 +93,11 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
           camera.lookAt(0, 0, 0);
         }}
       >
-        <ambientLight intensity={0.8} />
-        <directionalLight position={[5, 5, 5]} intensity={1} />
-        <directionalLight position={[-5, 5, 5]} intensity={0.8} />
+        <ambientLight intensity={1.2} />
+        <directionalLight position={[5, 5, 5]} intensity={1.5} />
+        <directionalLight position={[-5, 5, 5]} intensity={1.2} />
+        <directionalLight position={[0, 5, 0]} intensity={1} />
+        <pointLight position={[0, 0, 0]} intensity={0.8} distance={10} />
         <Suspense fallback={null}>
           {shoes.length > 0 && (
             <>
