@@ -47,7 +47,7 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
   // Автоматический запуск ботинка при доскролле до футера
   useEffect(() => {
     const footer = footerRef.current;
-    if (!footer || !createShoeRef.current) return;
+    if (!footer) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -75,7 +75,7 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
     return () => {
       observer.disconnect();
     };
-  }, [createShoeRef.current]);
+  }, []); // Запускается только один раз при монтировании
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!footerRef.current) return;
