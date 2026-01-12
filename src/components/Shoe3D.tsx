@@ -64,6 +64,8 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
   const [currentVelocity, setCurrentVelocity] = useState<[number, number, number]>(velocity);
   const [rotation, setRotation] = useState<[number, number, number]>([0, 0, 0]);
   const [currentAngularVelocity, setCurrentAngularVelocity] = useState<[number, number, number]>(angularVelocity);
+  const landedTimeRef = useRef<number | null>(null);
+  const isLandedRef = useRef(false);
   
   const gravity = -0.012;
   const damping = 0.995; // Сопротивление воздуха
@@ -96,9 +98,13 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
       finalY = groundY;
       finalVy = -newVy * bounceDamping; // Отскок с затуханием
       
-      // Если скорость очень мала, останавливаем
-      if (Math.abs(finalVy) < 0.01) {
+      // Если скорость очень мала, останавливаем и отмечаем приземление
+      if (Math.abs(finalVy) < 0.01 && Math.abs(newVx) < 0.01) {
         finalVy = 0;
+        if (!isLandedRef.current) {
+          isLandedRef.current = true;
+          landedTimeRef.current = Date.now();
+        }
       }
     }
 
@@ -125,11 +131,20 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
     groupRef.current.position.set(newX, finalY, fixedZ);
     groupRef.current.rotation.set(rotation[0], rotation[1], rotation[2]);
 
-    // Удаляем если упал слишком низко или далеко, или если скорость очень мала и он на земле
+    // Удаляем если упал слишком низко или далеко
     // Z координата не проверяется, так как она фиксирована
-    if (finalY < groundY - 3 || Math.abs(newX) > 8 || 
-        (finalY <= groundY && Math.abs(finalVy) < 0.005 && Math.abs(newVx) < 0.01)) {
+    if (finalY < groundY - 3 || Math.abs(newX) > 8) {
       onRemove();
+      return;
+    }
+    
+    // Удаляем через 1 секунду после приземления
+    if (isLandedRef.current && landedTimeRef.current) {
+      const timeSinceLanding = Date.now() - landedTimeRef.current;
+      if (timeSinceLanding >= 1000) {
+        onRemove();
+        return;
+      }
     }
   });
 
