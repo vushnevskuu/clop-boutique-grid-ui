@@ -79,7 +79,7 @@ const ShoeCanvas = memo(({ onShoeCreate }: ShoeCanvasProps) => {
         left: 0,
         width: '100%',
         height: '600px',
-        zIndex: 20,
+        zIndex: 40,
         pointerEvents: 'none',
       }}
     >
