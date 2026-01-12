@@ -230,11 +230,12 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
             height: isMobile ? 'auto' : 'auto', 
             maxHeight: isMobile ? 'none' : 'none',
             margin: 0, 
-            marginLeft: isMobile ? '-25%' : 0,
+            marginLeft: isMobile ? 'auto' : 0,
+            marginRight: isMobile ? 'auto' : 0,
             padding: 0,
             objectFit: isMobile ? 'cover' : 'contain',
             objectPosition: 'center center',
-            transform: isMobile ? 'none' : transform, // На мобильных убираем 3D трансформации
+            transform: isMobile ? 'translateX(-16.666%)' : transform, // Центрируем увеличенное изображение: -25% от 150% = -16.666%
             transformOrigin: 'center center',
             transition: isMobile ? 'none' : 'transform 0.1s ease-out',
             willChange: isMobile ? 'auto' : 'transform',
