@@ -131,7 +131,10 @@ const Hero = () => {
           <img 
             src="/logo.svg" 
             alt="CLOP Logo" 
-            className="w-auto h-12 md:h-16 lg:h-20"
+            className="w-auto h-16 md:h-16 lg:h-20"
+            style={{
+              filter: 'brightness(0) invert(1)', // Делаем логотип белым для лучшей видимости
+            }}
             loading="eager"
             fetchPriority="high"
           />

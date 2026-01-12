@@ -41,8 +41,8 @@ const Model = ({ modelPath, scrollProgress, mousePosition = { x: 0, y: 0 } }: Mo
     const size = box.getSize(new THREE.Vector3());
     const maxDim = Math.max(size.x, size.y, size.z);
     const baseScale = maxDim > 0 ? 2 / maxDim : 1;
-    // На мобильных уменьшаем масштаб в 2 раза
-    const scale = isMobile ? baseScale * 0.5 : baseScale;
+    // На мобильных увеличиваем масштаб в 2 раза для лучшей видимости
+    const scale = isMobile ? baseScale * 2 : baseScale;
     return { clonedScene: cloned, box, scale };
   }, [scene, isMobile]);
 
