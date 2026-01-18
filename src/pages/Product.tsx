@@ -43,36 +43,6 @@ const Product = memo(() => {
     }
   }, []);
 
-  if (productsLoading) {
-    return (
-      <div className="min-h-screen">
-        <Header />
-        <main className="flex items-center justify-center min-h-screen px-4">
-          <div className="text-center">Loading product...</div>
-        </main>
-      </div>
-    );
-  }
-
-  if (!product) {
-    return (
-      <div className="min-h-screen">
-        <Header />
-        <main className="flex items-center justify-center min-h-screen px-4">
-          <div className="text-center">
-            <h1 className="font-bold mb-4 break-words" style={{ fontSize: 'clamp(20px, 5vw, 32px)' }}>Product not found</h1>
-            <button
-              onClick={handleBackClick}
-              className="btn-brutal px-4 py-2 text-sm md:text-base"
-            >
-              Back to catalog
-            </button>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
   // Prepare images array - используем product.images если есть, иначе product.image/hoverImage
   const productImages = useMemo(() => {
     if (!product) return [];
@@ -115,6 +85,36 @@ const Product = memo(() => {
       return () => window.removeEventListener('resize', updateLogoWidth);
     }
   }, []);
+
+  if (productsLoading) {
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <main className="flex items-center justify-center min-h-screen px-4">
+          <div className="text-center">Loading product...</div>
+        </main>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <main className="flex items-center justify-center min-h-screen px-4">
+          <div className="text-center">
+            <h1 className="font-bold mb-4 break-words" style={{ fontSize: 'clamp(20px, 5vw, 32px)' }}>Product not found</h1>
+            <button
+              onClick={handleBackClick}
+              className="btn-brutal px-4 py-2 text-sm md:text-base"
+            >
+              Back to catalog
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
