@@ -25,7 +25,7 @@ const ProductCard = memo(({ id, image, hoverImage, title, price, size, brand }: 
 
   return (
     <Link 
-      to={`/product/${id}`}
+      to={`/product/${encodeURIComponent(String(id))}`}
       className="flex flex-col"
       style={{
         backgroundColor: '#ffffff',

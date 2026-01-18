@@ -50,9 +50,8 @@ export function useProducts() {
         
         // Обрабатываем каждый товар из manifest
         for (const productFolder of manifest.products || []) {
-          // URL-кодируем имя папки для безопасной работы с пробелами и спецсимволами
-          const encodedFolder = encodeURIComponent(productFolder).replace(/%20/g, ' ');
-          const productPath = `/cloth/${encodedFolder}`;
+          // Формируем путь к папке товара (пробелы в пути будут обработаны браузером автоматически)
+          const productPath = `/cloth/${productFolder}`;
           
           // Загружаем описание
           let description = '';
@@ -74,19 +73,17 @@ export function useProducts() {
             console.warn(`Failed to load description for ${productFolder}:`, err);
           }
           
-          // Получаем изображения из manifest и правильно формируем пути
+          // Получаем изображения из manifest и формируем пути
           const images: string[] = (manifest.images?.[productFolder] || [])
-            .map((img: string) => {
-              // URL-кодируем имя файла изображения
-              const encodedImg = encodeURIComponent(img);
-              return `${productPath}/${encodedImg}`;
-            })
+            .map((img: string) => `${productPath}/${img}`)
             .sort((a: string, b: string) => {
               // Сортируем по номеру в имени файла
               const numA = parseInt(a.match(/(\d+)/)?.[1] || '0');
               const numB = parseInt(b.match(/(\d+)/)?.[1] || '0');
               return numA - numB;
             });
+          
+          console.log(`Loaded product "${productFolder}":`, { productPath, images }); // Debug log
           
           loadedProducts.push({
             id: productFolder,

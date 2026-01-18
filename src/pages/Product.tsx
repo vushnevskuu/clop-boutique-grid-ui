@@ -13,8 +13,15 @@ const Product = memo(() => {
 
   const product = useMemo(() => {
     if (!id) return undefined;
+    // Декодируем ID из URL (на случай пробелов и спецсимволов)
+    const decodedId = decodeURIComponent(id);
     // ID может быть как строкой (из cloth), так и числом (старые товары)
-    return products.find((p) => p.id === id || p.id === String(id) || String(p.id) === id);
+    return products.find((p) => 
+      p.id === decodedId || 
+      p.id === String(decodedId) || 
+      String(p.id) === decodedId ||
+      String(p.id) === id
+    );
   }, [id, products]);
   
   const handleBackClick = useCallback(() => {
