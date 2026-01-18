@@ -87,18 +87,16 @@ const Product = memo(() => {
 
   // Find similar products (same brand first, then other products)
   const similarProducts = useMemo(() => {
-    if (!product || !products || products.length === 0) return [];
-    const productId = String(product.id);
-    const productBrand = product.brand || '';
-    const sameBrand = products.filter((p) => String(p.id) !== productId && (p.brand || '') === productBrand);
-    const otherProducts = products.filter((p) => String(p.id) !== productId && (p.brand || '') !== productBrand);
+    if (!product) return [];
+    const sameBrand = products.filter((p) => String(p.id) !== String(product.id) && p.brand === product.brand);
+    const otherProducts = products.filter((p) => String(p.id) !== String(product.id) && p.brand !== product.brand);
     const combined = [...sameBrand, ...otherProducts];
     const result = [];
     while (result.length < 16 && combined.length > 0) {
       result.push(...combined);
     }
     return result.slice(0, 16);
-  }, [product?.id, product?.brand, products]);
+  }, [product, products]);
 
   // Измеряем ширину логотипа
   useEffect(() => {
@@ -178,16 +176,12 @@ const Product = memo(() => {
                       className="w-full"
                     >
                       <img
-                        src={img.src || ''}
-                        alt={`${product?.title || 'Product'} ${index + 1}`}
+                        src={img.src}
+                        alt={`${product.title} ${index + 1}`}
                         className="w-full h-auto object-cover cursor-pointer"
                         loading="lazy"
                         decoding="async"
-                        onClick={() => handleImageClick(img.src || '')}
-                        onError={(e) => {
-                          console.error(`Failed to load image: ${img.src}`);
-                          e.currentTarget.style.display = 'none';
-                        }}
+                        onClick={() => handleImageClick(img.src)}
                       />
                     </div>
                   ))}
@@ -217,13 +211,13 @@ const Product = memo(() => {
                 )}
                 
                 {/* Size Table */}
-                {product.sizes && product.sizes.length > 0 && product.sizes[0] && (
+                {product.sizes && product.sizes.length > 0 && (
                   <div className="text-black p-0 m-0 mt-4 md:mt-6">
                     <div className="overflow-x-auto -mx-4 md:mx-0 px-4 md:px-0">
                       <table className="w-full min-w-[280px] text-[11px] md:text-sm" style={{ borderCollapse: 'collapse' }}>
                         <thead>
                           <tr>
-                            {Object.keys(product.sizes[0] || {}).map((key) => (
+                            {Object.keys(product.sizes[0]).map((key) => (
                               <th key={key} className="text-left pb-2 whitespace-nowrap font-normal border border-[#f3f3f3] p-1.5 md:p-2 capitalize">
                                 {key}
                               </th>
@@ -233,7 +227,7 @@ const Product = memo(() => {
                         <tbody>
                           {product.sizes.map((sizeRow, index) => (
                             <tr key={index}>
-                              {Object.entries(sizeRow || {}).map(([key, value]) => (
+                              {Object.entries(sizeRow).map(([key, value]) => (
                                 <td key={key} className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">
                                   {value || '-'}
                                 </td>
