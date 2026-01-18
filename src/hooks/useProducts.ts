@@ -165,19 +165,23 @@ function parseDescriptionFile(content: string): { description: string; sizes: Pr
       }
       
       if (values.length > 0) {
-        const sizeRow: Product['sizes'][0] = {};
+        const sizeRow: Record<string, string> & { size?: string } = {};
+
         headers.forEach((header, index) => {
           if (values[index] && header) {
             const normalizedHeader = header.toLowerCase();
             sizeRow[normalizedHeader] = values[index];
           }
         });
+
         // Если первый столбец - размер
         if (values[0] && !sizeRow.size) {
           sizeRow.size = values[0];
         }
-        if (Object.keys(sizeRow).length > 0) {
-          sizes.push(sizeRow);
+
+        // В Product.sizes.size обязателен
+        if (sizeRow.size && Object.keys(sizeRow).length > 0) {
+          sizes.push(sizeRow as Product["sizes"][0]);
         }
       }
     } else if (!inSizesSection) {
@@ -213,7 +217,7 @@ function parseDescriptionFile(content: string): { description: string; sizes: Pr
     
     // Формат "Chest (pit to pit): 50–52 cm" - извлекаем измерения как одну строку
     if (sizes.length === 0 && description.match(/(Chest|Waist|Shoulder|Back|Front|Arm)/i)) {
-      const measurementRow: { [key: string]: string } = {};
+      const measurementRow: Record<string, string> = { size: "One Size" };
       
       // Извлекаем все измерения
       const chestMatch = description.match(/Chest[^:]*:\s*([^\n]+)/i);
@@ -231,7 +235,7 @@ function parseDescriptionFile(content: string): { description: string; sizes: Pr
       if (armMatch) measurementRow['arm opening'] = armMatch[1].trim().replace(/\s+/g, ' ');
       
       if (Object.keys(measurementRow).length > 0) {
-        sizes.push(measurementRow);
+        sizes.push(measurementRow as Product["sizes"][0]);
         
         // Удаляем строки с измерениями из описания после извлечения
         // Удаляем "Approximate measurements" и все строки после неё, которые содержат измерения
