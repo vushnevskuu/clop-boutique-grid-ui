@@ -97,24 +97,24 @@ const Shoe3D = ({ startPosition, velocity, angularVelocity, onRemove }: Shoe3DPr
     // Ограничиваем максимальную высоту
     if (newY > maxHeight) {
       finalY = maxHeight;
-      finalVy = 0; // Останавливаем на вершине
+    finalVy = 0; // Останавливаем на вершине
     } else if (newY <= groundY) {
       finalY = groundY;
       finalVy = -newVy * bounceDamping; // Отскок с затуханием
-      
-      // Если скорость очень мала, останавливаем и отмечаем приземление
-      if (Math.abs(finalVy) < 0.01 && Math.abs(newVx) < 0.01) {
-        finalVy = 0;
-        if (!isLandedRef.current) {
-          isLandedRef.current = true;
-          landedTimeRef.current = Date.now();
-        }
-      }
     }
 
     // Обновляем скорость с затуханием (Z скорость всегда 0, так как глубина фиксирована)
     const newVx = vx * damping;
     const newVz = 0; // Z скорость всегда 0, глубина фиксирована
+    
+    // Если скорость очень мала, останавливаем и отмечаем приземление
+    if (Math.abs(finalVy) < 0.01 && Math.abs(newVx) < 0.01 && finalY <= groundY) {
+      finalVy = 0;
+      if (!isLandedRef.current) {
+        isLandedRef.current = true;
+        landedTimeRef.current = Date.now();
+      }
+    }
 
     setPosition([newX, finalY, fixedZ]); // Z всегда остается изначальной
     setCurrentVelocity([newVx, finalVy, newVz]);
