@@ -74,14 +74,26 @@ export function useProducts() {
           }
           
           // Получаем изображения из manifest и формируем пути
+          // Важно: кодируем пробелы в пути для правильной работы с URL
           const images: string[] = (manifest.images?.[productFolder] || [])
-            .map((img: string) => `${productPath}/${img}`)
+            .map((img: string) => {
+              // Кодируем пробелы в имени файла и пути
+              const encodedPath = productPath.split('/').map(segment => encodeURIComponent(segment)).join('/');
+              const encodedImg = encodeURIComponent(img);
+              return `${encodedPath}/${encodedImg}`;
+            })
             .sort((a: string, b: string) => {
               // Сортируем по номеру в имени файла
               const numA = parseInt(a.match(/(\d+)/)?.[1] || '0');
               const numB = parseInt(b.match(/(\d+)/)?.[1] || '0');
               return numA - numB;
             });
+          
+          console.log(`Product "${productFolder}":`, { 
+            productPath, 
+            images: images.slice(0, 2),
+            firstImage: images[0] 
+          });
           
           loadedProducts.push({
             id: productFolder,
