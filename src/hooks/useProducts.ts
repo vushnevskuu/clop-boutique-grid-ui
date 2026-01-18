@@ -77,14 +77,13 @@ export function useProducts() {
           }
           
           // Получаем изображения из manifest и формируем пути
-          // Для браузера используем encodeURIComponent для правильного кодирования пробелов и спецсимволов
+          // Кодируем каждую часть пути отдельно для корректной работы с пробелами в продакшене
           const images: string[] = (manifest.images?.[productFolder] || [])
             .map((img: string) => {
-              // Кодируем имя файла через encodeURIComponent, путь формируем без кодирования папки (Vite обрабатывает)
-              // Используем encodeURI для кодирования всего пути
-              const fullPath = `/cloth/${productFolder}/${img}`;
-              // Кодируем только непустые части пути, сохраняя структуру
-              return fullPath.split('/').map(part => part ? encodeURIComponent(part) : '').join('/');
+              // Кодируем папку и имя файла отдельно
+              const encodedFolder = encodeURIComponent(productFolder);
+              const encodedImg = encodeURIComponent(img);
+              return `/cloth/${encodedFolder}/${encodedImg}`;
             })
             .sort((a: string, b: string) => {
               // Сортируем по номеру в имени файла
