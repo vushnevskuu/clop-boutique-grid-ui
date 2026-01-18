@@ -77,14 +77,13 @@ export function useProducts() {
           }
           
           // Получаем изображения из manifest и формируем пути
-          // Для файлов из public/ используем абсолютные пути с кодированием пробелов
+          // Для файлов из public/ используем абсолютные пути БЕЗ кодирования
+          // Vite автоматически обрабатывает пробелы в путях к файлам из public/
           const images: string[] = (manifest.images?.[productFolder] || [])
             .map((img: string) => {
-              // Формируем абсолютный путь с кодированием пробелов
-              // Важно: начинаем с / для абсолютного пути из public/
-              const encodedFolderName = encodeURIComponent(productFolder);
-              const encodedImageName = encodeURIComponent(img);
-              return `/cloth/${encodedFolderName}/${encodedImageName}`;
+              // Формируем абсолютный путь БЕЗ кодирования пробелов
+              // Vite автоматически обрабатывает пути из public/ при сервинге файлов
+              return `/cloth/${productFolder}/${img}`;
             })
             .sort((a: string, b: string) => {
               // Сортируем по номеру в имени файла
