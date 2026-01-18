@@ -77,11 +77,14 @@ export function useProducts() {
           }
           
           // Получаем изображения из manifest и формируем пути
-          // Для браузера НЕ кодируем путь заранее - браузер сам закодирует при запросе
+          // Для браузера используем encodeURIComponent для правильного кодирования пробелов и спецсимволов
           const images: string[] = (manifest.images?.[productFolder] || [])
             .map((img: string) => {
-              // Формируем путь без двойного кодирования
-              return `/cloth/${productFolder}/${img}`;
+              // Кодируем имя файла через encodeURIComponent, путь формируем без кодирования папки (Vite обрабатывает)
+              // Используем encodeURI для кодирования всего пути
+              const fullPath = `/cloth/${productFolder}/${img}`;
+              // Кодируем только непустые части пути, сохраняя структуру
+              return fullPath.split('/').map(part => part ? encodeURIComponent(part) : '').join('/');
             })
             .sort((a: string, b: string) => {
               // Сортируем по номеру в имени файла
@@ -162,7 +165,7 @@ function parseDescriptionFile(content: string): { description: string; sizes: Pr
       }
       
       if (values.length > 0) {
-        const sizeRow: { [key: string]: string } = {};
+        const sizeRow: Product['sizes'][0] = {};
         headers.forEach((header, index) => {
           if (values[index] && header) {
             const normalizedHeader = header.toLowerCase();
@@ -173,8 +176,8 @@ function parseDescriptionFile(content: string): { description: string; sizes: Pr
         if (values[0] && !sizeRow.size) {
           sizeRow.size = values[0];
         }
-        if (Object.keys(sizeRow).length > 0 && sizeRow.size) {
-          sizes.push(sizeRow as Product['sizes'][0]);
+        if (Object.keys(sizeRow).length > 0) {
+          sizes.push(sizeRow);
         }
       }
     } else if (!inSizesSection) {
@@ -228,9 +231,29 @@ function parseDescriptionFile(content: string): { description: string; sizes: Pr
       if (armMatch) measurementRow['arm opening'] = armMatch[1].trim().replace(/\s+/g, ' ');
       
       if (Object.keys(measurementRow).length > 0) {
-        // Добавляем size как 'One Size' если нет явного размера
-        measurementRow['size'] = 'One Size';
-        sizes.push(measurementRow as Product['sizes'][0]);
+        sizes.push(measurementRow);
+        
+        // Удаляем строки с измерениями из описания после извлечения
+        // Удаляем "Approximate measurements" и все строки после неё, которые содержат измерения
+        const measurementKeywords = /Approximate measurements|Chest|Waist|Shoulder|Back length|Front length|Arm opening/i;
+        const descLines = description.split('\n');
+        const filteredLines: string[] = [];
+        let skipMeasurementLines = false;
+        
+        for (const line of descLines) {
+          if (measurementKeywords.test(line) || (skipMeasurementLines && line.match(/^\s*[A-Z]/))) {
+            skipMeasurementLines = true;
+            continue;
+          }
+          if (skipMeasurementLines && line.trim() === '') {
+            skipMeasurementLines = false;
+          }
+          if (!skipMeasurementLines) {
+            filteredLines.push(line);
+          }
+        }
+        
+        description = filteredLines.join('\n').trim();
       }
     }
   }
