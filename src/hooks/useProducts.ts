@@ -34,8 +34,16 @@ export function useProducts() {
       try {
         setLoading(true);
         
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/479bd6ea-c80d-4e3a-82d4-f5e5e0ef2b1b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useProducts.ts:37',message:'Starting to load products',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
+        
         // Загружаем manifest.json из public/cloth/
         const manifestResponse = await fetch('/cloth/manifest.json');
+        
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/479bd6ea-c80d-4e3a-82d4-f5e5e0ef2b1b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useProducts.ts:40',message:'Manifest fetch result',data:{ok:manifestResponse.ok,status:manifestResponse.status,url:manifestResponse.url},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
         
         if (!manifestResponse.ok) {
           // Если manifest.json нет, возвращаем пустой массив
@@ -46,6 +54,10 @@ export function useProducts() {
         }
         
         const manifest = await manifestResponse.json();
+        
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/479bd6ea-c80d-4e3a-82d4-f5e5e0ef2b1b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useProducts.ts:52',message:'Manifest parsed',data:{productsCount:manifest.products?.length||0,products:manifest.products},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
         const loadedProducts: Product[] = [];
         
         // Обрабатываем каждый товар из manifest
@@ -62,28 +74,42 @@ export function useProducts() {
           try {
             // Пробуем оба варианта названия файла (description.txt и discription.txt)
             // Используем закодированный путь для fetch
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/479bd6ea-c80d-4e3a-82d4-f5e5e0ef2b1b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useProducts.ts:65',message:'Fetching description',data:{productFolder,productPath:`${productPath}/description.txt`},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+            // #endregion
             let descResponse = await fetch(`${productPath}/description.txt`);
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/479bd6ea-c80d-4e3a-82d4-f5e5e0ef2b1b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useProducts.ts:67',message:'Description fetch result',data:{ok:descResponse.ok,status:descResponse.status,url:descResponse.url,productFolder},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+            // #endregion
             if (!descResponse.ok) {
               descResponse = await fetch(`${productPath}/discription.txt`);
+              // #region agent log
+              fetch('http://127.0.0.1:7242/ingest/479bd6ea-c80d-4e3a-82d4-f5e5e0ef2b1b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useProducts.ts:69',message:'Alternative description fetch',data:{ok:descResponse.ok,status:descResponse.status,url:descResponse.url},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+              // #endregion
             }
             if (descResponse.ok) {
               const descContent = await descResponse.text();
               const parsed = parseDescriptionFile(descContent);
               description = parsed.description;
               sizes = parsed.sizes;
+              // #region agent log
+              fetch('http://127.0.0.1:7242/ingest/479bd6ea-c80d-4e3a-82d4-f5e5e0ef2b1b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useProducts.ts:73',message:'Description loaded successfully',data:{descriptionLength:description.length,sizesCount:sizes.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+              // #endregion
             }
           } catch (err) {
             console.warn(`Failed to load description for ${productFolder}:`, err);
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/479bd6ea-c80d-4e3a-82d4-f5e5e0ef2b1b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useProducts.ts:76',message:'Description fetch error',data:{error:String(err),productFolder},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+            // #endregion
           }
           
           // Получаем изображения из manifest и формируем пути
-          // Кодируем путь для URL с пробелами и спецсимволами
+          // НЕ кодируем пути здесь - браузер сам кодирует при запросе
+          // Это важно для корректной работы в production
           const images: string[] = (manifest.images?.[productFolder] || [])
             .map((img: string) => {
-              // Кодируем имя папки и файла для корректного URL
-              const encodedFolder = encodeURIComponent(productFolder);
-              const encodedImg = encodeURIComponent(img);
-              return `/cloth/${encodedFolder}/${encodedImg}`;
+              // Формируем путь с пробелами - браузер сам закодирует при запросе
+              return `/cloth/${productFolder}/${img}`;
             })
             .sort((a: string, b: string) => {
               // Сортируем по номеру в имени файла
@@ -91,6 +117,10 @@ export function useProducts() {
               const numB = parseInt(b.match(/(\d+)/)?.[1] || '0');
               return numA - numB;
             });
+          
+          // #region agent log
+          fetch('http://127.0.0.1:7242/ingest/479bd6ea-c80d-4e3a-82d4-f5e5e0ef2b1b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useProducts.ts:86',message:'Images paths generated',data:{productFolder,imagesCount:images.length,images:images},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+          // #endregion
           
           loadedProducts.push({
             id: productFolder,
@@ -100,8 +130,13 @@ export function useProducts() {
             images,
             image: images[0] || '',
             hoverImage: images[1] || images[0] || '',
+            price: '$100', // Добавляем цену по умолчанию
           });
         }
+        
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/479bd6ea-c80d-4e3a-82d4-f5e5e0ef2b1b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useProducts.ts:105',message:'Products loaded successfully',data:{productsCount:loadedProducts.length,products:loadedProducts.map(p=>({id:p.id,title:p.title,image:p.image,imagesCount:p.images?.length||0}))},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
         
         setProducts(loadedProducts);
         setError(null);
@@ -122,7 +157,8 @@ export function useProducts() {
 
 // Парсинг текстового файла описания
 function parseDescriptionFile(content: string): { description: string; sizes: Product['sizes'] } {
-  const lines = content.split('\n').map(line => line.trim()).filter(line => line);
+  // Сохраняем пустые строки для абзацев, но триммируем каждую строку
+  const lines = content.split('\n').map(line => line.trim());
   
   let description = '';
   let sizes: Product['sizes'] = [];
@@ -164,7 +200,7 @@ function parseDescriptionFile(content: string): { description: string; sizes: Pr
       }
       
       if (values.length > 0) {
-        const sizeRow: { [key: string]: string } = {};
+        const sizeRow: Product['sizes'][0] = {};
         headers.forEach((header, index) => {
           if (values[index] && header) {
             const normalizedHeader = header.toLowerCase();
@@ -175,13 +211,15 @@ function parseDescriptionFile(content: string): { description: string; sizes: Pr
         if (values[0] && !sizeRow.size) {
           sizeRow.size = values[0];
         }
-        if (Object.keys(sizeRow).length > 0 && sizeRow.size) {
-          sizes.push(sizeRow as Product['sizes'][0]);
+        if (Object.keys(sizeRow).length > 0) {
+          sizes.push(sizeRow);
         }
       }
     } else if (!inSizesSection) {
-      // Описание - все строки до таблицы размеров
-      if (description) description += '\n';
+      // Описание - все строки до таблицы размеров (сохраняем пустые строки для абзацев)
+      if (description) {
+        description += '\n';
+      }
       description += line;
     }
   }
@@ -230,9 +268,29 @@ function parseDescriptionFile(content: string): { description: string; sizes: Pr
       if (armMatch) measurementRow['arm opening'] = armMatch[1].trim().replace(/\s+/g, ' ');
       
       if (Object.keys(measurementRow).length > 0) {
-        // Добавляем size как 'One Size' если нет явного размера
-        measurementRow['size'] = 'One Size';
-        sizes.push(measurementRow as Product['sizes'][0]);
+        sizes.push(measurementRow);
+        
+        // Удаляем строки с измерениями из описания после извлечения
+        // Удаляем "Approximate measurements" и все строки после неё, которые содержат измерения
+        const measurementKeywords = /Approximate measurements|Chest|Waist|Shoulder|Back length|Front length|Arm opening/i;
+        const descLines = description.split('\n');
+        const filteredLines: string[] = [];
+        let skipMeasurementLines = false;
+        
+        for (const line of descLines) {
+          if (measurementKeywords.test(line) || (skipMeasurementLines && line.match(/^\s*[A-Z]/))) {
+            skipMeasurementLines = true;
+            continue;
+          }
+          if (skipMeasurementLines && line.trim() === '') {
+            skipMeasurementLines = false;
+          }
+          if (!skipMeasurementLines) {
+            filteredLines.push(line);
+          }
+        }
+        
+        description = filteredLines.join('\n').trim();
       }
     }
   }
