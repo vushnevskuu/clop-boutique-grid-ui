@@ -1,8 +1,13 @@
 {
   "products": [
+    "Le grande blue",
     "Le_grande_blue"
   ],
   "images": {
+    "Le grande blue": [
+      "1.webp",
+      "2.webp"
+    ],
     "Le_grande_blue": [
       "1.webp",
       "2.webp"
