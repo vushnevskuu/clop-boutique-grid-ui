@@ -89,12 +89,6 @@ export function useProducts() {
               return numA - numB;
             });
           
-          console.log(`Product "${productFolder}":`, { 
-            productPath, 
-            images: images.slice(0, 2),
-            firstImage: images[0] 
-          });
-          
           loadedProducts.push({
             id: productFolder,
             title: productFolder,
