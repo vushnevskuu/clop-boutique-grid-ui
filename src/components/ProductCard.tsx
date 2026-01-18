@@ -2,11 +2,11 @@ import { useState, memo, useCallback } from "react";
 import { Link } from "react-router-dom";
 
 interface ProductCardProps {
-  id: number;
+  id: number | string;
   image: string;
   hoverImage?: string;
   title: string;
-  price: string;
+  price?: string;
   size?: string;
   brand?: string;
 }

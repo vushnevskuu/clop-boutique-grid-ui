@@ -1,98 +1,21 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import Header from "@/components/Header";
 import { useState, useMemo, memo, useCallback, useRef, useEffect } from "react";
-
-import product1 from "@/assets/product-1.jpg";
-import product2 from "@/assets/product-2.jpg";
-import product3 from "@/assets/product-3.jpg";
-import product4 from "@/assets/product-4.jpg";
-import product5 from "@/assets/product-5.jpg";
-import product6 from "@/assets/product-6.jpg";
-import product7 from "@/assets/product-7.jpg";
-import product8 from "@/assets/product-8.jpg";
-
-const products = [
-  {
-    id: 1,
-    image: product1,
-    hoverImage: product2,
-    title: "Leather jacket",
-    brand: "Vintage",
-    price: "$125",
-    size: "M",
-  },
-  {
-    id: 2,
-    image: product2,
-    hoverImage: product3,
-    title: "Classic jeans",
-    brand: "Levi's",
-    price: "$42",
-    size: "32",
-  },
-  {
-    id: 3,
-    image: product3,
-    hoverImage: product4,
-    title: "Wool sweater",
-    brand: "Handmade",
-    price: "$58",
-    size: "L",
-  },
-  {
-    id: 4,
-    image: product4,
-    hoverImage: product5,
-    title: "Leather sneakers",
-    brand: "Vintage",
-    price: "$39",
-    size: "42",
-  },
-  {
-    id: 5,
-    image: product5,
-    hoverImage: product6,
-    title: "Silk scarf",
-    brand: "Italian",
-    price: "$21",
-  },
-  {
-    id: 6,
-    image: product6,
-    hoverImage: product7,
-    title: "Corduroy pants",
-    brand: "Vintage",
-    price: "$45",
-    size: "M",
-  },
-  {
-    id: 7,
-    image: product7,
-    hoverImage: product8,
-    title: "Oversized blazer",
-    brand: "90s",
-    price: "$72",
-    size: "L",
-  },
-  {
-    id: 8,
-    image: product8,
-    hoverImage: product1,
-    title: "Basic t-shirt",
-    brand: "Premium Cotton",
-    price: "$18",
-    size: "M",
-  },
-];
+import { useProducts } from "@/hooks/useProducts";
 
 const Product = memo(() => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { products, loading: productsLoading } = useProducts();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [logoWidth, setLogoWidth] = useState<number>(120);
   const imageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
-  const product = useMemo(() => products.find((p) => p.id === Number(id)), [id]);
+  const product = useMemo(() => {
+    if (!id) return undefined;
+    // ID может быть как строкой (из cloth), так и числом (старые товары)
+    return products.find((p) => p.id === id || p.id === String(id) || String(p.id) === id);
+  }, [id, products]);
   
   const handleBackClick = useCallback(() => {
     navigate("/");
@@ -114,6 +37,17 @@ const Product = memo(() => {
   }, []);
 
 
+  if (productsLoading) {
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <main className="flex items-center justify-center min-h-screen px-4">
+          <div className="text-center">Загрузка товара...</div>
+        </main>
+      </div>
+    );
+  }
+
   if (!product) {
     return (
       <div className="min-h-screen">
@@ -133,26 +67,30 @@ const Product = memo(() => {
     );
   }
 
-  // Prepare images array
+  // Prepare images array - используем product.images если есть, иначе product.image/hoverImage
   const productImages = useMemo(() => {
-    const images = [
-      { src: product.image },
-      ...(product.hoverImage ? [{ src: product.hoverImage }] : [])
-    ];
+    if (!product) return [];
+    if (product.images && product.images.length > 0) {
+      return product.images.map(src => ({ src }));
+    }
+    const images = [];
+    if (product.image) images.push({ src: product.image });
+    if (product.hoverImage) images.push({ src: product.hoverImage });
     return images;
-  }, [product.image, product.hoverImage]);
+  }, [product]);
 
   // Find similar products (same brand first, then other products)
   const similarProducts = useMemo(() => {
-    const sameBrand = products.filter((p) => p.id !== product.id && p.brand === product.brand);
-    const otherProducts = products.filter((p) => p.id !== product.id && p.brand !== product.brand);
+    if (!product) return [];
+    const sameBrand = products.filter((p) => String(p.id) !== String(product.id) && p.brand === product.brand);
+    const otherProducts = products.filter((p) => String(p.id) !== String(product.id) && p.brand !== product.brand);
     const combined = [...sameBrand, ...otherProducts];
     const result = [];
     while (result.length < 16 && combined.length > 0) {
       result.push(...combined);
     }
     return result.slice(0, 16);
-  }, [product.id, product.brand]);
+  }, [product, products]);
 
   // Измеряем ширину логотипа
   useEffect(() => {
@@ -257,55 +195,48 @@ const Product = memo(() => {
                   </p>
                 )}
                 
-                {/* Size Table */}
-                <div className="text-black p-0 m-0 mt-4 md:mt-6">
-                  <div className="overflow-x-auto -mx-4 md:mx-0 px-4 md:px-0">
-                    <table className="w-full min-w-[280px] text-[11px] md:text-sm" style={{ borderCollapse: 'collapse' }}>
-                      <thead>
-                        <tr>
-                          <th className="text-left pb-2 whitespace-nowrap font-normal border border-[#f3f3f3] p-1.5 md:p-2">Size</th>
-                          <th className="text-left pb-2 whitespace-nowrap font-normal border border-[#f3f3f3] p-1.5 md:p-2">Chest</th>
-                          <th className="text-left pb-2 whitespace-nowrap font-normal border border-[#f3f3f3] p-1.5 md:p-2">Waist</th>
-                          <th className="text-left pb-2 whitespace-nowrap font-normal border border-[#f3f3f3] p-1.5 md:p-2">Length</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">XS</td>
-                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">86-90</td>
-                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">66-70</td>
-                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">58</td>
-                        </tr>
-                        <tr>
-                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">S</td>
-                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">90-94</td>
-                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">70-74</td>
-                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">60</td>
-                        </tr>
-                        <tr>
-                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">M</td>
-                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">94-98</td>
-                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">74-78</td>
-                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">62</td>
-                        </tr>
-                        <tr>
-                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">L</td>
-                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">98-102</td>
-                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">78-82</td>
-                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">64</td>
-                        </tr>
-                        <tr>
-                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">XL</td>
-                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">102-106</td>
-                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">82-86</td>
-                          <td className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">66</td>
-                        </tr>
-                      </tbody>
-                    </table>
+                {/* Description */}
+                {product.description && (
+                  <div className="text-black p-0 m-0 mt-4 md:mt-6">
+                    <p className="text-xs md:text-sm break-words whitespace-pre-line">
+                      {product.description}
+                    </p>
                   </div>
-                </div>
+                )}
                 
-                <p className="font-bold break-words text-xs md:text-sm">{product.price}</p>
+                {/* Size Table */}
+                {product.sizes && product.sizes.length > 0 && (
+                  <div className="text-black p-0 m-0 mt-4 md:mt-6">
+                    <div className="overflow-x-auto -mx-4 md:mx-0 px-4 md:px-0">
+                      <table className="w-full min-w-[280px] text-[11px] md:text-sm" style={{ borderCollapse: 'collapse' }}>
+                        <thead>
+                          <tr>
+                            {Object.keys(product.sizes[0]).map((key) => (
+                              <th key={key} className="text-left pb-2 whitespace-nowrap font-normal border border-[#f3f3f3] p-1.5 md:p-2 capitalize">
+                                {key}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {product.sizes.map((sizeRow, index) => (
+                            <tr key={index}>
+                              {Object.entries(sizeRow).map(([key, value]) => (
+                                <td key={key} className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">
+                                  {value || '-'}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+                
+                {product.price && (
+                  <p className="font-bold break-words text-xs md:text-sm">{product.price}</p>
+                )}
 
                 <div className="pt-4 md:pt-8">
                   <button 
@@ -329,7 +260,7 @@ const Product = memo(() => {
                   <Link key={item.id} to={`/product/${item.id}`} className="block w-full">
                     <div className="aspect-[4/5] overflow-hidden bg-gray-100">
                       <img
-                        src={item.image}
+                        src={item.image || item.images?.[0] || ''}
                         alt={item.title}
                         className="w-full h-full object-cover"
                         loading="lazy"
