@@ -87,16 +87,18 @@ const Product = memo(() => {
 
   // Find similar products (same brand first, then other products)
   const similarProducts = useMemo(() => {
-    if (!product) return [];
-    const sameBrand = products.filter((p) => String(p.id) !== String(product.id) && p.brand === product.brand);
-    const otherProducts = products.filter((p) => String(p.id) !== String(product.id) && p.brand !== product.brand);
+    if (!product || !products || products.length === 0) return [];
+    const productId = String(product.id);
+    const productBrand = product.brand || '';
+    const sameBrand = products.filter((p) => String(p.id) !== productId && (p.brand || '') === productBrand);
+    const otherProducts = products.filter((p) => String(p.id) !== productId && (p.brand || '') !== productBrand);
     const combined = [...sameBrand, ...otherProducts];
     const result = [];
     while (result.length < 16 && combined.length > 0) {
       result.push(...combined);
     }
     return result.slice(0, 16);
-  }, [product, products]);
+  }, [product?.id, product?.brand, products]);
 
   // Измеряем ширину логотипа
   useEffect(() => {
@@ -176,12 +178,16 @@ const Product = memo(() => {
                       className="w-full"
                     >
                       <img
-                        src={img.src}
-                        alt={`${product.title} ${index + 1}`}
+                        src={img.src || ''}
+                        alt={`${product?.title || 'Product'} ${index + 1}`}
                         className="w-full h-auto object-cover cursor-pointer"
                         loading="lazy"
                         decoding="async"
-                        onClick={() => handleImageClick(img.src)}
+                        onClick={() => handleImageClick(img.src || '')}
+                        onError={(e) => {
+                          console.error(`Failed to load image: ${img.src}`);
+                          e.currentTarget.style.display = 'none';
+                        }}
                       />
                     </div>
                   ))}

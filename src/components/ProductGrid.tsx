@@ -56,18 +56,22 @@ const ProductGrid = memo(() => {
       }}
     >
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-5">
-        {products.map((product) => (
-          <ProductCard
-            key={product.id}
-            id={product.id}
-            image={product.image || product.images[0] || ''}
-            hoverImage={product.hoverImage || product.images[1] || product.images[0] || ''}
-            title={product.title}
-            brand={product.brand}
-            price={product.price}
-            size={product.size}
-          />
-        ))}
+        {products.map((product) => {
+          const firstImage = product.image || (product.images && product.images.length > 0 ? product.images[0] : '') || '';
+          const secondImage = product.hoverImage || (product.images && product.images.length > 1 ? product.images[1] : product.images?.[0]) || firstImage;
+          return (
+            <ProductCard
+              key={product.id}
+              id={product.id}
+              image={firstImage}
+              hoverImage={secondImage}
+              title={product.title}
+              brand={product.brand}
+              price={product.price}
+              size={product.size}
+            />
+          );
+        })}
       </div>
     </section>
   );
