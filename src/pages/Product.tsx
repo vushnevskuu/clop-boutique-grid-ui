@@ -43,6 +43,50 @@ const Product = memo(() => {
     }
   }, []);
 
+  // Prepare images array - используем product.images если есть, иначе product.image/hoverImage
+  const productImages = useMemo(() => {
+    if (!product) return [] as { src: string }[];
+    if (product.images && product.images.length > 0) {
+      return product.images.map((src) => ({ src }));
+    }
+    const images: { src: string }[] = [];
+    if (product.image) images.push({ src: product.image });
+    if (product.hoverImage) images.push({ src: product.hoverImage });
+    return images;
+  }, [product]);
+
+  // Find similar products (same brand first, then other products)
+  const similarProducts = useMemo(() => {
+    if (!product || !products || products.length === 0) return [];
+    const productId = String(product.id);
+    const productBrand = product.brand || "";
+    const sameBrand = products.filter(
+      (p) => String(p.id) !== productId && (p.brand || "") === productBrand
+    );
+    const otherProducts = products.filter(
+      (p) => String(p.id) !== productId && (p.brand || "") !== productBrand
+    );
+    return [...sameBrand, ...otherProducts].slice(0, 16);
+  }, [product?.id, product?.brand, products]);
+
+  // Измеряем ширину логотипа
+  useEffect(() => {
+    const logo = document.querySelector(
+      'header img[alt="CLOP Logo"]'
+    ) as HTMLImageElement;
+    if (!logo) return;
+
+    const updateLogoWidth = () => {
+      const width = logo.offsetWidth || logo.clientWidth;
+      if (width > 0) setLogoWidth(width);
+    };
+
+    updateLogoWidth();
+    window.addEventListener("resize", updateLogoWidth);
+    return () => window.removeEventListener("resize", updateLogoWidth);
+  }, []);
+
+  // Условные return — строго ПОСЛЕ всех хуков
   if (productsLoading) {
     return (
       <div className="min-h-screen">
@@ -60,7 +104,12 @@ const Product = memo(() => {
         <Header />
         <main className="flex items-center justify-center min-h-screen px-4">
           <div className="text-center">
-            <h1 className="font-bold mb-4 break-words" style={{ fontSize: 'clamp(20px, 5vw, 32px)' }}>Product not found</h1>
+            <h1
+              className="font-bold mb-4 break-words"
+              style={{ fontSize: "clamp(20px, 5vw, 32px)" }}
+            >
+              Product not found
+            </h1>
             <button
               onClick={handleBackClick}
               className="btn-brutal px-4 py-2 text-sm md:text-base"
@@ -72,49 +121,6 @@ const Product = memo(() => {
       </div>
     );
   }
-
-  // Prepare images array - используем product.images если есть, иначе product.image/hoverImage
-  const productImages = useMemo(() => {
-    if (!product) return [];
-    if (product.images && product.images.length > 0) {
-      return product.images.map(src => ({ src }));
-    }
-    const images = [];
-    if (product.image) images.push({ src: product.image });
-    if (product.hoverImage) images.push({ src: product.hoverImage });
-    return images;
-  }, [product]);
-
-  // Find similar products (same brand first, then other products)
-  const similarProducts = useMemo(() => {
-    if (!product || !products || products.length === 0) return [];
-    const productId = String(product.id);
-    const productBrand = product.brand || '';
-    const sameBrand = products.filter((p) => String(p.id) !== productId && (p.brand || '') === productBrand);
-    const otherProducts = products.filter((p) => String(p.id) !== productId && (p.brand || '') !== productBrand);
-    const combined = [...sameBrand, ...otherProducts];
-    // Просто возвращаем первые 16 товаров
-    return combined.slice(0, 16);
-  }, [product?.id, product?.brand, products]);
-
-  // Измеряем ширину логотипа
-  useEffect(() => {
-    const logo = document.querySelector('header img[alt="CLOP Logo"]') as HTMLImageElement;
-    if (logo) {
-      const updateLogoWidth = () => {
-        const width = logo.offsetWidth || logo.clientWidth;
-        if (width > 0) {
-          setLogoWidth(width);
-        }
-      };
-      
-      updateLogoWidth();
-      
-      // Обновляем при изменении размера окна
-      window.addEventListener('resize', updateLogoWidth);
-      return () => window.removeEventListener('resize', updateLogoWidth);
-    }
-  }, []);
 
   return (
     <div className="min-h-screen bg-background">
