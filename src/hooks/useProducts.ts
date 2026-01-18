@@ -83,8 +83,6 @@ export function useProducts() {
               return numA - numB;
             });
           
-          console.log(`Loaded product "${productFolder}":`, { productPath, images }); // Debug log
-          
           loadedProducts.push({
             id: productFolder,
             title: productFolder,
