@@ -77,11 +77,13 @@ export function useProducts() {
           }
           
           // Получаем изображения из manifest и формируем пути
-          // Для браузера НЕ кодируем путь заранее - браузер сам закодирует при запросе
+          // Кодируем путь для URL с пробелами и спецсимволами
           const images: string[] = (manifest.images?.[productFolder] || [])
             .map((img: string) => {
-              // Формируем путь без двойного кодирования
-              return `/cloth/${productFolder}/${img}`;
+              // Кодируем имя папки и файла для корректного URL
+              const encodedFolder = encodeURIComponent(productFolder);
+              const encodedImg = encodeURIComponent(img);
+              return `/cloth/${encodedFolder}/${encodedImg}`;
             })
             .sort((a: string, b: string) => {
               // Сортируем по номеру в имени файла
