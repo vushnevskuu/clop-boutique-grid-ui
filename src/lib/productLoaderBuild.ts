@@ -57,7 +57,7 @@ function parseDescriptionFile(content: string): { description: string; sizes: Si
       }
       
       if (values.length > 0) {
-        const sizeRow: SizeRow = {};
+        const sizeRow: { [key: string]: string } = {};
         headers.forEach((header, index) => {
           if (values[index] && header) {
             // Нормализуем имя заголовка
@@ -73,8 +73,8 @@ function parseDescriptionFile(content: string): { description: string; sizes: Si
         if (values[0] && !sizeRow.size) {
           sizeRow.size = values[0];
         }
-        if (Object.keys(sizeRow).length > 0) {
-          sizes.push(sizeRow);
+        if (Object.keys(sizeRow).length > 0 && sizeRow.size) {
+          sizes.push(sizeRow as SizeRow);
         }
       }
     } else {
