@@ -83,8 +83,8 @@ export function useProducts() {
               // Кодируем имя файла через encodeURIComponent, путь формируем без кодирования папки (Vite обрабатывает)
               // Используем encodeURI для кодирования всего пути
               const fullPath = `/cloth/${productFolder}/${img}`;
-              // Кодируем только специальные символы, сохраняя структуру пути
-              return fullPath.split('/').map(part => encodeURIComponent(part)).join('/');
+              // Кодируем только непустые части пути, сохраняя структуру
+              return fullPath.split('/').map(part => part ? encodeURIComponent(part) : '').join('/');
             })
             .sort((a: string, b: string) => {
               // Сортируем по номеру в имени файла
