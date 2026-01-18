@@ -211,13 +211,13 @@ const Product = memo(() => {
                 )}
                 
                 {/* Size Table */}
-                {product.sizes && product.sizes.length > 0 && (
+                {product.sizes && product.sizes.length > 0 && product.sizes[0] && (
                   <div className="text-black p-0 m-0 mt-4 md:mt-6">
                     <div className="overflow-x-auto -mx-4 md:mx-0 px-4 md:px-0">
                       <table className="w-full min-w-[280px] text-[11px] md:text-sm" style={{ borderCollapse: 'collapse' }}>
                         <thead>
                           <tr>
-                            {Object.keys(product.sizes[0]).map((key) => (
+                            {Object.keys(product.sizes[0] || {}).map((key) => (
                               <th key={key} className="text-left pb-2 whitespace-nowrap font-normal border border-[#f3f3f3] p-1.5 md:p-2 capitalize">
                                 {key}
                               </th>
@@ -227,7 +227,7 @@ const Product = memo(() => {
                         <tbody>
                           {product.sizes.map((sizeRow, index) => (
                             <tr key={index}>
-                              {Object.entries(sizeRow).map(([key, value]) => (
+                              {Object.entries(sizeRow || {}).map(([key, value]) => (
                                 <td key={key} className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">
                                   {value || '-'}
                                 </td>
