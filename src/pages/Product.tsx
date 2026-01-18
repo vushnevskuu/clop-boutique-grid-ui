@@ -23,6 +23,33 @@ const Product = memo(() => {
       String(p.id) === id
     );
   }, [id, products]);
+
+  // Prepare images array - используем product.images если есть, иначе product.image/hoverImage
+  // ВАЖНО: Этот хук должен быть ДО условных return
+  const productImages = useMemo(() => {
+    if (!product) return [];
+    if (product.images && product.images.length > 0) {
+      return product.images.map(src => ({ src }));
+    }
+    const images = [];
+    if (product.image) images.push({ src: product.image });
+    if (product.hoverImage) images.push({ src: product.hoverImage });
+    return images;
+  }, [product]);
+
+  // Find similar products (same brand first, then other products)
+  // ВАЖНО: Этот хук должен быть ДО условных return
+  const similarProducts = useMemo(() => {
+    if (!product) return [];
+    const sameBrand = products.filter((p) => String(p.id) !== String(product.id) && p.brand === product.brand);
+    const otherProducts = products.filter((p) => String(p.id) !== String(product.id) && p.brand !== product.brand);
+    const combined = [...sameBrand, ...otherProducts];
+    const result: typeof products = [];
+    while (result.length < 16 && combined.length > 0) {
+      result.push(...combined);
+    }
+    return result.slice(0, 16);
+  }, [product, products]);
   
   const handleBackClick = useCallback(() => {
     navigate("/");
@@ -43,6 +70,27 @@ const Product = memo(() => {
     }
   }, []);
 
+  // Измеряем ширину логотипа
+  // ВАЖНО: Этот хук должен быть ДО условных return
+  useEffect(() => {
+    const logo = document.querySelector('header img[alt="CLOP Logo"]') as HTMLImageElement;
+    if (logo) {
+      const updateLogoWidth = () => {
+        const width = logo.offsetWidth || logo.clientWidth;
+        if (width > 0) {
+          setLogoWidth(width);
+        }
+      };
+      
+      updateLogoWidth();
+      
+      // Обновляем при изменении размера окна
+      window.addEventListener('resize', updateLogoWidth);
+      return () => window.removeEventListener('resize', updateLogoWidth);
+    }
+  }, []);
+
+  // Условные return ПОСЛЕ всех хуков
   if (productsLoading) {
     return (
       <div className="min-h-screen">
@@ -72,50 +120,6 @@ const Product = memo(() => {
       </div>
     );
   }
-
-  // Prepare images array - используем product.images если есть, иначе product.image/hoverImage
-  const productImages = useMemo(() => {
-    if (!product) return [];
-    if (product.images && product.images.length > 0) {
-      return product.images.map(src => ({ src }));
-    }
-    const images = [];
-    if (product.image) images.push({ src: product.image });
-    if (product.hoverImage) images.push({ src: product.hoverImage });
-    return images;
-  }, [product]);
-
-  // Find similar products (same brand first, then other products)
-  const similarProducts = useMemo(() => {
-    if (!product) return [];
-    const sameBrand = products.filter((p) => String(p.id) !== String(product.id) && p.brand === product.brand);
-    const otherProducts = products.filter((p) => String(p.id) !== String(product.id) && p.brand !== product.brand);
-    const combined = [...sameBrand, ...otherProducts];
-    const result = [];
-    while (result.length < 16 && combined.length > 0) {
-      result.push(...combined);
-    }
-    return result.slice(0, 16);
-  }, [product, products]);
-
-  // Измеряем ширину логотипа
-  useEffect(() => {
-    const logo = document.querySelector('header img[alt="CLOP Logo"]') as HTMLImageElement;
-    if (logo) {
-      const updateLogoWidth = () => {
-        const width = logo.offsetWidth || logo.clientWidth;
-        if (width > 0) {
-          setLogoWidth(width);
-        }
-      };
-      
-      updateLogoWidth();
-      
-      // Обновляем при изменении размера окна
-      window.addEventListener('resize', updateLogoWidth);
-      return () => window.removeEventListener('resize', updateLogoWidth);
-    }
-  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -262,8 +266,8 @@ const Product = memo(() => {
                 You may also like
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-10 gap-4 md:gap-6">
-                {similarProducts.map((item) => (
-                  <Link key={item.id} to={`/product/${encodeURIComponent(String(item.id))}`} className="block w-full">
+                {similarProducts.map((item, idx) => (
+                  <Link key={`${item.id}-${idx}`} to={`/product/${encodeURIComponent(String(item.id))}`} className="block w-full">
                     <div className="aspect-[4/5] overflow-hidden bg-gray-100">
                       <img
                         src={item.image || item.images?.[0] || ''}
