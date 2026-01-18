@@ -50,8 +50,10 @@ export function useProducts() {
         
         // Обрабатываем каждый товар из manifest
         for (const productFolder of manifest.products || []) {
-          // Формируем путь к папке товара (пробелы в пути будут обработаны браузером автоматически)
-          const productPath = `/cloth/${productFolder}`;
+          // Формируем путь к папке товара с кодированием пробелов для URL
+          const encodedFolder = encodeURIComponent(productFolder);
+          const productPath = `/cloth/${encodedFolder}`;
+          const productPathRaw = `/cloth/${productFolder}`; // Для внутреннего использования
           
           // Загружаем описание
           let description = '';
@@ -59,6 +61,7 @@ export function useProducts() {
           
           try {
             // Пробуем оба варианта названия файла (description.txt и discription.txt)
+            // Используем закодированный путь для fetch
             let descResponse = await fetch(`${productPath}/description.txt`);
             if (!descResponse.ok) {
               descResponse = await fetch(`${productPath}/discription.txt`);
@@ -74,13 +77,14 @@ export function useProducts() {
           }
           
           // Получаем изображения из manifest и формируем пути
-          // Важно: кодируем пробелы в пути для правильной работы с URL
+          // Для файлов из public/ используем абсолютные пути с кодированием пробелов
           const images: string[] = (manifest.images?.[productFolder] || [])
             .map((img: string) => {
-              // Кодируем пробелы в имени файла и пути
-              const encodedPath = productPath.split('/').map(segment => encodeURIComponent(segment)).join('/');
-              const encodedImg = encodeURIComponent(img);
-              return `${encodedPath}/${encodedImg}`;
+              // Формируем абсолютный путь с кодированием пробелов
+              // Важно: начинаем с / для абсолютного пути из public/
+              const encodedFolderName = encodeURIComponent(productFolder);
+              const encodedImageName = encodeURIComponent(img);
+              return `/cloth/${encodedFolderName}/${encodedImageName}`;
             })
             .sort((a: string, b: string) => {
               // Сортируем по номеру в имени файла
