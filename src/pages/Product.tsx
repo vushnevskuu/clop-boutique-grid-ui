@@ -43,7 +43,6 @@ const Product = memo(() => {
     }
   }, []);
 
-
   if (productsLoading) {
     return (
       <div className="min-h-screen">
@@ -264,7 +263,7 @@ const Product = memo(() => {
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-10 gap-4 md:gap-6">
                 {similarProducts.map((item) => (
-                  <Link key={item.id} to={`/product/${item.id}`} className="block w-full">
+                  <Link key={item.id} to={`/product/${encodeURIComponent(String(item.id))}`} className="block w-full">
                     <div className="aspect-[4/5] overflow-hidden bg-gray-100">
                       <img
                         src={item.image || item.images?.[0] || ''}
