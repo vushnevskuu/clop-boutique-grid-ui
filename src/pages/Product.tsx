@@ -49,7 +49,7 @@ const Product = memo(() => {
       <div className="min-h-screen">
         <Header />
         <main className="flex items-center justify-center min-h-screen px-4">
-          <div className="text-center">Загрузка товара...</div>
+          <div className="text-center">Loading product...</div>
         </main>
       </div>
     );

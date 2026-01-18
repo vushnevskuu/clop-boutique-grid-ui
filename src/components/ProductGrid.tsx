@@ -14,7 +14,7 @@ const ProductGrid = memo(() => {
           backgroundColor: 'transparent'
         }}
       >
-        <div className="text-center py-8">Загрузка товаров...</div>
+        <div className="text-center py-8">Loading products...</div>
       </section>
     );
   }
@@ -28,7 +28,7 @@ const ProductGrid = memo(() => {
           backgroundColor: 'transparent'
         }}
       >
-        <div className="text-center py-8 text-red-500">Ошибка загрузки товаров: {error.message}</div>
+        <div className="text-center py-8 text-red-500">Error loading products: {error.message}</div>
       </section>
     );
   }
@@ -42,7 +42,7 @@ const ProductGrid = memo(() => {
           backgroundColor: 'transparent'
         }}
       >
-        <div className="text-center py-8">Товары не найдены</div>
+        <div className="text-center py-8">No products found</div>
       </section>
     );
   }
