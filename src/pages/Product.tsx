@@ -23,6 +23,33 @@ const Product = memo(() => {
       String(p.id) === id
     );
   }, [id, products]);
+
+  // Prepare images array - используем product.images если есть, иначе product.image/hoverImage
+  // ВАЖНО: Этот хук должен быть ДО условных return
+  const productImages = useMemo(() => {
+    if (!product) return [];
+    if (product.images && product.images.length > 0) {
+      return product.images.map(src => ({ src }));
+    }
+    const images = [];
+    if (product.image) images.push({ src: product.image });
+    if (product.hoverImage) images.push({ src: product.hoverImage });
+    return images;
+  }, [product]);
+
+  // Find similar products (same brand first, then other products)
+  // ВАЖНО: Этот хук должен быть ДО условных return
+  const similarProducts = useMemo(() => {
+    if (!product) return [];
+    const sameBrand = products.filter((p) => String(p.id) !== String(product.id) && p.brand === product.brand);
+    const otherProducts = products.filter((p) => String(p.id) !== String(product.id) && p.brand !== product.brand);
+    const combined = [...sameBrand, ...otherProducts];
+    const result: typeof products = [];
+    while (result.length < 16 && combined.length > 0) {
+      result.push(...combined);
+    }
+    return result.slice(0, 16);
+  }, [product, products]);
   
   const handleBackClick = useCallback(() => {
     navigate("/");
@@ -43,50 +70,27 @@ const Product = memo(() => {
     }
   }, []);
 
-  // Prepare images array - используем product.images если есть, иначе product.image/hoverImage
-  const productImages = useMemo(() => {
-    if (!product) return [] as { src: string }[];
-    if (product.images && product.images.length > 0) {
-      return product.images.map((src) => ({ src }));
-    }
-    const images: { src: string }[] = [];
-    if (product.image) images.push({ src: product.image });
-    if (product.hoverImage) images.push({ src: product.hoverImage });
-    return images;
-  }, [product]);
-
-  // Find similar products (same brand first, then other products)
-  const similarProducts = useMemo(() => {
-    if (!product || !products || products.length === 0) return [];
-    const productId = String(product.id);
-    const productBrand = product.brand || "";
-    const sameBrand = products.filter(
-      (p) => String(p.id) !== productId && (p.brand || "") === productBrand
-    );
-    const otherProducts = products.filter(
-      (p) => String(p.id) !== productId && (p.brand || "") !== productBrand
-    );
-    return [...sameBrand, ...otherProducts].slice(0, 16);
-  }, [product?.id, product?.brand, products]);
-
   // Измеряем ширину логотипа
+  // ВАЖНО: Этот хук должен быть ДО условных return
   useEffect(() => {
-    const logo = document.querySelector(
-      'header img[alt="CLOP Logo"]'
-    ) as HTMLImageElement;
-    if (!logo) return;
-
-    const updateLogoWidth = () => {
-      const width = logo.offsetWidth || logo.clientWidth;
-      if (width > 0) setLogoWidth(width);
-    };
-
-    updateLogoWidth();
-    window.addEventListener("resize", updateLogoWidth);
-    return () => window.removeEventListener("resize", updateLogoWidth);
+    const logo = document.querySelector('header img[alt="CLOP Logo"]') as HTMLImageElement;
+    if (logo) {
+      const updateLogoWidth = () => {
+        const width = logo.offsetWidth || logo.clientWidth;
+        if (width > 0) {
+          setLogoWidth(width);
+        }
+      };
+      
+      updateLogoWidth();
+      
+      // Обновляем при изменении размера окна
+      window.addEventListener('resize', updateLogoWidth);
+      return () => window.removeEventListener('resize', updateLogoWidth);
+    }
   }, []);
 
-  // Условные return — строго ПОСЛЕ всех хуков
+  // Условные return ПОСЛЕ всех хуков
   if (productsLoading) {
     return (
       <div className="min-h-screen">
@@ -104,12 +108,7 @@ const Product = memo(() => {
         <Header />
         <main className="flex items-center justify-center min-h-screen px-4">
           <div className="text-center">
-            <h1
-              className="font-bold mb-4 break-words"
-              style={{ fontSize: "clamp(20px, 5vw, 32px)" }}
-            >
-              Product not found
-            </h1>
+            <h1 className="font-bold mb-4 break-words" style={{ fontSize: 'clamp(20px, 5vw, 32px)' }}>Product not found</h1>
             <button
               onClick={handleBackClick}
               className="btn-brutal px-4 py-2 text-sm md:text-base"
@@ -181,16 +180,12 @@ const Product = memo(() => {
                       className="w-full"
                     >
                       <img
-                        src={img.src || ''}
-                        alt={`${product?.title || 'Product'} ${index + 1}`}
+                        src={img.src}
+                        alt={`${product.title} ${index + 1}`}
                         className="w-full h-auto object-cover cursor-pointer"
                         loading="lazy"
                         decoding="async"
-                        onClick={() => handleImageClick(img.src || '')}
-                        onError={(e) => {
-                          console.error(`Failed to load image: ${img.src}`);
-                          e.currentTarget.style.display = 'none';
-                        }}
+                        onClick={() => handleImageClick(img.src)}
                       />
                     </div>
                   ))}
@@ -220,13 +215,13 @@ const Product = memo(() => {
                 )}
                 
                 {/* Size Table */}
-                {product.sizes && product.sizes.length > 0 && product.sizes[0] && (
+                {product.sizes && product.sizes.length > 0 && (
                   <div className="text-black p-0 m-0 mt-4 md:mt-6">
                     <div className="overflow-x-auto -mx-4 md:mx-0 px-4 md:px-0">
                       <table className="w-full min-w-[280px] text-[11px] md:text-sm" style={{ borderCollapse: 'collapse' }}>
                         <thead>
                           <tr>
-                            {Object.keys(product.sizes[0] || {}).map((key) => (
+                            {Object.keys(product.sizes[0]).map((key) => (
                               <th key={key} className="text-left pb-2 whitespace-nowrap font-normal border border-[#f3f3f3] p-1.5 md:p-2 capitalize">
                                 {key}
                               </th>
@@ -236,7 +231,7 @@ const Product = memo(() => {
                         <tbody>
                           {product.sizes.map((sizeRow, index) => (
                             <tr key={index}>
-                              {Object.entries(sizeRow || {}).map(([key, value]) => (
+                              {Object.entries(sizeRow).map(([key, value]) => (
                                 <td key={key} className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">
                                   {value || '-'}
                                 </td>
@@ -271,8 +266,8 @@ const Product = memo(() => {
                 You may also like
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-10 gap-4 md:gap-6">
-                {similarProducts.map((item) => (
-                  <Link key={item.id} to={`/product/${encodeURIComponent(String(item.id))}`} className="block w-full">
+                {similarProducts.map((item, idx) => (
+                  <Link key={`${item.id}-${idx}`} to={`/product/${encodeURIComponent(String(item.id))}`} className="block w-full">
                     <div className="aspect-[4/5] overflow-hidden bg-gray-100">
                       <img
                         src={item.image || item.images?.[0] || ''}
