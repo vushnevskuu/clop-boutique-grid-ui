@@ -187,26 +187,53 @@ function parseDescriptionFile(content: string): { description: string; sizes: Pr
     }
   }
   
-  // Альтернативный парсинг для формата "Size: XS, Chest: 86-90"
-  if (sizes.length === 0 && description.match(/Size:/i)) {
-    const sizeBlocks = description.split(/\n\s*\n/);
-    sizeBlocks.forEach(block => {
-      if (block.match(/Size:/i)) {
-        const sizeMatch = block.match(/Size:\s*([^\n,]+)/i);
-        const chestMatch = block.match(/Chest:\s*([^\n,]+)/i);
-        const waistMatch = block.match(/Waist:\s*([^\n,]+)/i);
-        const lengthMatch = block.match(/Length:\s*([^\n,]+)/i);
-        
-        if (sizeMatch) {
-          sizes.push({
-            size: sizeMatch[1].trim(),
-            chest: chestMatch?.[1].trim(),
-            waist: waistMatch?.[1].trim(),
-            length: lengthMatch?.[1].trim(),
-          });
+  // Альтернативный парсинг для формата "Size: XS, Chest: 86-90" или "Chest (pit to pit): 50–52 cm"
+  if (sizes.length === 0) {
+    // Формат "Size: XS, Chest: 86-90"
+    if (description.match(/Size:/i)) {
+      const sizeBlocks = description.split(/\n\s*\n/);
+      sizeBlocks.forEach(block => {
+        if (block.match(/Size:/i)) {
+          const sizeMatch = block.match(/Size:\s*([^\n,]+)/i);
+          const chestMatch = block.match(/Chest:\s*([^\n,]+)/i);
+          const waistMatch = block.match(/Waist:\s*([^\n,]+)/i);
+          const lengthMatch = block.match(/Length:\s*([^\n,]+)/i);
+          
+          if (sizeMatch) {
+            sizes.push({
+              size: sizeMatch[1].trim(),
+              chest: chestMatch?.[1]?.trim() || '',
+              waist: waistMatch?.[1]?.trim() || '',
+              length: lengthMatch?.[1]?.trim() || '',
+            });
+          }
         }
+      });
+    }
+    
+    // Формат "Chest (pit to pit): 50–52 cm" - извлекаем измерения как одну строку
+    if (sizes.length === 0 && description.match(/(Chest|Waist|Shoulder|Back|Front|Arm)/i)) {
+      const measurementRow: { [key: string]: string } = {};
+      
+      // Извлекаем все измерения
+      const chestMatch = description.match(/Chest[^:]*:\s*([^\n]+)/i);
+      const waistMatch = description.match(/Waist[^:]*:\s*([^\n]+)/i);
+      const shoulderMatch = description.match(/Shoulder[^:]*:\s*([^\n]+)/i);
+      const backMatch = description.match(/Back[^:]*length[^:]*:\s*([^\n]+)/i);
+      const frontMatch = description.match(/Front[^:]*length[^:]*:\s*([^\n]+)/i);
+      const armMatch = description.match(/Arm[^:]*opening[^:]*:\s*([^\n]+)/i);
+      
+      if (chestMatch) measurementRow['chest (pit to pit)'] = chestMatch[1].trim().replace(/\s+/g, ' ');
+      if (waistMatch) measurementRow['waist'] = waistMatch[1].trim().replace(/\s+/g, ' ');
+      if (shoulderMatch) measurementRow['shoulder width'] = shoulderMatch[1].trim().replace(/\s+/g, ' ');
+      if (backMatch) measurementRow['back length'] = backMatch[1].trim().replace(/\s+/g, ' ');
+      if (frontMatch) measurementRow['front length'] = frontMatch[1].trim().replace(/\s+/g, ' ');
+      if (armMatch) measurementRow['arm opening'] = armMatch[1].trim().replace(/\s+/g, ' ');
+      
+      if (Object.keys(measurementRow).length > 0) {
+        sizes.push(measurementRow);
       }
-    });
+    }
   }
   
   return { description: description.trim(), sizes };
