@@ -50,14 +50,20 @@ export function useProducts() {
         
         // Обрабатываем каждый товар из manifest
         for (const productFolder of manifest.products || []) {
-          const productPath = `/cloth/${productFolder}`;
+          // URL-кодируем имя папки для безопасной работы с пробелами и спецсимволами
+          const encodedFolder = encodeURIComponent(productFolder).replace(/%20/g, ' ');
+          const productPath = `/cloth/${encodedFolder}`;
           
           // Загружаем описание
           let description = '';
           let sizes: Product['sizes'] = [];
           
           try {
-            const descResponse = await fetch(`${productPath}/description.txt`);
+            // Пробуем оба варианта названия файла (description.txt и discription.txt)
+            let descResponse = await fetch(`${productPath}/description.txt`);
+            if (!descResponse.ok) {
+              descResponse = await fetch(`${productPath}/discription.txt`);
+            }
             if (descResponse.ok) {
               const descContent = await descResponse.text();
               const parsed = parseDescriptionFile(descContent);
@@ -68,9 +74,13 @@ export function useProducts() {
             console.warn(`Failed to load description for ${productFolder}:`, err);
           }
           
-          // Получаем изображения из manifest
+          // Получаем изображения из manifest и правильно формируем пути
           const images: string[] = (manifest.images?.[productFolder] || [])
-            .map((img: string) => `${productPath}/${img}`)
+            .map((img: string) => {
+              // URL-кодируем имя файла изображения
+              const encodedImg = encodeURIComponent(img);
+              return `${productPath}/${encodedImg}`;
+            })
             .sort((a: string, b: string) => {
               // Сортируем по номеру в имени файла
               const numA = parseInt(a.match(/(\d+)/)?.[1] || '0');
