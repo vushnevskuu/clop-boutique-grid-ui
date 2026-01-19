@@ -20,8 +20,15 @@ const ProductCard = memo(({ id, image, hoverImage, title, price, size, brand }: 
   const handleButtonClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    // Handle message us action
-  }, []);
+    
+    // Создаём ссылку на карточку товара
+    const productUrl = `${window.location.origin}/product/${encodeURIComponent(String(id))}`;
+    const messageText = `Hey! I want this ${productUrl}`;
+    const telegramUrl = `https://t.me/hithisisi?text=${encodeURIComponent(messageText)}`;
+    
+    // Открываем Telegram в новой вкладке
+    window.open(telegramUrl, '_blank');
+  }, [id]);
 
   return (
     <Link 

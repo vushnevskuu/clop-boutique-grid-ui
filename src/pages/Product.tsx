@@ -249,6 +249,16 @@ const Product = memo(() => {
 
                 <div className="pt-4 md:pt-8">
                   <button 
+                    onClick={() => {
+                      // Создаём ссылку на карточку товара
+                      const productId = encodeURIComponent(String(product.id));
+                      const productUrl = `${window.location.origin}/product/${productId}`;
+                      const messageText = `Hey! I want this ${productUrl}`;
+                      const telegramUrl = `https://t.me/hithisisi?text=${encodeURIComponent(messageText)}`;
+                      
+                      // Открываем Telegram в новой вкладке
+                      window.open(telegramUrl, '_blank');
+                    }}
                     className="px-4 md:px-8 py-3 md:py-4 w-full transition-all duration-200 bg-black text-white text-xs md:text-sm font-normal"
                   >
                     message us
