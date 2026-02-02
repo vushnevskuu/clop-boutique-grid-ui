@@ -1,12 +1,36 @@
 {
   "products": [
-    "Le_grande_blue"
+    "Jackrose_made_in_Japan",
+    "Le grande blue",
+    "Le_grande_blue",
+    "kazuyuki_kumagai"
   ],
   "images": {
+    "Jackrose_made_in_Japan": [
+      "1.webp",
+      "2.webp",
+      "3.webp",
+      "4.webp",
+      "5.webp",
+      "6.webp"
+    ],
+    "Le grande blue": [
+      "1.webp",
+      "2.webp"
+    ],
     "Le_grande_blue": [
       "1.webp",
       "2.webp",
       "3.webp"
+    ],
+    "kazuyuki_kumagai": [
+      "1.webp",
+      "2.webp",
+      "3.webp",
+      "4.webp",
+      "5.webp",
+      "6.webp",
+      "7.webp"
     ]
   }
 }
