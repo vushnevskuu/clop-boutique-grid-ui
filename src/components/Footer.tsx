@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo, useCallback, memo } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () => void) => void) => void }) => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -6,7 +7,9 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
   const [lastHoverTime, setLastHoverTime] = useState(0);
   const footerRef = useRef<HTMLElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
-  const createShoeRef = useRef<(() => void) | null>(null);
+  const createShoeRef = useRef<((fromCenter?: boolean) => void) | null>(null);
+  const autoShoeLaunchedRef = useRef(false); // Флаг для отслеживания автоматического запуска
+  const isMobile = useIsMobile();
 
   // Memoized handlers to prevent recreation
   const handleWheel = useCallback((e: WheelEvent) => {
@@ -37,11 +40,44 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
 
   useEffect(() => {
     if (onShoeCreate) {
-      onShoeCreate((createShoe: () => void) => {
+      onShoeCreate((createShoe: (fromCenter?: boolean) => void) => {
         createShoeRef.current = createShoe;
       });
     }
   }, [onShoeCreate]);
+
+  // Автоматический запуск ботинка при доскролле до футера
+  useEffect(() => {
+    const footer = footerRef.current;
+    if (!footer) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          // Если футер виден и автоматический ботинок еще не был запущен
+          if (entry.isIntersecting && !autoShoeLaunchedRef.current && createShoeRef.current) {
+            autoShoeLaunchedRef.current = true;
+            // Небольшая задержка для более плавного эффекта
+            setTimeout(() => {
+              if (createShoeRef.current) {
+                createShoeRef.current(true); // Первый ботинок вылетает из центра
+              }
+            }, 300);
+          }
+        });
+      },
+      {
+        threshold: 0.3, // Футер должен быть виден минимум на 30%
+        rootMargin: '0px'
+      }
+    );
+
+    observer.observe(footer);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []); // Запускается только один раз при монтировании
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!footerRef.current) return;
@@ -57,20 +93,33 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
   }, []);
 
   const handleMouseEnter = useCallback(() => {
+    if (isMobile) return; // На мобильных не используем hover
     setIsHovered(true);
     const now = Date.now();
     
     // Создаём ботинок при входе мыши на футер (с задержкой между выбросами)
     if (now - lastHoverTime > 300 && createShoeRef.current) {
       setLastHoverTime(now);
-      createShoeRef.current();
+      createShoeRef.current(false); // Остальные ботинки вылетают из случайных позиций
     }
-  }, [lastHoverTime]);
+  }, [lastHoverTime, isMobile]);
 
   const handleMouseLeave = useCallback(() => {
+    if (isMobile) return; // На мобильных не используем hover
     setMousePosition({ x: 0, y: 0 });
     setIsHovered(false);
-  }, []);
+  }, [isMobile]);
+
+  const handleClick = useCallback(() => {
+    if (!isMobile) return; // Только на мобильных
+    const now = Date.now();
+    
+    // Создаём ботинок при клике на футер (с задержкой между выбросами)
+    if (now - lastHoverTime > 300 && createShoeRef.current) {
+      setLastHoverTime(now);
+      createShoeRef.current(false); // Ботинки вылетают из случайных позиций
+    }
+  }, [lastHoverTime, isMobile]);
 
 
   // Prevent overscroll/bounce effect when scrolled to footer
@@ -87,19 +136,27 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
   useEffect(() => {
     const footer = footerRef.current;
     if (footer) {
-      footer.addEventListener('mousemove', handleMouseMove);
-      footer.addEventListener('mouseenter', handleMouseEnter);
-      footer.addEventListener('mouseleave', handleMouseLeave);
+      if (!isMobile) {
+        // На десктопе используем hover события
+        footer.addEventListener('mousemove', handleMouseMove);
+        footer.addEventListener('mouseenter', handleMouseEnter);
+        footer.addEventListener('mouseleave', handleMouseLeave);
+      }
+      // На мобильных используем клик
+      footer.addEventListener('click', handleClick);
     }
 
     return () => {
       if (footer) {
-        footer.removeEventListener('mousemove', handleMouseMove);
-        footer.removeEventListener('mouseenter', handleMouseEnter);
-        footer.removeEventListener('mouseleave', handleMouseLeave);
+        if (!isMobile) {
+          footer.removeEventListener('mousemove', handleMouseMove);
+          footer.removeEventListener('mouseenter', handleMouseEnter);
+          footer.removeEventListener('mouseleave', handleMouseLeave);
+        }
+        footer.removeEventListener('click', handleClick);
       }
     };
-  }, [handleMouseMove, handleMouseEnter, handleMouseLeave]);
+  }, [handleMouseMove, handleMouseEnter, handleMouseLeave, handleClick, isMobile]);
 
   // Memoize 3D transform calculations
   const transform = useMemo(() => {
@@ -107,7 +164,7 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
     const rotateY = -mousePosition.x * 0.1;
     const translateZ = (Math.abs(mousePosition.x) * 5 + Math.abs(mousePosition.y) * 5) * 0.05;
     const isHovered = mousePosition.x !== 0 || mousePosition.y !== 0;
-    const scale = isHovered ? 1.01 : 1;
+    const scale = isHovered ? 1.005 : 1;
     return `perspective(1000px) scale(${scale}) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(${translateZ}px)`;
   }, [mousePosition.x, mousePosition.y]);
 
@@ -116,10 +173,19 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
     if (footerRef.current && img.naturalHeight) {
       const aspectRatio = img.naturalWidth / img.naturalHeight;
       const containerWidth = footerRef.current.offsetWidth;
-      const calculatedHeight = containerWidth / aspectRatio;
-      footerRef.current.style.height = `${calculatedHeight}px`;
+      
+      if (isMobile) {
+        // На мобильных: изображение увеличено до 150%, высота рассчитывается с учетом этого
+        // Но видимая часть остается в пределах контейнера благодаря overflow: hidden
+        const calculatedHeight = containerWidth / aspectRatio;
+        footerRef.current.style.height = `${calculatedHeight}px`;
+      } else {
+        // На десктопе: обычная высота
+        const calculatedHeight = containerWidth / aspectRatio;
+        footerRef.current.style.height = `${calculatedHeight}px`;
+      }
     }
-  }, []);
+  }, [isMobile]);
 
   return (
     <footer 
@@ -133,39 +199,57 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
         zIndex: 25,
         overflow: 'hidden',
         width: '100%',
-        touchAction: 'none',
+        touchAction: isMobile ? 'auto' : 'none',
         overscrollBehavior: 'none',
         backgroundColor: 'transparent',
         background: 'none',
+        minHeight: isMobile ? '200px' : 'auto',
+        cursor: isMobile ? 'pointer' : 'default',
       }}
     >
-      <img 
-        ref={imgRef}
-        src="/footer.webp" 
-        alt="Footer" 
-        className="w-full h-auto object-cover"
-        style={{ 
-          display: 'block', 
+      <div
+        style={{
           position: 'relative',
-          width: '100%', 
-          height: 'auto', 
-          margin: 0, 
-          padding: 0,
-          objectFit: 'contain',
-          transform: transform,
-          transformOrigin: 'center center',
-          transition: 'transform 0.3s ease-in',
-          willChange: 'transform',
-          zIndex: 26,
+          width: '100%',
+          height: '100%',
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
-        loading="lazy"
-        decoding="async"
-        fetchPriority="low"
-        onError={(e) => {
-          console.error('Footer image failed to load:', e);
-        }}
-        onLoad={handleImageLoad}
-      />
+      >
+        <img 
+          ref={imgRef}
+          src="/footer.webp" 
+          alt="Footer" 
+          className="w-full h-auto"
+          style={{ 
+            display: 'block', 
+            position: 'relative',
+            width: isMobile ? '150%' : '100%', 
+            height: isMobile ? 'auto' : 'auto', 
+            maxHeight: isMobile ? 'none' : 'none',
+            margin: 0, 
+            marginLeft: isMobile ? 'auto' : 0,
+            marginRight: isMobile ? 'auto' : 0,
+            padding: 0,
+            objectFit: isMobile ? 'cover' : 'contain',
+            objectPosition: 'center center',
+            transform: isMobile ? 'translateX(-25%)' : transform, // Центрируем увеличенное изображение (150% ширины)
+            transformOrigin: 'center center',
+            transition: isMobile ? 'none' : 'transform 0.1s ease-out',
+            willChange: isMobile ? 'auto' : 'transform',
+            zIndex: 26,
+          }}
+          loading="lazy"
+          decoding="async"
+          fetchPriority="low"
+          onError={(e) => {
+            console.error('Footer image failed to load:', e);
+          }}
+          onLoad={handleImageLoad}
+        />
+      </div>
     </footer>
   );
 });

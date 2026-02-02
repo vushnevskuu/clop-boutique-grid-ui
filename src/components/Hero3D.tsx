@@ -1,6 +1,7 @@
 import { useRef, Suspense, useMemo, useEffect } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useGLTF, Center } from "@react-three/drei";
+import { useIsMobile } from "@/hooks/use-mobile";
 import * as THREE from "three";
 
 interface Model3DProps {
@@ -13,6 +14,7 @@ const Model = ({ modelPath, scrollProgress, mousePosition = { x: 0, y: 0 } }: Mo
   // Load model with caching enabled
   const { scene } = useGLTF(modelPath, true);
   const meshRef = useRef<THREE.Group>(null);
+  const isMobile = useIsMobile();
   
   // Optimize: dispose of unused geometries and materials
   useEffect(() => {
@@ -38,9 +40,11 @@ const Model = ({ modelPath, scrollProgress, mousePosition = { x: 0, y: 0 } }: Mo
     cloned.position.sub(center);
     const size = box.getSize(new THREE.Vector3());
     const maxDim = Math.max(size.x, size.y, size.z);
-    const scale = maxDim > 0 ? 2 / maxDim : 1;
+    const baseScale = maxDim > 0 ? 2 / maxDim : 1;
+    // На мобильных увеличиваем масштаб в 2 раза для лучшей видимости
+    const scale = isMobile ? baseScale * 2 : baseScale;
     return { clonedScene: cloned, box, scale };
-  }, [scene]);
+  }, [scene, isMobile]);
 
   // Rotate model based on scroll progress - memoized calculation
   const rotationY = useMemo(() => scrollProgress * Math.PI * 0.5, [scrollProgress]);
@@ -113,9 +117,7 @@ const Hero3D = ({ modelPath, scrollProgress, mousePosition = { x: 0, y: 0 } }: H
         
         {/* Hemisphere light for natural sky/ground lighting */}
         <hemisphereLight 
-          skyColor={0xffffff} 
-          groundColor={0xffffff} 
-          intensity={0.8} 
+          args={[0xffffff, 0xffffff, 0.8]} 
         />
         
         {/* Main directional lights from multiple angles */}

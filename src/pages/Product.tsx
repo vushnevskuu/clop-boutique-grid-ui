@@ -1,98 +1,28 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import Header from "@/components/Header";
 import { useState, useMemo, memo, useCallback, useRef, useEffect } from "react";
-
-import product1 from "@/assets/product-1.jpg";
-import product2 from "@/assets/product-2.jpg";
-import product3 from "@/assets/product-3.jpg";
-import product4 from "@/assets/product-4.jpg";
-import product5 from "@/assets/product-5.jpg";
-import product6 from "@/assets/product-6.jpg";
-import product7 from "@/assets/product-7.jpg";
-import product8 from "@/assets/product-8.jpg";
-
-const products = [
-  {
-    id: 1,
-    image: product1,
-    hoverImage: product2,
-    title: "Leather jacket",
-    brand: "Vintage",
-    price: "$125",
-    size: "M",
-  },
-  {
-    id: 2,
-    image: product2,
-    hoverImage: product3,
-    title: "Classic jeans",
-    brand: "Levi's",
-    price: "$42",
-    size: "32",
-  },
-  {
-    id: 3,
-    image: product3,
-    hoverImage: product4,
-    title: "Wool sweater",
-    brand: "Handmade",
-    price: "$58",
-    size: "L",
-  },
-  {
-    id: 4,
-    image: product4,
-    hoverImage: product5,
-    title: "Leather sneakers",
-    brand: "Vintage",
-    price: "$39",
-    size: "42",
-  },
-  {
-    id: 5,
-    image: product5,
-    hoverImage: product6,
-    title: "Silk scarf",
-    brand: "Italian",
-    price: "$21",
-  },
-  {
-    id: 6,
-    image: product6,
-    hoverImage: product7,
-    title: "Corduroy pants",
-    brand: "Vintage",
-    price: "$45",
-    size: "M",
-  },
-  {
-    id: 7,
-    image: product7,
-    hoverImage: product8,
-    title: "Oversized blazer",
-    brand: "90s",
-    price: "$72",
-    size: "L",
-  },
-  {
-    id: 8,
-    image: product8,
-    hoverImage: product1,
-    title: "Basic t-shirt",
-    brand: "Premium Cotton",
-    price: "$18",
-    size: "M",
-  },
-];
+import { useProducts } from "@/hooks/useProducts";
 
 const Product = memo(() => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { products, loading: productsLoading } = useProducts();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [logoWidth, setLogoWidth] = useState<number>(120);
   const imageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
-  const product = useMemo(() => products.find((p) => p.id === Number(id)), [id]);
+  const product = useMemo(() => {
+    if (!id) return undefined;
+    // Декодируем ID из URL (на случай пробелов и спецсимволов)
+    const decodedId = decodeURIComponent(id);
+    // ID может быть как строкой (из cloth), так и числом (старые товары)
+    return products.find((p) => 
+      p.id === decodedId || 
+      p.id === String(decodedId) || 
+      String(p.id) === decodedId ||
+      String(p.id) === id
+    );
+  }, [id, products]);
   
   const handleBackClick = useCallback(() => {
     navigate("/");
@@ -113,46 +43,29 @@ const Product = memo(() => {
     }
   }, []);
 
-
-  if (!product) {
-    return (
-      <div className="min-h-screen">
-        <Header />
-        <main className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <h1 className="font-bold mb-4" style={{ fontSize: '32px' }}>Product not found</h1>
-            <button
-              onClick={handleBackClick}
-              className="btn-brutal"
-            >
-              Back to catalog
-            </button>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  // Prepare images array
+  // Prepare images array - используем product.images если есть, иначе product.image/hoverImage
   const productImages = useMemo(() => {
-    const images = [
-      { src: product.image },
-      ...(product.hoverImage ? [{ src: product.hoverImage }] : [])
-    ];
+    if (!product) return [];
+    if (product.images && product.images.length > 0) {
+      return product.images.map(src => ({ src }));
+    }
+    const images = [];
+    if (product.image) images.push({ src: product.image });
+    if (product.hoverImage) images.push({ src: product.hoverImage });
     return images;
-  }, [product.image, product.hoverImage]);
+  }, [product]);
 
   // Find similar products (same brand first, then other products)
   const similarProducts = useMemo(() => {
-    const sameBrand = products.filter((p) => p.id !== product.id && p.brand === product.brand);
-    const otherProducts = products.filter((p) => p.id !== product.id && p.brand !== product.brand);
+    if (!product || !products || products.length === 0) return [];
+    const productId = String(product.id);
+    const productBrand = product.brand || '';
+    const sameBrand = products.filter((p) => String(p.id) !== productId && (p.brand || '') === productBrand);
+    const otherProducts = products.filter((p) => String(p.id) !== productId && (p.brand || '') !== productBrand);
     const combined = [...sameBrand, ...otherProducts];
-    const result = [];
-    while (result.length < 16 && combined.length > 0) {
-      result.push(...combined);
-    }
-    return result.slice(0, 16);
-  }, [product.id, product.brand]);
+    // Просто возвращаем первые 16 товаров
+    return combined.slice(0, 16);
+  }, [product?.id, product?.brand, products]);
 
   // Измеряем ширину логотипа
   useEffect(() => {
@@ -173,16 +86,46 @@ const Product = memo(() => {
     }
   }, []);
 
+  if (productsLoading) {
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <main className="flex items-center justify-center min-h-screen px-4">
+          <div className="text-center">Loading product...</div>
+        </main>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <main className="flex items-center justify-center min-h-screen px-4">
+          <div className="text-center">
+            <h1 className="font-bold mb-4 break-words" style={{ fontSize: 'clamp(20px, 5vw, 32px)' }}>Product not found</h1>
+            <button
+              onClick={handleBackClick}
+              className="btn-brutal px-4 py-2 text-sm md:text-base"
+            >
+              Back to catalog
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="pb-12" style={{ paddingTop: '60px' }}>
-        <div style={{ marginLeft: '30px', marginRight: '30px' }}>
-          <div className="flex gap-4 mb-20" style={{ marginTop: '60px' }}>
+      <main className="pb-12 pt-16 md:pt-[60px]">
+        <div className="px-4 md:px-8 lg:px-[30px]">
+          <div className="flex flex-col md:flex-row gap-4 mb-12 md:mb-20 mt-5 md:mt-[60px]">
             {/* Thumbnails and Images Gallery - весь блок sticky как описание */}
-            <div className="flex gap-4 flex-1 sticky top-24" style={{ alignSelf: 'flex-start' }}>
-              {/* Product Info Panel - только миниатюры слева */}
-              <div className="flex-shrink-0" style={{ width: `${logoWidth}px` }}>
+            <div className="flex flex-col md:flex-row gap-4 flex-1 md:sticky md:top-24" style={{ alignSelf: 'flex-start' }}>
+              {/* Product Info Panel - только миниатюры слева - скрыто на мобильных */}
+              <div className="hidden md:block flex-shrink-0" style={{ width: `${logoWidth}px` }}>
                 <div className="sticky top-24">
                   {/* Thumbnails */}
                   <div className="flex flex-col gap-4">
@@ -217,7 +160,7 @@ const Product = memo(() => {
               </div>
 
               {/* Images Gallery - scrollable */}
-              <div className="flex-1">
+              <div className="flex-1 w-full">
                 <div className="flex flex-col">
                   {productImages.map((img, index) => (
                     <div 
@@ -232,12 +175,16 @@ const Product = memo(() => {
                       className="w-full"
                     >
                       <img
-                        src={img.src}
-                        alt={`${product.title} ${index + 1}`}
+                        src={img.src || ''}
+                        alt={`${product?.title || 'Product'} ${index + 1}`}
                         className="w-full h-auto object-cover cursor-pointer"
                         loading="lazy"
                         decoding="async"
-                        onClick={() => handleImageClick(img.src)}
+                        onClick={() => handleImageClick(img.src || '')}
+                        onError={(e) => {
+                          console.error(`Failed to load image: ${img.src}`);
+                          e.currentTarget.style.display = 'none';
+                        }}
                       />
                     </div>
                   ))}
@@ -245,82 +192,74 @@ const Product = memo(() => {
               </div>
             </div>
 
-            {/* Product Info Panel - 750px width */}
-            <div className="flex-shrink-0 sticky top-24" style={{ width: '750px', marginLeft: '20px', alignSelf: 'flex-start' }}>
-              <div className="space-y-6">
-                <h1 className="font-bold uppercase tracking-tighter" style={{ fontSize: '32px' }}>
-                  {product.title}
+            {/* Product Info Panel - адаптивная ширина */}
+            <div className="flex-shrink-0 w-full md:w-[600px] md:sticky md:top-24 md:ml-5 self-start">
+              <div className="space-y-4 md:space-y-6">
+                <h1 className="font-bold uppercase tracking-tighter break-words text-[20px] md:text-[32px] leading-tight">
+                  {product.title.replace(/_/g, ' ')}
                 </h1>
                 {product.brand && (
-                  <p className="text-muted-foreground lowercase tracking-widest" style={{ fontSize: '14px' }}>
+                  <p className="text-muted-foreground lowercase tracking-widest break-words text-xs md:text-sm">
                     {product.brand}
                   </p>
                 )}
                 
-                {/* Size Table */}
-                <div 
-                  style={{ 
-                    color: '#000000',
-                    padding: '0',
-                    margin: '0',
-                    marginTop: '24px'
-                  }}
-                >
-                  <table className="w-full" style={{ fontSize: '14px', borderCollapse: 'collapse' }}>
-                    <thead>
-                      <tr>
-                        <th className="text-left pb-2" style={{ fontWeight: 'normal', border: '1px solid #f3f3f3', padding: '8px' }}>Size</th>
-                        <th className="text-left pb-2" style={{ fontWeight: 'normal', border: '1px solid #f3f3f3', padding: '8px' }}>Chest</th>
-                        <th className="text-left pb-2" style={{ fontWeight: 'normal', border: '1px solid #f3f3f3', padding: '8px' }}>Waist</th>
-                        <th className="text-left pb-2" style={{ fontWeight: 'normal', border: '1px solid #f3f3f3', padding: '8px' }}>Length</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>XS</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>86-90</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>66-70</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>58</td>
-                      </tr>
-                      <tr>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>S</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>90-94</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>70-74</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>60</td>
-                      </tr>
-                      <tr>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>M</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>94-98</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>74-78</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>62</td>
-                      </tr>
-                      <tr>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>L</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>98-102</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>78-82</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>64</td>
-                      </tr>
-                      <tr>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>XL</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>102-106</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>82-86</td>
-                        <td className="py-1" style={{ border: '1px solid #f3f3f3', padding: '8px' }}>66</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+                {/* Description */}
+                {product.description && (
+                  <div className="text-black p-0 m-0 mt-4 md:mt-6">
+                    <p className="text-xs md:text-sm break-words whitespace-pre-line">
+                      {product.description}
+                    </p>
+                  </div>
+                )}
                 
-                <p className="font-bold" style={{ fontSize: '14px' }}>{product.price}</p>
+                {/* Size Table */}
+                {product.sizes && product.sizes.length > 0 && product.sizes[0] && (
+                  <div className="text-black p-0 m-0 mt-4 md:mt-6">
+                    <div className="overflow-x-auto -mx-4 md:mx-0 px-4 md:px-0">
+                      <table className="w-full min-w-[280px] text-[11px] md:text-sm" style={{ borderCollapse: 'collapse' }}>
+                        <thead>
+                          <tr>
+                            {Object.keys(product.sizes[0] || {}).map((key) => (
+                              <th key={key} className="text-left pb-2 whitespace-nowrap font-normal border border-[#f3f3f3] p-1.5 md:p-2 capitalize">
+                                {key}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {product.sizes.map((sizeRow, index) => (
+                            <tr key={index}>
+                              {Object.entries(sizeRow || {}).map(([key, value]) => (
+                                <td key={key} className="py-1 whitespace-nowrap border border-[#f3f3f3] p-1.5 md:p-2">
+                                  {value || '-'}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+                
+                {product.price && (
+                  <p className="font-bold break-words text-xs md:text-sm">{product.price}</p>
+                )}
 
-                <div className="pt-8">
+                <div className="pt-4 md:pt-8">
                   <button 
-                    className="px-8 py-4 w-full transition-all duration-200"
-                    style={{ 
-                      backgroundColor: '#000000', 
-                      color: '#ffffff',
-                      fontSize: '14px',
-                      fontWeight: 'normal'
+                    onClick={() => {
+                      // Создаём ссылку на карточку товара
+                      const productId = encodeURIComponent(String(product.id));
+                      const productUrl = `${window.location.origin}/product/${productId}`;
+                      const messageText = `Hey! I want this ${productUrl}`;
+                      const telegramUrl = `https://t.me/hithisisi?text=${encodeURIComponent(messageText)}`;
+                      
+                      // Открываем Telegram в новой вкладке
+                      window.open(telegramUrl, '_blank');
                     }}
+                    className="px-4 md:px-8 py-3 md:py-4 w-full transition-all duration-200 bg-black text-white text-xs md:text-sm font-normal"
                   >
                     message us
                   </button>
@@ -331,16 +270,16 @@ const Product = memo(() => {
 
           {/* You may also like section */}
           {similarProducts.length > 0 && (
-            <section className="mt-20">
-              <h2 className="font-bold uppercase mb-8" style={{ fontSize: '14px' }}>
+            <section className="mt-12 md:mt-20">
+              <h2 className="font-bold uppercase mb-4 md:mb-8 break-words" style={{ fontSize: 'clamp(12px, 3vw, 14px)' }}>
                 You may also like
               </h2>
-              <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-10" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${logoWidth}px, 1fr))` }}>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-10 gap-4 md:gap-6">
                 {similarProducts.map((item) => (
-                  <Link key={item.id} to={`/product/${item.id}`} className="block" style={{ width: `${logoWidth}px` }}>
+                  <Link key={item.id} to={`/product/${encodeURIComponent(String(item.id))}`} className="block w-full">
                     <div className="aspect-[4/5] overflow-hidden bg-gray-100">
                       <img
-                        src={item.image}
+                        src={item.image || item.images?.[0] || ''}
                         alt={item.title}
                         className="w-full h-full object-cover"
                         loading="lazy"
@@ -358,7 +297,7 @@ const Product = memo(() => {
       {/* Image Modal */}
       {selectedImage && (
         <div
-          className="fixed inset-0 z-[100] bg-black bg-opacity-90 flex items-center justify-center"
+          className="fixed inset-0 z-[100] bg-black bg-opacity-90 flex items-center justify-center p-4"
           onClick={handleCloseModal}
           style={{ cursor: 'pointer', pointerEvents: 'auto' }}
         >
@@ -371,7 +310,7 @@ const Product = memo(() => {
           />
           <button
             onClick={handleCloseModal}
-            className="absolute top-4 right-4 text-white text-4xl font-bold z-[101]"
+            className="absolute top-2 right-2 md:top-4 md:right-4 text-white text-3xl md:text-4xl font-bold z-[101] p-2"
             style={{ cursor: 'pointer', pointerEvents: 'auto' }}
           >
             ×

@@ -1,0 +1,12 @@
+{
+  "products": [
+    "Le_grande_blue"
+  ],
+  "images": {
+    "Le_grande_blue": [
+      "1.webp",
+      "2.webp",
+      "3.webp"
+    ]
+  }
+}
