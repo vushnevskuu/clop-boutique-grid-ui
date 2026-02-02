@@ -15,6 +15,9 @@ export interface ProductData {
   images: string[]; // Массив путей к изображениям, отсортированный по номеру
 }
 
+// Известные ключи измерений — только такие строки считаем размером, не описанием
+const MEASUREMENT_KEYS = /^(chest|waist|shoulder|back length|front length|arm opening|size|размер|sleeve|length|hip|inseam)/i;
+
 // Парсинг текстового файла описания
 function parseDescriptionFile(content: string): { description: string; sizes: SizeRow[] } {
   const lines = content.split('\n').map(line => line.trim()).filter(line => line);
@@ -23,29 +26,48 @@ function parseDescriptionFile(content: string): { description: string; sizes: Si
   let sizes: SizeRow[] = [];
   let inSizesSection = false;
   let headers: string[] = [];
+  let currentRow: { [key: string]: string } = {};
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     
-    // Проверяем, является ли строка заголовком таблицы размеров
-    if (line.toLowerCase().includes('size') || line.match(/^\s*(size|размер)/i)) {
+    // Начало секции размеров: "size", "размер", "approximate measurements", "measurements (laid flat)"
+    const isSizeSectionStart = 
+      line.toLowerCase().includes('size') || 
+      line.match(/^\s*(size|размер)/i) ||
+      /approximate\s+measurements|measurements\s*\(laid\s+flat\)/i.test(line);
+    
+    if (isSizeSectionStart) {
       inSizesSection = true;
-      // Извлекаем заголовки из первой строки
-      headers = line.split(/\s+/).map(h => h.toLowerCase());
+      // Если это заголовок таблицы через пробелы (старый формат) — сохраняем заголовки
+      if (!line.match(/^.+:\s*.+$/)) {
+        headers = line.split(/\s+/).map(h => h.toLowerCase());
+      }
       continue;
     }
     
     if (inSizesSection) {
-      // Парсим строки размеров (табличные данные)
+      // Формат "Ключ: значение" (например "Chest (pit to pit): 50–52 cm")
+      const keyValueMatch = line.match(/^(.+?):\s*(.+)$/);
+      if (keyValueMatch) {
+        const key = keyValueMatch[1].trim();
+        const value = keyValueMatch[2].trim();
+        // Только строки, похожие на размеры, чтобы не затащить описание
+        if (MEASUREMENT_KEYS.test(key) || /\d+\s*[–\-]\s*\d+\s*cm|~\d+/i.test(value)) {
+          currentRow[key] = value;
+          continue;
+        }
+      }
+      
+      // Старый формат: строка из нескольких значений через пробелы (табличные данные)
       const values = line.split(/\s+/).filter(v => v);
-      if (values.length > 0) {
+      if (values.length > 0 && headers.length > 0) {
         const sizeRow: { [key: string]: string } = {};
         headers.forEach((header, index) => {
           if (values[index]) {
             sizeRow[header] = values[index];
           }
         });
-        // Если первый столбец - размер, используем его как ключ 'size'
         if (values[0] && !sizeRow.size) {
           sizeRow.size = values[0];
         }
@@ -54,13 +76,18 @@ function parseDescriptionFile(content: string): { description: string; sizes: Si
         }
       }
     } else {
-      // Описание - все строки до таблицы размеров
+      // Описание — всё до секции размеров
       if (description) description += '\n';
       description += line;
     }
   }
   
-  // Альтернативный парсинг: если размеры в формате "Size: XS, Chest: 86-90, ..."
+  // Если собрали одну строку размеров из формата "Ключ: значение"
+  if (Object.keys(currentRow).length > 0) {
+    sizes.push(currentRow as SizeRow);
+  }
+  
+  // Альтернативный парсинг: "Size: XS, Chest: 86-90, ..."
   if (sizes.length === 0 && description.includes('Size:')) {
     const sizeMatches = description.match(/Size:\s*([^\n,]+)/gi);
     if (sizeMatches) {
