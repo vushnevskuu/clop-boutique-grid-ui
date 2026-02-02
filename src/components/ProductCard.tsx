@@ -77,7 +77,7 @@ const ProductCard = memo(({ id, image, hoverImage, title, price, size, brand }: 
           <h3 
             className="font-normal uppercase tracking-wide text-[10px] md:text-xs break-words" 
           >
-            {title}
+            {title.replace(/_/g, ' ')}
           </h3>
           {brand && <p className="text-muted-foreground lowercase text-xs md:text-sm break-words">{brand}</p>}
           <div className="mt-1 md:mt-2">
