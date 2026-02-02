@@ -122,6 +122,10 @@ export function useProducts() {
           fetch('http://127.0.0.1:7242/ingest/479bd6ea-c80d-4e3a-82d4-f5e5e0ef2b1b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useProducts.ts:86',message:'Images paths generated',data:{productFolder,imagesCount:images.length,images:images},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
           // #endregion
           
+          const priceByProduct: Record<string, string> = {
+            'Le_grande_blue': '$350',
+            'Jackrose_made_in_Japan': '$150',
+          };
           loadedProducts.push({
             id: productFolder,
             title: productFolder,
@@ -130,7 +134,7 @@ export function useProducts() {
             images,
             image: images[0] || '',
             hoverImage: images[1] || images[0] || '',
-            price: '$100', // Добавляем цену по умолчанию
+            price: priceByProduct[productFolder] ?? '$100',
           });
         }
         
