@@ -155,144 +155,55 @@ export function useProducts() {
   return { products, loading, error };
 }
 
-// Парсинг текстового файла описания
+// Строка считается началом блока размеров (описание до неё, размеры — после)
+const SIZE_SECTION_START = /approximate\s+measurements|measurements\s*\(laid\s+flat\)|^\s*(size|размер)\s*$/i;
+
+// Строка "Ключ: значение" считается размером только если ключ — известное измерение
+const MEASUREMENT_KEY = /^(chest|waist|shoulder\s*width|back\s*length|front\s*length|arm\s*opening|size|размер)/i;
+
+// Значение похоже на размер (числа, см), а не на текст описания
+const LOOKS_LIKE_MEASUREMENT = /^[\d\s–\-~]+cm$|^\d+\s*[–\-]\s*\d+(\s*cm)?$/i;
+
+// Парсинг текстового файла описания (только из description.txt — описание и таблица размеров)
 function parseDescriptionFile(content: string): { description: string; sizes: Product['sizes'] } {
-  // Сохраняем пустые строки для абзацев, но триммируем каждую строку
-  const lines = content.split('\n').map(line => line.trim());
+  const lines = content.split('\n').map(line => line.trim()).filter(line => line.length > 0);
   
   let description = '';
   let sizes: Product['sizes'] = [];
   let inSizesSection = false;
-  let headers: string[] = [];
+  const measurementRow: { [key: string]: string } = {};
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     
-    // Проверяем, является ли строка заголовком таблицы размеров
-    const isHeaderRow = line.toLowerCase().includes('size') || 
-                        line.match(/^\s*(size|размер)/i) ||
-                        (line.includes('\t') && line.match(/size|chest|waist|length/i));
-    
-    if (isHeaderRow) {
+    // Начало блока размеров: "Approximate measurements (laid flat):" или "Size" / "Размер"
+    if (SIZE_SECTION_START.test(line)) {
       inSizesSection = true;
-      // Извлекаем заголовки
-      if (line.includes('\t')) {
-        headers = line.split('\t').map(h => h.toLowerCase().trim()).filter(h => h);
-      } else {
-        headers = line.split(/\s{2,}/).map(h => h.toLowerCase().trim()).filter(h => h);
-        if (headers.length < 2) {
-          headers = line.split(/\s+/).map(h => h.toLowerCase().trim()).filter(h => h);
-        }
-      }
       continue;
     }
     
-    if (inSizesSection && headers.length > 0) {
-      // Парсим строки размеров
-      let values: string[] = [];
-      if (line.includes('\t')) {
-        values = line.split('\t').map(v => v.trim()).filter(v => v);
-      } else {
-        values = line.split(/\s{2,}/).map(v => v.trim()).filter(v => v);
-        if (values.length < 2 && line.match(/\d/)) {
-          values = line.split(/\s+/).filter(v => v && !v.match(/^[A-Z]$/)); // Исключаем одиночные буквы
+    if (inSizesSection) {
+      // Формат одной строки: "Chest (pit to pit): 50–52 cm"
+      const keyValue = line.match(/^(.+?):\s*(.+)$/);
+      if (keyValue) {
+        const key = keyValue[1].trim();
+        const value = keyValue[2].trim();
+        const isMeasurementKey = MEASUREMENT_KEY.test(key);
+        const isMeasurementValue = LOOKS_LIKE_MEASUREMENT.test(value) || /^\d+[–\-]\d+\s*cm/.test(value);
+        if (isMeasurementKey && isMeasurementValue) {
+          measurementRow[key] = value;
+          continue;
         }
       }
-      
-      if (values.length > 0) {
-        const sizeRow: Product['sizes'][0] = {};
-        headers.forEach((header, index) => {
-          if (values[index] && header) {
-            const normalizedHeader = header.toLowerCase();
-            sizeRow[normalizedHeader] = values[index];
-          }
-        });
-        // Если первый столбец - размер
-        if (values[0] && !sizeRow.size) {
-          sizeRow.size = values[0];
-        }
-        if (Object.keys(sizeRow).length > 0) {
-          sizes.push(sizeRow);
-        }
-      }
-    } else if (!inSizesSection) {
-      // Описание - все строки до таблицы размеров (сохраняем пустые строки для абзацев)
-      if (description) {
-        description += '\n';
-      }
+      // Любая другая строка в блоке размеров не подходит — не добавляем в sizes
+    } else {
+      if (description) description += '\n';
       description += line;
     }
   }
   
-  // Альтернативный парсинг для формата "Size: XS, Chest: 86-90" или "Chest (pit to pit): 50–52 cm"
-  if (sizes.length === 0) {
-    // Формат "Size: XS, Chest: 86-90"
-    if (description.match(/Size:/i)) {
-      const sizeBlocks = description.split(/\n\s*\n/);
-      sizeBlocks.forEach(block => {
-        if (block.match(/Size:/i)) {
-          const sizeMatch = block.match(/Size:\s*([^\n,]+)/i);
-          const chestMatch = block.match(/Chest:\s*([^\n,]+)/i);
-          const waistMatch = block.match(/Waist:\s*([^\n,]+)/i);
-          const lengthMatch = block.match(/Length:\s*([^\n,]+)/i);
-          
-          if (sizeMatch) {
-            sizes.push({
-              size: sizeMatch[1].trim(),
-              chest: chestMatch?.[1]?.trim() || '',
-              waist: waistMatch?.[1]?.trim() || '',
-              length: lengthMatch?.[1]?.trim() || '',
-            });
-          }
-        }
-      });
-    }
-    
-    // Формат "Chest (pit to pit): 50–52 cm" - извлекаем измерения как одну строку
-    if (sizes.length === 0 && description.match(/(Chest|Waist|Shoulder|Back|Front|Arm)/i)) {
-      const measurementRow: { [key: string]: string } = {};
-      
-      // Извлекаем все измерения
-      const chestMatch = description.match(/Chest[^:]*:\s*([^\n]+)/i);
-      const waistMatch = description.match(/Waist[^:]*:\s*([^\n]+)/i);
-      const shoulderMatch = description.match(/Shoulder[^:]*:\s*([^\n]+)/i);
-      const backMatch = description.match(/Back[^:]*length[^:]*:\s*([^\n]+)/i);
-      const frontMatch = description.match(/Front[^:]*length[^:]*:\s*([^\n]+)/i);
-      const armMatch = description.match(/Arm[^:]*opening[^:]*:\s*([^\n]+)/i);
-      
-      if (chestMatch) measurementRow['chest (pit to pit)'] = chestMatch[1].trim().replace(/\s+/g, ' ');
-      if (waistMatch) measurementRow['waist'] = waistMatch[1].trim().replace(/\s+/g, ' ');
-      if (shoulderMatch) measurementRow['shoulder width'] = shoulderMatch[1].trim().replace(/\s+/g, ' ');
-      if (backMatch) measurementRow['back length'] = backMatch[1].trim().replace(/\s+/g, ' ');
-      if (frontMatch) measurementRow['front length'] = frontMatch[1].trim().replace(/\s+/g, ' ');
-      if (armMatch) measurementRow['arm opening'] = armMatch[1].trim().replace(/\s+/g, ' ');
-      
-      if (Object.keys(measurementRow).length > 0) {
-        sizes.push(measurementRow);
-        
-        // Удаляем строки с измерениями из описания после извлечения
-        // Удаляем "Approximate measurements" и все строки после неё, которые содержат измерения
-        const measurementKeywords = /Approximate measurements|Chest|Waist|Shoulder|Back length|Front length|Arm opening/i;
-        const descLines = description.split('\n');
-        const filteredLines: string[] = [];
-        let skipMeasurementLines = false;
-        
-        for (const line of descLines) {
-          if (measurementKeywords.test(line) || (skipMeasurementLines && line.match(/^\s*[A-Z]/))) {
-            skipMeasurementLines = true;
-            continue;
-          }
-          if (skipMeasurementLines && line.trim() === '') {
-            skipMeasurementLines = false;
-          }
-          if (!skipMeasurementLines) {
-            filteredLines.push(line);
-          }
-        }
-        
-        description = filteredLines.join('\n').trim();
-      }
-    }
+  if (Object.keys(measurementRow).length > 0) {
+    sizes.push(measurementRow);
   }
   
   return { description: description.trim(), sizes };
