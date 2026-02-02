@@ -166,7 +166,8 @@ const LOOKS_LIKE_MEASUREMENT = /^[\d\s–\-~]+cm$|^\d+\s*[–\-]\s*\d+(\s*cm)?$/
 
 // Парсинг текстового файла описания (только из description.txt — описание и таблица размеров)
 function parseDescriptionFile(content: string): { description: string; sizes: Product['sizes'] } {
-  const lines = content.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+  // Не убираем пустые строки — они задают абзацы в описании
+  const lines = content.split('\n').map(line => line.trim());
   
   let description = '';
   let sizes: Product['sizes'] = [];
@@ -177,7 +178,7 @@ function parseDescriptionFile(content: string): { description: string; sizes: Pr
     const line = lines[i];
     
     // Начало блока размеров: "Approximate measurements (laid flat):" или "Size" / "Размер"
-    if (SIZE_SECTION_START.test(line)) {
+    if (line.length > 0 && SIZE_SECTION_START.test(line)) {
       inSizesSection = true;
       continue;
     }
@@ -197,6 +198,7 @@ function parseDescriptionFile(content: string): { description: string; sizes: Pr
       }
       // Любая другая строка в блоке размеров не подходит — не добавляем в sizes
     } else {
+      // Описание: сохраняем пустые строки как переносы (абзацы)
       if (description) description += '\n';
       description += line;
     }
