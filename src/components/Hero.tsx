@@ -87,12 +87,13 @@ const Hero = () => {
       style={{ height: '300vh', position: 'relative' }} // 3 viewport heights for scrollable area
     >
       {/* Fixed Background with 3D Model - moves up after animations complete */}
+      {/* pointer-events: none — касания проходят к документу, скролл работает в Safari */}
       <div 
         className="fixed inset-0 z-0 bg-white"
         style={{
           transform: `translateY(${heroTranslateY}px)`,
           transition: 'none',
-          touchAction: 'pan-y',
+          pointerEvents: 'none',
         }}
       >
         {/* 3D Model centered - lazy loaded */}
@@ -110,15 +111,13 @@ const Hero = () => {
       </div>
 
       {/* Fixed Content Container - moves up after animations complete */}
-      {/* touch-action: pan-y позволяет Safari прокручивать страницу при свайпе по оверлею */}
+      {/* pointer-events: none — касания проходят к документу, скролл работает в Safari */}
       <div 
         ref={heroRef}
         className="fixed inset-0 z-10 w-full h-screen flex items-center justify-center"
         style={{
           opacity: scrollProgress >= 1 ? 0 : 1,
-          pointerEvents: scrollProgress >= 1 ? 'none' : 'auto',
-          touchAction: 'pan-y',
-          WebkitTouchCallout: 'none',
+          pointerEvents: 'none',
           transform: `translateY(${heroTranslateY}px)`,
           transition: 'opacity 0.3s ease-out',
           willChange: 'transform'
@@ -183,8 +182,7 @@ const Hero = () => {
         className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-20"
         style={{
           opacity: (logoOpacity > 0.5 && scrollProgress < 1) ? 1 : 0,
-          pointerEvents: scrollProgress >= 1 ? 'none' : 'auto',
-          touchAction: 'pan-y',
+          pointerEvents: 'none',
           transition: "opacity 0.3s ease-out"
         }}
       >
