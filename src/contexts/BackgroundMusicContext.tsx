@@ -11,6 +11,7 @@ const BackgroundMusicContext = createContext<BackgroundMusicContextType | null>(
 
 export function BackgroundMusicProvider({ children }: { children: ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const hasStartedRef = useRef(false);
   const [isMuted, setIsMuted] = useState(true);
 
   const toggleMute = useCallback(() => {
@@ -33,6 +34,23 @@ export function BackgroundMusicProvider({ children }: { children: ReactNode }) {
       audio.pause();
       audioRef.current = null;
     };
+  }, []);
+
+  // Старт музыки при первом скролле
+  useEffect(() => {
+    if (hasStartedRef.current) return;
+
+    const onScroll = () => {
+      if (hasStartedRef.current || !audioRef.current) return;
+      hasStartedRef.current = true;
+      audioRef.current.muted = false;
+      setIsMuted(false);
+      audioRef.current.play().catch(() => {});
+      window.removeEventListener("scroll", onScroll, { passive: true });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll, { passive: true });
   }, []);
 
   return (
