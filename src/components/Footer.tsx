@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect, useMemo, useCallback, memo } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useMainScroll } from "@/contexts/MainScrollContext";
 
 const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () => void) => void) => void }) => {
+  const { scrollContainerRef } = useMainScroll();
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
   const [lastHoverTime, setLastHoverTime] = useState(0);
@@ -11,24 +13,30 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
   const autoShoeLaunchedRef = useRef(false); // Флаг для отслеживания автоматического запуска
   const isMobile = useIsMobile();
 
+  const isAtBottom = useCallback(() => {
+    const el = scrollContainerRef?.current;
+    if (el) {
+      return el.scrollTop + el.clientHeight >= el.scrollHeight - 10;
+    }
+    return window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 10;
+  }, [scrollContainerRef]);
+
   // Memoized handlers to prevent recreation
   const handleWheel = useCallback((e: WheelEvent) => {
     if (!footerRef.current) return;
     
-    const isAtBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 10;
-    
-    if (isAtBottom && e.deltaY > 0) {
+    if (isAtBottom() && e.deltaY > 0) {
       e.preventDefault();
       e.stopPropagation();
     }
-  }, []);
+  }, [isAtBottom]);
 
   const handleTouchMove = useCallback((e: TouchEvent) => {
     if (!footerRef.current) return;
     
-    const isAtBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 10;
+    const atBottom = isAtBottom();
     
-    if (isAtBottom) {
+    if (atBottom) {
       const touch = e.touches[0];
       const element = document.elementFromPoint(touch.clientX, touch.clientY);
       

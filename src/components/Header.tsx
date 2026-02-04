@@ -2,8 +2,10 @@ import { Menu, X, Volume2, VolumeX } from "lucide-react";
 import { useState, useEffect, useMemo, useCallback, memo } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { useBackgroundMusic } from "@/contexts/BackgroundMusicContext";
+import { useMainScroll } from "@/contexts/MainScrollContext";
 
 const Header = memo(() => {
+  const { scrollContainerRef } = useMainScroll();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const location = useLocation();
@@ -13,19 +15,26 @@ const Header = memo(() => {
   const handleScroll = useCallback(() => {
     const windowHeight = window.innerHeight;
     const heroHeight = windowHeight * 3;
-    const scrollPosition = window.scrollY;
+    const scrollPosition = scrollContainerRef?.current
+      ? scrollContainerRef.current.scrollTop
+      : window.scrollY;
     const progress = Math.max(0, Math.min(1, scrollPosition / heroHeight));
     setScrollProgress(progress);
-  }, []);
+  }, [scrollContainerRef]);
 
   useEffect(() => {
     if (!isProductPage) {
+      const el = scrollContainerRef?.current;
+      if (el) {
+        el.addEventListener("scroll", handleScroll, { passive: true });
+        handleScroll();
+        return () => el.removeEventListener("scroll", handleScroll);
+      }
       window.addEventListener("scroll", handleScroll, { passive: true });
       handleScroll();
-
       return () => window.removeEventListener("scroll", handleScroll);
     }
-  }, [handleScroll, isProductPage]);
+  }, [handleScroll, isProductPage, scrollContainerRef]);
 
   // Memoize calculations
   const heroLogoOpacity = useMemo(() => Math.max(0, 1 - scrollProgress * 3), [scrollProgress]);

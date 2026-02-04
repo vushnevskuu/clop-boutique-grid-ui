@@ -1,4 +1,5 @@
 import { createContext, useContext, useRef, useState, useCallback, useEffect, type ReactNode } from "react";
+import { useMainScroll } from "@/contexts/MainScrollContext";
 
 const MUSIC_SRC = "/music/background.mp3";
 
@@ -10,6 +11,7 @@ type BackgroundMusicContextType = {
 const BackgroundMusicContext = createContext<BackgroundMusicContextType | null>(null);
 
 export function BackgroundMusicProvider({ children }: { children: ReactNode }) {
+  const { scrollContainerRef } = useMainScroll();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const hasStartedRef = useRef(false);
   const [isMuted, setIsMuted] = useState(true);
@@ -36,7 +38,7 @@ export function BackgroundMusicProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // Старт музыки при первом скролле
+  // Старт музыки при первом скролле (window или скролл-контейнер главной)
   useEffect(() => {
     if (hasStartedRef.current) return;
 
@@ -47,11 +49,17 @@ export function BackgroundMusicProvider({ children }: { children: ReactNode }) {
       setIsMuted(false);
       audioRef.current.play().catch(() => {});
       window.removeEventListener("scroll", onScroll, { passive: true });
+      container?.removeEventListener("scroll", onScroll, { passive: true } as EventListenerOptions);
     };
 
+    const container = scrollContainerRef?.current ?? null;
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll, { passive: true });
-  }, []);
+    if (container) container.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll, { passive: true });
+      container?.removeEventListener("scroll", onScroll, { passive: true } as EventListenerOptions);
+    };
+  }, [scrollContainerRef]);
 
   return (
     <BackgroundMusicContext.Provider value={{ isMuted, toggleMute }}>

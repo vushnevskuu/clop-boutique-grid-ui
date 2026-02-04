@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useMemo, useCallback, lazy, Suspense } from "react";
 import { useGLTF } from "@react-three/drei";
+import { useMainScroll } from "@/contexts/MainScrollContext";
 
 // Preload 3D model for faster loading
 if (typeof window !== 'undefined') {
@@ -10,22 +11,28 @@ if (typeof window !== 'undefined') {
 const Hero3D = lazy(() => import("./Hero3D"));
 
 const Hero = () => {
+  const { scrollContainerRef } = useMainScroll();
   const [scrollProgress, setScrollProgress] = useState(0);
   const [scrollPosition, setScrollPosition] = useState(0);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const heroRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
 
+  const getScrollTop = useCallback(() => {
+    const el = scrollContainerRef?.current;
+    return el ? el.scrollTop : window.scrollY;
+  }, [scrollContainerRef]);
+
   const handleScroll = useCallback(() => {
     if (!sectionRef.current) return;
 
     const windowHeight = window.innerHeight;
     const heroHeight = windowHeight * 3;
-    const currentScroll = window.scrollY;
+    const currentScroll = getScrollTop();
     setScrollPosition(currentScroll);
     const progress = Math.max(0, Math.min(1, currentScroll / heroHeight));
     setScrollProgress(progress);
-  }, []);
+  }, [getScrollTop]);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!sectionRef.current) return;
@@ -42,15 +49,21 @@ const Hero = () => {
   }, []);
 
   useEffect(() => {
+    const scrollEl = scrollContainerRef?.current;
+    if (scrollEl) {
+      scrollEl.addEventListener("scroll", handleScroll, { passive: true });
+      handleScroll();
+      return () => scrollEl.removeEventListener("scroll", handleScroll);
+    }
     window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("mousemove", handleMouseMove, { passive: true });
-    handleScroll(); // Initial calculation
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [handleScroll, scrollContainerRef]);
 
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("mousemove", handleMouseMove);
-    };
-  }, [handleScroll, handleMouseMove]);
+  useEffect(() => {
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, [handleMouseMove]);
 
   // Memoize opacity calculations to avoid recalculations
   const logoOpacity = useMemo(() => Math.max(0, 1 - scrollProgress * 3), [scrollProgress]);
