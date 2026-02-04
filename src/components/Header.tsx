@@ -1,12 +1,14 @@
-import { Menu, X } from "lucide-react";
+import { Menu, X, Volume2, VolumeX } from "lucide-react";
 import { useState, useEffect, useMemo, useCallback, memo } from "react";
 import { useLocation, Link } from "react-router-dom";
+import { useBackgroundMusic } from "@/contexts/BackgroundMusicContext";
 
 const Header = memo(() => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const location = useLocation();
   const isProductPage = location.pathname.startsWith('/product');
+  const { isMuted, toggleMute } = useBackgroundMusic();
 
   const handleScroll = useCallback(() => {
     const windowHeight = window.innerHeight;
@@ -54,8 +56,8 @@ const Header = memo(() => {
           </a>
         </div>
 
-        <nav 
-          className="hidden md:flex items-center gap-8"
+        <div 
+          className="hidden md:flex items-center gap-4"
           style={{ 
             opacity: showHeaderLogo ? 1 : 0,
             transition: 'opacity 0.3s ease-out'
@@ -81,7 +83,15 @@ const Header = memo(() => {
           >
             Catalog
           </Link>
-        </nav>
+          <button
+            type="button"
+            onClick={toggleMute}
+            className="p-1.5 text-foreground hover:opacity-80 transition-opacity"
+            aria-label={isMuted ? 'Включить звук' : 'Выключить звук'}
+          >
+            {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+          </button>
+        </div>
 
         <button
           className="md:hidden text-foreground"
@@ -118,6 +128,18 @@ const Header = memo(() => {
           >
             Catalog
           </Link>
+          <button
+            type="button"
+            onClick={() => { toggleMute(); setIsMenuOpen(false); }}
+            className="block w-full text-left px-6 py-4 uppercase font-normal transition-all duration-200"
+            style={{ 
+              fontSize: '14px', 
+              backgroundColor: '#f3f3f3', 
+              color: '#000000'
+            }}
+          >
+            {isMuted ? 'Sound off' : 'Sound on'}
+          </button>
         </nav>
       )}
     </header>
