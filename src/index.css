@@ -81,6 +81,9 @@
     padding: 0;
     overscroll-behavior-y: none;
     overscroll-behavior: none;
+    /* Safari: разрешаем вертикальный скролл жестами */
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
   }
   
   html {
@@ -88,6 +91,8 @@
     padding: 0;
     overscroll-behavior-y: none;
     overscroll-behavior: none;
+    /* Safari: корректная высота документа для скролла */
+    min-height: 100%;
   }
 
   h1, h2, h3, h4, h5, h6 {

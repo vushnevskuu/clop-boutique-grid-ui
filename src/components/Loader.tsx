@@ -105,6 +105,11 @@ const Loader = memo(() => {
       }, 3000);
     };
 
+    const restoreScroll = () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+
     const checkComplete = () => {
       // Wait for all conditions to be met
       if (resourcesLoaded && windowLoaded && componentsRendered) {
@@ -113,11 +118,8 @@ const Loader = memo(() => {
         
         // Wait a bit to ensure everything is ready, then hide loader
         setTimeout(() => {
+          restoreScroll(); // Сразу восстанавливаем скролл (важно для Safari)
           setIsLoaded(true);
-          setTimeout(() => {
-            document.body.style.overflow = '';
-            document.documentElement.style.overflow = '';
-          }, 300);
         }, 200);
       }
     };
@@ -150,16 +152,17 @@ const Loader = memo(() => {
       windowLoaded = true;
       componentsRendered = true;
       setLoadingProgress(100);
-      setTimeout(() => {
-        setIsLoaded(true);
-        document.body.style.overflow = '';
-        document.documentElement.style.overflow = '';
-      }, 300);
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      setIsLoaded(true);
     }, 8000);
 
     return () => {
       window.removeEventListener('load', handleWindowLoad);
       clearTimeout(fallbackTimeout);
+      // Гарантированно восстанавливаем скролл при размонтировании (Safari и др.)
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
     };
   }, []);
 
