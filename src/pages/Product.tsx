@@ -121,9 +121,9 @@ const Product = memo(() => {
       <Header />
       <main className="pb-12 pt-16 md:pt-[60px]">
         <div className="px-4 md:px-8 lg:px-[30px]">
-          <div className="flex flex-col md:flex-row gap-4 mb-12 md:mb-20 mt-5 md:mt-[60px]">
-            {/* Thumbnails and Images Gallery - весь блок sticky как описание */}
-            <div className="flex flex-col md:flex-row gap-4 flex-1 md:sticky md:top-24" style={{ alignSelf: 'flex-start' }}>
+        <div className="flex flex-col md:flex-row gap-4 mb-12 md:mb-20 mt-5 md:mt-[60px]">
+            {/* Thumbnails and Images Gallery */}
+            <div className="flex flex-col md:flex-row gap-4 flex-1">
               {/* Product Info Panel - только миниатюры слева - скрыто на мобильных */}
               <div className="hidden md:block flex-shrink-0" style={{ width: `${logoWidth}px` }}>
                 <div className="sticky top-24">
@@ -193,7 +193,7 @@ const Product = memo(() => {
             </div>
 
             {/* Product Info Panel - адаптивная ширина */}
-            <div className="flex-shrink-0 w-full md:w-[600px] md:sticky md:top-24 md:ml-5 self-start">
+            <div className="flex-shrink-0 w-full md:w-[600px] md:ml-5 self-start">
               <div className="space-y-4 md:space-y-6">
                 <h1 className="font-bold uppercase tracking-tighter break-words text-[20px] md:text-[32px] leading-tight">
                   {product.title.replace(/_/g, ' ')}
