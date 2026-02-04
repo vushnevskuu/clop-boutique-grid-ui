@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Loader from "@/components/Loader";
 import { BackgroundMusicProvider } from "@/contexts/BackgroundMusicContext";
 import { MainScrollContext } from "@/contexts/MainScrollContext";
+import { useIsSafari } from "@/hooks/use-is-safari";
 
 // Import Index directly to avoid dynamic import issues
 import Index from "./pages/Index";
@@ -17,12 +18,20 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
 
+const nullScrollRef = { current: null as HTMLDivElement | null };
+
 const App = () => {
   const mainScrollRef = useRef<HTMLDivElement | null>(null);
+  const isSafari = useIsSafari();
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <MainScrollContext.Provider value={{ scrollContainerRef: mainScrollRef }}>
+        <MainScrollContext.Provider
+          value={{
+            scrollContainerRef: isSafari ? mainScrollRef : nullScrollRef,
+            useScrollContainer: isSafari,
+          }}
+        >
           <BackgroundMusicProvider>
             <Loader />
             <Toaster />

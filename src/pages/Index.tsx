@@ -10,7 +10,7 @@ import ShoeCanvas from "@/components/ShoeCanvas";
 
 const Index = memo(() => {
   const createShoeRef = useRef<(() => void) | null>(null);
-  const { scrollContainerRef } = useMainScroll();
+  const { scrollContainerRef, useScrollContainer } = useMainScroll();
   const location = useLocation();
   const isMobile = useIsMobile();
 
@@ -29,8 +29,8 @@ const Index = memo(() => {
     if (location.hash === '#shop') {
       setTimeout(() => {
         const shopEl = document.getElementById('shop');
-        const container = scrollContainerRef.current;
-        if (shopEl && container) {
+        const container = scrollContainerRef?.current;
+        if (shopEl && useScrollContainer && container) {
           const top = shopEl.getBoundingClientRect().top + container.scrollTop;
           container.scrollTo({ top: top - 80, behavior: 'smooth' });
         } else if (shopEl) {
@@ -38,28 +38,37 @@ const Index = memo(() => {
         }
       }, 100);
     }
-  }, [location.hash]);
+  }, [location.hash, useScrollContainer]);
+
+  const content = (
+    <>
+      <main className="m-0 p-0 mb-12 md:mb-[60px]">
+        <Hero />
+        <ProductGrid />
+      </main>
+      {!isMobile && <ShoeCanvas onShoeCreate={handleShoeCreate} />}
+      {!isMobile && <Footer onShoeCreate={handleFooterShoeCreate} />}
+    </>
+  );
 
   return (
     <div className="min-h-screen" style={{ margin: 0, padding: 0 }}>
       <Header />
-      {/* Явный скролл-контейнер — в Safari скролл внутри div работает надёжно */}
-      <div
-        ref={scrollContainerRef}
+      {useScrollContainer ? (
+        <div
+          ref={scrollContainerRef}
           className="overflow-y-auto overflow-x-hidden w-full"
           style={{
             height: '100vh',
             WebkitOverflowScrolling: 'touch',
           }}
         >
-          <main className="m-0 p-0 mb-12 md:mb-[60px]">
-            <Hero />
-            <ProductGrid />
-          </main>
-          {!isMobile && <ShoeCanvas onShoeCreate={handleShoeCreate} />}
-          {!isMobile && <Footer onShoeCreate={handleFooterShoeCreate} />}
+          {content}
         </div>
-      </div>
+      ) : (
+        content
+      )}
+    </div>
   );
 });
 

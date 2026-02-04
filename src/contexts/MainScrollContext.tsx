@@ -1,8 +1,11 @@
 import { createContext, useContext, type RefObject } from "react";
 
-/** Ref на скролл-контейнер главной страницы — в Safari скролл внутри div работает, document scroll нет */
+const nullRef = { current: null as HTMLDivElement | null };
+
+/** В Safari — скролл через div; в Arc/Chrome и др. — document scroll (useScrollContainer = false) */
 export const MainScrollContext = createContext<{
   scrollContainerRef: RefObject<HTMLDivElement | null>;
-}>({ scrollContainerRef: { current: null } });
+  useScrollContainer: boolean;
+}>({ scrollContainerRef: nullRef, useScrollContainer: false });
 
 export const useMainScroll = () => useContext(MainScrollContext);
