@@ -1,33 +1,13 @@
-import { useState, useEffect, useRef, useCallback, memo } from "react";
+import { useState, useEffect, memo } from "react";
 
 const Loader = memo(() => {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  const prevOverflowRef = useRef<{ body: string; html: string } | null>(null);
-
-  const unlockScroll = useCallback(() => {
-    const prev = prevOverflowRef.current;
-    const safe = (v: string | undefined) => {
-      if (!v) return "";
-      // Safari/некорректные значения могут попасть как строка "false"
-      if (v === "hidden" || v === "false") return "";
-      return v;
-    };
-
-    document.body.style.overflow = safe(prev?.body);
-    document.documentElement.style.overflow = safe(prev?.html);
-  }, []);
-
   useEffect(() => {
-    // Block scrolling (and remember previous inline styles)
-    prevOverflowRef.current = {
-      body: document.body.style.overflow,
-      html: document.documentElement.style.overflow,
-    };
-
-    document.body.style.overflow = "hidden";
-    document.documentElement.style.overflow = "hidden";
+    // Block scrolling
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
 
     let progress = 0;
     let resourcesLoaded = false;
@@ -134,8 +114,10 @@ const Loader = memo(() => {
         // Wait a bit to ensure everything is ready, then hide loader
         setTimeout(() => {
           setIsLoaded(true);
-          // Important: unlock scroll reliably (Safari can get stuck otherwise)
-          unlockScroll();
+          setTimeout(() => {
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+          }, 300);
         }, 200);
       }
     };
@@ -170,21 +152,16 @@ const Loader = memo(() => {
       setLoadingProgress(100);
       setTimeout(() => {
         setIsLoaded(true);
-        unlockScroll();
+        document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
       }, 300);
     }, 8000);
 
     return () => {
       window.removeEventListener('load', handleWindowLoad);
       clearTimeout(fallbackTimeout);
-      unlockScroll();
     };
-  }, [unlockScroll]);
-
-  // Extra safety: if loader is hidden, ensure scroll is unlocked.
-  useEffect(() => {
-    if (isLoaded) unlockScroll();
-  }, [isLoaded, unlockScroll]);
+  }, []);
 
   if (isLoaded) {
     return null;

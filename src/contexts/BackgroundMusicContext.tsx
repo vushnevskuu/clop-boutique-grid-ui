@@ -46,11 +46,11 @@ export function BackgroundMusicProvider({ children }: { children: ReactNode }) {
       audioRef.current.muted = false;
       setIsMuted(false);
       audioRef.current.play().catch(() => {});
-      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("scroll", onScroll, { passive: true });
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll, { passive: true });
   }, []);
 
   return (
