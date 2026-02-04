@@ -9,7 +9,7 @@ export interface Product {
   title: string;
   description: string;
   sizes: Array<{
-    size: string;
+    size?: string;
     chest?: string;
     waist?: string;
     length?: string;
