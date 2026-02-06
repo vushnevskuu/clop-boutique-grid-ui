@@ -1,6 +1,7 @@
 {
   "products": [
     "Chimala",
+    "Diet_butcher_slim_skin",
     "Jackrose_blue_made_in_Japan",
     "Jackrose_made_in_Japan",
     "Le_grande_blue",
@@ -13,6 +14,16 @@
       "3.webp",
       "4.webp",
       "5.webp"
+    ],
+    "Diet_butcher_slim_skin": [
+      "1.webp",
+      "2.webp",
+      "3.webp",
+      "4.webp",
+      "5.webp",
+      "6.webp",
+      "7.webp",
+      "8.webp"
     ],
     "Jackrose_blue_made_in_Japan": [
       "1.webp",

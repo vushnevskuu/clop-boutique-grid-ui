@@ -127,6 +127,7 @@ export function useProducts() {
             'Jackrose_made_in_Japan': '$150',
             'Jackrose_blue_made_in_Japan': '$150',
             'Chimala': '$100',
+            'Diet_butcher_slim_skin': '$100',
           };
           loadedProducts.push({
             id: productFolder,
