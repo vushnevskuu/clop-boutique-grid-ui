@@ -5,6 +5,7 @@
     "Jackrose_blue_made_in_Japan",
     "Jackrose_made_in_Japan",
     "Le_grande_blue",
+    "Love_boat_jacket",
     "kazuyuki_kumagai"
   ],
   "images": {
@@ -46,6 +47,12 @@
       "1.webp",
       "2.webp",
       "3.webp"
+    ],
+    "Love_boat_jacket": [
+      "1.webp",
+      "2.webp",
+      "3.webp",
+      "4.webp"
     ],
     "kazuyuki_kumagai": [
       "1.webp",

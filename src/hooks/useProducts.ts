@@ -128,6 +128,7 @@ export function useProducts() {
             'Jackrose_blue_made_in_Japan': '$150',
             'Chimala': '$100',
             'Diet_butcher_slim_skin': '$100',
+            'Love_boat_jacket': '$50',
           };
           loadedProducts.push({
             id: productFolder,
