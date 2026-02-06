@@ -129,7 +129,7 @@ export function useProducts() {
             'Chimala': '$100',
             'Diet_butcher_slim_skin': '$100',
             'Love_boat_jacket': '$50',
-            'Leather_engineer_boots ': '$80',
+            'Leather_engineer_boots': '$80',
           };
           loadedProducts.push({
             id: productFolder,
