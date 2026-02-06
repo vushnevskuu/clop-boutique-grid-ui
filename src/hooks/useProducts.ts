@@ -125,6 +125,7 @@ export function useProducts() {
           const priceByProduct: Record<string, string> = {
             'Le_grande_blue': '$350',
             'Jackrose_made_in_Japan': '$150',
+            'Jackrose_blue_made_in_Japan': '$150',
           };
           loadedProducts.push({
             id: productFolder,
