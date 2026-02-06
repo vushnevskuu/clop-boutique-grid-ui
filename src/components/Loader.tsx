@@ -25,10 +25,11 @@ const Loader = memo(() => {
     const totalCritical = criticalResources.length;
 
     const updateProgress = () => {
-      // Calculate progress: 40% for resources, 30% for window load, 30% for React render
-      const resourceProgress = resourcesLoaded ? 40 : (loadedCount / totalCritical) * 40;
-      const windowProgress = windowLoaded ? 30 : 0;
-      const renderProgress = componentsRendered ? 30 : 0;
+      // Оптимизированная прогрессия: быстрее показываем контент
+      // 30% для критических ресурсов, 20% для window load, 50% для React render
+      const resourceProgress = resourcesLoaded ? 30 : (loadedCount / totalCritical) * 30;
+      const windowProgress = windowLoaded ? 20 : 0;
+      const renderProgress = componentsRendered ? 50 : 0;
       
       progress = Math.min(100, Math.round(resourceProgress + windowProgress + renderProgress));
       setLoadingProgress(progress);
@@ -94,15 +95,15 @@ const Loader = memo(() => {
           clearInterval(checkInterval);
           checkComplete();
         }
-      }, 50);
+      }, 30); // Проверяем чаще (30ms вместо 50ms)
 
-      // Stop checking after 3 seconds
+      // Stop checking after 1.5 секунды (быстрее показываем контент)
       setTimeout(() => {
         clearInterval(checkInterval);
         componentsRendered = true;
         updateProgress();
         checkComplete();
-      }, 3000);
+      }, 1500);
     };
 
     const restoreScroll = () => {
@@ -111,16 +112,16 @@ const Loader = memo(() => {
     };
 
     const checkComplete = () => {
-      // Wait for all conditions to be met
-      if (resourcesLoaded && windowLoaded && componentsRendered) {
-        // Ensure we show at least 100% for a moment
+      // Показываем контент быстрее - не ждём все ресурсы
+      // Если компоненты отрендерены, можно показывать контент
+      if (componentsRendered && (resourcesLoaded || windowLoaded)) {
         setLoadingProgress(100);
         
-        // Wait a bit to ensure everything is ready, then hide loader
+        // Минимальная задержка для плавности
         setTimeout(() => {
-          restoreScroll(); // Сразу восстанавливаем скролл (важно для Safari)
+          restoreScroll();
           setIsLoaded(true);
-        }, 200);
+        }, 100);
       }
     };
 
@@ -146,7 +147,7 @@ const Loader = memo(() => {
       setTimeout(checkComponentsRendered, 100);
     }
 
-    // Fallback: ensure we complete after reasonable time (even if something fails)
+    // Fallback: ensure we complete after reasonable time (быстрее - 3 секунды)
     const fallbackTimeout = setTimeout(() => {
       resourcesLoaded = true;
       windowLoaded = true;
@@ -155,7 +156,7 @@ const Loader = memo(() => {
       document.body.style.overflow = '';
       document.documentElement.style.overflow = '';
       setIsLoaded(true);
-    }, 8000);
+    }, 3000);
 
     return () => {
       window.removeEventListener('load', handleWindowLoad);

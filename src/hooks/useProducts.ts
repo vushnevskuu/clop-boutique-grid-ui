@@ -34,12 +34,10 @@ export function useProducts() {
       try {
         setLoading(true);
         
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/479bd6ea-c80d-4e3a-82d4-f5e5e0ef2b1b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useProducts.ts:37',message:'Starting to load products',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-        // #endregion
-        
-        // Загружаем manifest.json из public/cloth/
-        const manifestResponse = await fetch('/cloth/manifest.json');
+        // Загружаем manifest.json с кэшированием
+        const manifestResponse = await fetch('/cloth/manifest.json', {
+          cache: 'force-cache', // Используем кэш браузера
+        });
         
         // #region agent log
         fetch('http://127.0.0.1:7242/ingest/479bd6ea-c80d-4e3a-82d4-f5e5e0ef2b1b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useProducts.ts:40',message:'Manifest fetch result',data:{ok:manifestResponse.ok,status:manifestResponse.status,url:manifestResponse.url},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
@@ -54,14 +52,10 @@ export function useProducts() {
         }
         
         const manifest = await manifestResponse.json();
-        
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/479bd6ea-c80d-4e3a-82d4-f5e5e0ef2b1b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useProducts.ts:52',message:'Manifest parsed',data:{productsCount:manifest.products?.length||0,products:manifest.products},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-        // #endregion
         const loadedProducts: Product[] = [];
         
-        // Обрабатываем каждый товар из manifest
-        for (const productFolder of manifest.products || []) {
+        // Загружаем описания параллельно для ускорения
+        const productPromises = (manifest.products || []).map(async (productFolder: string) => {
           // Формируем путь к папке товара с кодированием пробелов для URL
           const encodedFolder = encodeURIComponent(productFolder);
           const productPath = `/cloth/${encodedFolder}`;
@@ -72,55 +66,31 @@ export function useProducts() {
           let sizes: Product['sizes'] = [];
           
           try {
-            // Пробуем оба варианта названия файла (description.txt и discription.txt)
-            // Используем закодированный путь для fetch
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/479bd6ea-c80d-4e3a-82d4-f5e5e0ef2b1b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useProducts.ts:65',message:'Fetching description',data:{productFolder,productPath:`${productPath}/description.txt`},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-            // #endregion
-            let descResponse = await fetch(`${productPath}/description.txt`);
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/479bd6ea-c80d-4e3a-82d4-f5e5e0ef2b1b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useProducts.ts:67',message:'Description fetch result',data:{ok:descResponse.ok,status:descResponse.status,url:descResponse.url,productFolder},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-            // #endregion
+            const encodedFolder = encodeURIComponent(productFolder);
+            const productPath = `/cloth/${encodedFolder}`;
+            
+            let descResponse = await fetch(`${productPath}/description.txt`, { cache: 'force-cache' });
             if (!descResponse.ok) {
-              descResponse = await fetch(`${productPath}/discription.txt`);
-              // #region agent log
-              fetch('http://127.0.0.1:7242/ingest/479bd6ea-c80d-4e3a-82d4-f5e5e0ef2b1b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useProducts.ts:69',message:'Alternative description fetch',data:{ok:descResponse.ok,status:descResponse.status,url:descResponse.url},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-              // #endregion
+              descResponse = await fetch(`${productPath}/discription.txt`, { cache: 'force-cache' });
             }
             if (descResponse.ok) {
               const descContent = await descResponse.text();
               const parsed = parseDescriptionFile(descContent);
               description = parsed.description;
               sizes = parsed.sizes;
-              // #region agent log
-              fetch('http://127.0.0.1:7242/ingest/479bd6ea-c80d-4e3a-82d4-f5e5e0ef2b1b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useProducts.ts:73',message:'Description loaded successfully',data:{descriptionLength:description.length,sizesCount:sizes.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-              // #endregion
             }
           } catch (err) {
             console.warn(`Failed to load description for ${productFolder}:`, err);
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/479bd6ea-c80d-4e3a-82d4-f5e5e0ef2b1b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useProducts.ts:76',message:'Description fetch error',data:{error:String(err),productFolder},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-            // #endregion
           }
           
           // Получаем изображения из manifest и формируем пути
-          // НЕ кодируем пути здесь - браузер сам кодирует при запросе
-          // Это важно для корректной работы в production
           const images: string[] = (manifest.images?.[productFolder] || [])
-            .map((img: string) => {
-              // Формируем путь с пробелами - браузер сам закодирует при запросе
-              return `/cloth/${productFolder}/${img}`;
-            })
+            .map((img: string) => `/cloth/${productFolder}/${img}`)
             .sort((a: string, b: string) => {
-              // Сортируем по номеру в имени файла
               const numA = parseInt(a.match(/(\d+)/)?.[1] || '0');
               const numB = parseInt(b.match(/(\d+)/)?.[1] || '0');
               return numA - numB;
             });
-          
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/479bd6ea-c80d-4e3a-82d4-f5e5e0ef2b1b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useProducts.ts:86',message:'Images paths generated',data:{productFolder,imagesCount:images.length,images:images},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-          // #endregion
           
           const priceByProduct: Record<string, string> = {
             'Le_grande_blue': '$350',
@@ -131,7 +101,8 @@ export function useProducts() {
             'Love_boat_jacket': '$50',
             'Leather_engineer_boots': '$80',
           };
-          loadedProducts.push({
+          
+          return {
             id: productFolder,
             title: productFolder,
             description,
@@ -140,12 +111,12 @@ export function useProducts() {
             image: images[0] || '',
             hoverImage: images[1] || images[0] || '',
             price: priceByProduct[productFolder] ?? '$100',
-          });
-        }
+          };
+        });
         
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/479bd6ea-c80d-4e3a-82d4-f5e5e0ef2b1b',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useProducts.ts:105',message:'Products loaded successfully',data:{productsCount:loadedProducts.length,products:loadedProducts.map(p=>({id:p.id,title:p.title,image:p.image,imagesCount:p.images?.length||0}))},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-        // #endregion
+        // Ждём загрузки всех товаров параллельно
+        const products = await Promise.all(productPromises);
+        loadedProducts.push(...products);
         
         setProducts(loadedProducts);
         setError(null);

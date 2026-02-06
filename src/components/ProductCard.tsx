@@ -1,4 +1,4 @@
-import { useState, memo, useCallback } from "react";
+import { useState, memo, useCallback, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 
 interface ProductCardProps {
@@ -9,12 +9,35 @@ interface ProductCardProps {
   price?: string;
   size?: string;
   brand?: string;
+  priority?: boolean; // Для первых изображений в сетке
 }
 
-const ProductCard = memo(({ id, image, hoverImage, title, price, size, brand }: ProductCardProps) => {
+const ProductCard = memo(({ id, image, hoverImage, title, price, size, brand, priority = false }: ProductCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [isInView, setIsInView] = useState(priority); // Если priority, сразу загружаем
+  const imgRef = useRef<HTMLDivElement>(null);
   const displayImage = isHovered && hoverImage ? hoverImage : image;
   
+  // Intersection Observer для lazy loading изображений
+  useEffect(() => {
+    if (priority || !imgRef.current) return; // Если priority, уже загружаем
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsInView(true);
+            observer.disconnect();
+          }
+        });
+      },
+      { rootMargin: '50px' } // Начинаем загрузку за 50px до появления в viewport
+    );
+    
+    observer.observe(imgRef.current);
+    return () => observer.disconnect();
+  }, [priority]);
+
   const handleMouseEnter = useCallback(() => setIsHovered(true), []);
   const handleMouseLeave = useCallback(() => setIsHovered(false), []);
   const handleButtonClick = useCallback((e: React.MouseEvent) => {
@@ -41,15 +64,19 @@ const ProductCard = memo(({ id, image, hoverImage, title, price, size, brand }: 
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="relative aspect-[4/5] overflow-hidden">
-        <img
-          src={displayImage}
-          alt={title}
-          className="w-full h-full object-cover transition-opacity duration-300"
-          loading="lazy"
-          decoding="async"
-          fetchPriority="low"
-        />
+      <div ref={imgRef} className="relative aspect-[4/5] overflow-hidden">
+        {isInView ? (
+          <img
+            src={displayImage}
+            alt={title}
+            className="w-full h-full object-cover transition-opacity duration-300"
+            loading={priority ? "eager" : "lazy"}
+            decoding="async"
+            fetchPriority={priority ? "high" : "low"}
+          />
+        ) : (
+          <div className="w-full h-full bg-gray-100 animate-pulse" />
+        )}
         {/* Message Us button - appears on hover */}
         <button
           onClick={handleButtonClick}

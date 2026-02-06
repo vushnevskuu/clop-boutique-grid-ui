@@ -21,12 +21,18 @@ export default defineConfig(({ mode }) => ({
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
           'three-vendor': ['three', '@react-three/fiber', '@react-three/drei'],
+          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-toast'],
         },
       },
     },
     chunkSizeWarningLimit: 1000,
     cssCodeSplit: true,
     sourcemap: false,
-    minify: 'esbuild', // Use esbuild for faster minification
+    minify: 'esbuild',
+    // Оптимизация размера бандла
+    target: 'esnext',
+    assetsInlineLimit: 4096, // Инлайним маленькие ассеты
+    // Улучшенная компрессия
+    reportCompressedSize: true,
   },
 }));
