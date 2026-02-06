@@ -1,11 +1,19 @@
 {
   "products": [
+    "Chimala",
     "Jackrose_blue_made_in_Japan",
     "Jackrose_made_in_Japan",
     "Le_grande_blue",
     "kazuyuki_kumagai"
   ],
   "images": {
+    "Chimala": [
+      "1.webp",
+      "2.webp",
+      "3.webp",
+      "4.webp",
+      "5.webp"
+    ],
     "Jackrose_blue_made_in_Japan": [
       "1.webp",
       "2.webp",

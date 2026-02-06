@@ -126,6 +126,7 @@ export function useProducts() {
             'Le_grande_blue': '$350',
             'Jackrose_made_in_Japan': '$150',
             'Jackrose_blue_made_in_Japan': '$150',
+            'Chimala': '$100',
           };
           loadedProducts.push({
             id: productFolder,
