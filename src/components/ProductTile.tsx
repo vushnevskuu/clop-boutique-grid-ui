@@ -113,9 +113,21 @@ const ProductTile = memo(({
   const handleMouseEnter = useCallback(() => setIsHovered(true), []);
   const handleMouseLeave = useCallback(() => setIsHovered(false), []);
 
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (disableDrag) {
+        e.preventDefault();
+        navigate(`/product/${encodeURIComponent(String(id))}`);
+      }
+    },
+    [disableDrag, id, navigate]
+  );
+
   return (
     <div
       ref={tileRef}
+      role={disableDrag ? "button" : undefined}
+      tabIndex={disableDrag ? 0 : undefined}
       className={`absolute touch-none select-none ${disableDrag ? "cursor-pointer" : "cursor-grab active:cursor-grabbing"}`}
       style={{
         left: `${position.x}%`,
@@ -125,6 +137,7 @@ const ProductTile = memo(({
         zIndex: isDragging ? 50 : 1,
       }}
       onMouseDown={handleMouseDown}
+      onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >

@@ -101,27 +101,59 @@ const ProductGrid = memo(() => {
   const [positions, setPositions] = useState<Record<string, { x: number; y: number }>>({});
   const [numMobileChunks, setNumMobileChunks] = useState(INITIAL_MOBILE_CHUNKS);
   const loadingMoreChunksRef = useRef(false);
+  const [scrollContainerReady, setScrollContainerReady] = useState(false);
 
-  // Бесконечный скролл на мобилке: root = контейнер скролла (Safari) или viewport; подгружаем по 2 чанка
+  // На мобилке с контейнером скролла (Safari) ref может появиться после монтирования
+  useEffect(() => {
+    if (!isMobile || !useScrollContainer) return;
+    const t = setTimeout(() => setScrollContainerReady(true), 150);
+    return () => clearTimeout(t);
+  }, [isMobile, useScrollContainer]);
+
+  // Бесконечный скролл на мобилке: по событию scroll подгружаем чанки у низа (надёжно на мобиле)
   useEffect(() => {
     if (!isMobile) return;
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
-    const scrollRoot = useScrollContainer && scrollContainerRef?.current ? scrollContainerRef.current : null;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (!entries[0]?.isIntersecting || loadingMoreChunksRef.current) return;
+    const scrollEl = useScrollContainer && scrollContainerRef?.current ? scrollContainerRef.current : null;
+    const getScrollTarget = (): { scrollTop: number; scrollHeight: number; clientHeight: number } | null => {
+      if (scrollEl) {
+        return {
+          scrollTop: scrollEl.scrollTop,
+          scrollHeight: scrollEl.scrollHeight,
+          clientHeight: scrollEl.clientHeight,
+        };
+      }
+      return {
+        scrollTop: document.documentElement.scrollTop || window.scrollY,
+        scrollHeight: document.documentElement.scrollHeight,
+        clientHeight: window.innerHeight,
+      };
+    };
+    const THRESHOLD = 500;
+    let rafId = 0;
+    const checkAndLoad = () => {
+      const t = getScrollTarget();
+      if (!t || loadingMoreChunksRef.current) return;
+      const distFromBottom = t.scrollHeight - (t.scrollTop + t.clientHeight);
+      if (distFromBottom < THRESHOLD) {
         loadingMoreChunksRef.current = true;
         setNumMobileChunks((n) => n + 2);
         setTimeout(() => {
           loadingMoreChunksRef.current = false;
-        }, 350);
-      },
-      { root: scrollRoot, rootMargin: "500px 0px 500px 0px", threshold: 0 }
-    );
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [isMobile, useScrollContainer]);
+        }, 280);
+      }
+    };
+    const onScroll = () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(checkAndLoad);
+    };
+    const target = scrollEl || window;
+    target.addEventListener("scroll", onScroll, { passive: true });
+    checkAndLoad();
+    return () => {
+      target.removeEventListener("scroll", onScroll);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [isMobile, useScrollContainer, scrollContainerReady]);
 
   // При загрузке и при появлении новых товаров назначаем случайные позиции без наложения (десктоп)
   useEffect(() => {
