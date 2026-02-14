@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useMemo, useCallback, lazy, Suspense } from "react";
+import { ChevronDown } from "lucide-react";
 import { useGLTF } from "@react-three/drei";
 import { useMainScroll } from "@/contexts/MainScrollContext";
 
@@ -190,21 +191,20 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Scroll Indicator */}
+      {/* Scroll-down arrow */}
       <div 
-        className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-20"
+        className="fixed bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center"
         style={{
           opacity: (logoOpacity > 0.5 && scrollProgress < 1) ? 1 : 0,
           pointerEvents: 'none',
           transition: "opacity 0.3s ease-out"
         }}
       >
-        <div className="flex flex-col items-center gap-2 text-white">
-          <span className="text-xs uppercase tracking-widest">Scroll</span>
-          <div className="w-6 h-10 border-2 border-white rounded-full flex items-start justify-center p-2">
-            <div className="w-1 h-2 bg-white rounded-full animate-bounce" />
-          </div>
-        </div>
+        <ChevronDown 
+          className="w-6 h-6 text-black animate-bounce" 
+          strokeWidth={2.5}
+          aria-hidden
+        />
       </div>
     </section>
   );

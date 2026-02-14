@@ -1,6 +1,6 @@
 import { Menu, X, Volume2, VolumeX } from "lucide-react";
 import { useState, useEffect, useMemo, useCallback, memo } from "react";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useBackgroundMusic } from "@/contexts/BackgroundMusicContext";
 import { useMainScroll } from "@/contexts/MainScrollContext";
 
@@ -72,8 +72,10 @@ const Header = memo(() => {
             transition: 'opacity 0.3s ease-out'
           }}
         >
-          <Link 
-            to={isProductPage ? "/#shop" : "#shop"}
+          <a
+            href="https://www.instagram.com/clo.p_market"
+            target="_blank"
+            rel="noopener noreferrer"
             className="px-4 py-2 uppercase font-normal transition-all duration-200"
             style={{ 
               fontSize: '14px', 
@@ -90,8 +92,8 @@ const Header = memo(() => {
               e.currentTarget.style.color = '#000000';
             }}
           >
-            Catalog
-          </Link>
+            more items
+          </a>
           <button
             type="button"
             onClick={toggleMute}
@@ -116,8 +118,10 @@ const Header = memo(() => {
 
       {isMenuOpen && (
         <nav className="md:hidden bg-transparent">
-          <Link 
-            to={isProductPage ? "/#shop" : "#shop"}
+          <a
+            href="https://www.instagram.com/clo.p_market"
+            target="_blank"
+            rel="noopener noreferrer"
             className="block px-6 py-4 uppercase font-normal transition-all duration-200"
             style={{ 
               fontSize: '14px', 
@@ -135,8 +139,8 @@ const Header = memo(() => {
             }}
             onClick={() => setIsMenuOpen(false)}
           >
-            Catalog
-          </Link>
+            more items
+          </a>
           <button
             type="button"
             onClick={() => { toggleMute(); setIsMenuOpen(false); }}
