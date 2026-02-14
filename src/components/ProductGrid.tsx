@@ -2,11 +2,38 @@ import { memo, useEffect, useRef, useCallback, useState } from "react";
 import ProductTile from "./ProductTile";
 import { useProducts } from "@/hooks/useProducts";
 
+const TILE_WIDTH_PCT = 22;
+const TILE_HEIGHT_PCT = 28;
+
 function getRandomPosition(): { x: number; y: number } {
   return {
-    x: Math.random() * 80,
-    y: Math.random() * 80,
+    x: Math.random() * (100 - TILE_WIDTH_PCT),
+    y: Math.random() * (100 - TILE_HEIGHT_PCT),
   };
+}
+
+function rectanglesOverlap(
+  a: { x: number; y: number },
+  b: { x: number; y: number }
+): boolean {
+  return !(
+    a.x + TILE_WIDTH_PCT <= b.x ||
+    b.x + TILE_WIDTH_PCT <= a.x ||
+    a.y + TILE_HEIGHT_PCT <= b.y ||
+    b.y + TILE_HEIGHT_PCT <= a.y
+  );
+}
+
+function getRandomNonOverlappingPosition(
+  existing: Record<string, { x: number; y: number }>
+): { x: number; y: number } {
+  const list = Object.values(existing);
+  for (let attempt = 0; attempt < 200; attempt++) {
+    const pos = getRandomPosition();
+    const overlaps = list.some((other) => rectanglesOverlap(pos, other));
+    if (!overlaps) return pos;
+  }
+  return getRandomPosition();
 }
 
 const ProductGrid = memo(() => {
@@ -14,7 +41,7 @@ const ProductGrid = memo(() => {
   const containerRef = useRef<HTMLElement>(null);
   const [positions, setPositions] = useState<Record<string, { x: number; y: number }>>({});
 
-  // При загрузке и при появлении новых товаров назначаем случайные позиции
+  // При загрузке и при появлении новых товаров назначаем случайные позиции без наложения
   useEffect(() => {
     setPositions((prev) => {
       let next = { ...prev };
@@ -22,7 +49,7 @@ const ProductGrid = memo(() => {
       products.forEach((product) => {
         const sid = String(product.id);
         if (next[sid] == null) {
-          next[sid] = getRandomPosition();
+          next[sid] = getRandomNonOverlappingPosition(next);
           changed = true;
         }
       });
@@ -95,14 +122,13 @@ const ProductGrid = memo(() => {
   return (
     <section
       id="shop"
-      ref={containerRef}
       className="scroll-mt-20 relative z-30 px-4 md:px-8 lg:px-[30px] pb-0 overflow-visible"
       style={{
         backgroundColor: "transparent",
         minHeight: "180vh",
       }}
     >
-      <div className="relative w-full h-full" style={{ minHeight: "160vh" }}>
+      <div ref={containerRef} className="relative w-full h-full" style={{ minHeight: "160vh" }}>
         {products.map((product, index) => {
           const pos = positions[String(product.id)];
           if (pos == null) return null;
