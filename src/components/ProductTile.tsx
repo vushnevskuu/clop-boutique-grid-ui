@@ -9,6 +9,8 @@ interface ProductTileProps {
   onPositionChange: (id: string | number, x: number, y: number) => void;
   containerRef: React.RefObject<HTMLElement | null>;
   priority?: boolean;
+  /** На мобилке в режиме бесконечного скролла перетаскивание отключено — только тап для перехода */
+  disableDrag?: boolean;
 }
 
 const ProductTile = memo(({
@@ -19,6 +21,7 @@ const ProductTile = memo(({
   onPositionChange,
   containerRef,
   priority = false,
+  disableDrag = false,
 }: ProductTileProps) => {
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
@@ -54,7 +57,7 @@ const ProductTile = memo(({
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
-      if (e.button !== 0) return;
+      if (disableDrag || e.button !== 0) return;
       e.preventDefault();
       const rect = tileRef.current?.getBoundingClientRect();
       if (!rect) return;
@@ -67,7 +70,7 @@ const ProductTile = memo(({
         didMove: false,
       };
     },
-    []
+    [disableDrag]
   );
 
   useEffect(() => {
@@ -84,8 +87,8 @@ const ProductTile = memo(({
       const tileTop = e.clientY - offsetY;
       const xPct = ((tileLeft - rect.left) / rect.width) * 100;
       const yPct = ((tileTop - rect.top) / rect.height) * 100;
-      const clampedX = Math.max(0, Math.min(85, xPct));
-      const clampedY = Math.max(0, Math.min(85, yPct));
+      const clampedX = Math.max(0, Math.min(66, xPct));
+      const clampedY = Math.max(0, Math.min(58, yPct));
       onPositionChange(id, clampedX, clampedY);
     };
 
@@ -113,11 +116,11 @@ const ProductTile = memo(({
   return (
     <div
       ref={tileRef}
-      className="absolute cursor-grab active:cursor-grabbing touch-none select-none"
+      className={`absolute touch-none select-none ${disableDrag ? "cursor-pointer" : "cursor-grab active:cursor-grabbing"}`}
       style={{
         left: `${position.x}%`,
         top: `${position.y}%`,
-        width: "min(180px, 18vw)",
+        width: "clamp(140px, 27vw, 320px)",
         aspectRatio: "4/5",
         zIndex: isDragging ? 50 : 1,
       }}

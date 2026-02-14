@@ -83,7 +83,7 @@ export function useProducts() {
             console.warn(`Failed to load description for ${productFolder}:`, err);
           }
           
-          // Получаем изображения из manifest и формируем пути
+          // images — для страницы товара (с фоном: 1.webp, 2.webp, …)
           const images: string[] = (manifest.images?.[productFolder] || [])
             .map((img: string) => `/cloth/${productFolder}/${img}`)
             .sort((a: string, b: string) => {
@@ -91,6 +91,9 @@ export function useProducts() {
               const numB = parseInt(b.match(/(\d+)/)?.[1] || '0');
               return numA - numB;
             });
+          // gridImages — для карточек в сетке (1–2 без фона, если есть *-nobg.webp)
+          const gridImages: string[] = (manifest.gridImages?.[productFolder] || manifest.images?.[productFolder] || [])
+            .map((img: string) => `/cloth/${productFolder}/${img}`);
           
           const priceByProduct: Record<string, string> = {
             'Le_grande_blue': '$350',
@@ -108,8 +111,8 @@ export function useProducts() {
             description,
             sizes,
             images,
-            image: images[0] || '',
-            hoverImage: images[1] || images[0] || '',
+            image: gridImages[0] || images[0] || '',
+            hoverImage: gridImages[1] || gridImages[0] || images[1] || images[0] || '',
             price: priceByProduct[productFolder] ?? '$100',
           };
         });

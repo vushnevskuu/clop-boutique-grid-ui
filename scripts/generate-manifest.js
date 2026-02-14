@@ -60,10 +60,11 @@ if (workingDir === clothDir && workingDir !== publicClothDir) {
   workingDir = publicClothDir;
 }
 
-// Генерируем manifest.json
+// Генерируем manifest.json: images — для страницы товара (с фоном), gridImages — для карточек в сетке (1–2 без фона, если есть *-nobg.webp)
 const manifest = {
   products: [],
   images: {},
+  gridImages: {},
 };
 
 try {
@@ -77,20 +78,26 @@ try {
       // Получаем все файлы в папке товара
       const files = fs.readdirSync(productPath);
       
-      // Фильтруем изображения и текстовый файл описания
-      const imageFiles = files
-        .filter(file => {
-          const ext = path.extname(file).toLowerCase();
-          return ['.jpg', '.jpeg', '.png', '.webp', '.gif'].includes(ext);
-        })
+      // Фильтруем изображения (без -nobg для страницы товара — с фоном)
+      const allImageFiles = files.filter(file => {
+        const ext = path.extname(file).toLowerCase();
+        return ['.jpg', '.jpeg', '.png', '.webp', '.gif'].includes(ext);
+      });
+      const imageFiles = allImageFiles
+        .filter(file => !file.includes('-nobg'))
         .sort((a, b) => {
-          // Сортируем по номеру в имени файла
           const numA = parseInt(a.match(/(\d+)/)?.[1] || '0');
           const numB = parseInt(b.match(/(\d+)/)?.[1] || '0');
           return numA - numB;
         });
+
+      // Для карточек в сетке: первые два — без фона (*-nobg.webp), если есть
+      const gridImageFiles = imageFiles.map((file, i) => {
+        if (i === 0 && allImageFiles.includes('1-nobg.webp')) return '1-nobg.webp';
+        if (i === 1 && allImageFiles.includes('2-nobg.webp')) return '2-nobg.webp';
+        return file;
+      });
       
-      // Проверяем наличие description.txt
       const hasDescription = files.some(file => 
         file.toLowerCase() === 'description.txt' || 
         file.toLowerCase().endsWith('.txt')
@@ -99,6 +106,7 @@ try {
       if (imageFiles.length > 0) {
         manifest.products.push(productFolder);
         manifest.images[productFolder] = imageFiles;
+        manifest.gridImages[productFolder] = gridImageFiles;
       }
     }
   }

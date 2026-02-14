@@ -73,5 +73,70 @@
       "6.webp",
       "7.webp"
     ]
+  },
+  "gridImages": {
+    "Chimala": [
+      "1-nobg.webp",
+      "2-nobg.webp",
+      "3.webp",
+      "4.webp",
+      "5.webp"
+    ],
+    "Diet_butcher_slim_skin": [
+      "1-nobg.webp",
+      "2-nobg.webp",
+      "3.webp",
+      "4.webp",
+      "5.webp",
+      "6.webp",
+      "7.webp",
+      "8.webp"
+    ],
+    "Jackrose_blue_made_in_Japan": [
+      "1-nobg.webp",
+      "2-nobg.webp",
+      "3.webp",
+      "4.webp",
+      "5.webp",
+      "6.webp",
+      "7.webp"
+    ],
+    "Jackrose_made_in_Japan": [
+      "1-nobg.webp",
+      "2-nobg.webp",
+      "3.webp",
+      "4.webp",
+      "5.webp",
+      "6.webp"
+    ],
+    "Le_grande_blue": [
+      "1-nobg.webp",
+      "2-nobg.webp",
+      "3.webp"
+    ],
+    "Leather_engineer_boots": [
+      "1-nobg.webp",
+      "2-nobg.webp",
+      "3.webp",
+      "4.webp",
+      "5.webp",
+      "6.webp",
+      "7.webp"
+    ],
+    "Love_boat_jacket": [
+      "1-nobg.webp",
+      "2-nobg.webp",
+      "3.webp",
+      "4.webp"
+    ],
+    "kazuyuki_kumagai": [
+      "1-nobg.webp",
+      "2-nobg.webp",
+      "3.webp",
+      "4.webp",
+      "5.webp",
+      "6.webp",
+      "7.webp"
+    ]
   }
 }
