@@ -2,6 +2,7 @@ import { memo, useEffect, useRef, useCallback, useState } from "react";
 import ProductTile from "./ProductTile";
 import { useProducts } from "@/hooks/useProducts";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useMainScroll } from "@/contexts/MainScrollContext";
 
 // Размер карточек ~1.5× больше и адаптивный (clamp(140px, 27vw, 320px)) — запас по % для расчёта позиций
 const TILE_WIDTH_PCT = 34;
@@ -59,33 +60,68 @@ function getPositionsForPage(
   return positions;
 }
 
-const INITIAL_MOBILE_PAGES = 2;
-const PAGES_LOAD_MORE = 2;
-const MOBILE_PAGE_HEIGHT_VH = 85;
+// Мобильный бесконечный скролл: в каждом чанке 1–2 случайных товара (не вся пачка)
+const MOBILE_CHUNK_HEIGHT_VH = 80;
+const INITIAL_MOBILE_CHUNKS = 8;
+
+/** Для чанка с индексом chunkIndex возвращаем 1 или 2 случайных id товара (детерминированно). */
+function getChunkProductIds(chunkIndex: number, productIds: string[]): string[] {
+  if (productIds.length === 0) return [];
+  const rng = seededRandom(chunkIndex + 100);
+  const count = rng() < 0.5 ? 1 : 2;
+  const countClamped = Math.min(count, productIds.length);
+  const indices: number[] = [];
+  while (indices.length < countClamped) {
+    const i = Math.floor(rng() * productIds.length);
+    if (!indices.includes(i)) indices.push(i);
+  }
+  return indices.map((i) => productIds[i]);
+}
+
+/** Позиции для товаров внутри одного чанка. */
+function getChunkPositions(
+  chunkIndex: number,
+  chunkProductIds: string[]
+): Record<string, { x: number; y: number }> {
+  const rng = seededRandom(chunkIndex + 200);
+  const positions: Record<string, { x: number; y: number }> = {};
+  for (const id of chunkProductIds) {
+    positions[id] = getRandomNonOverlappingPosition(positions, rng);
+  }
+  return positions;
+}
 
 const ProductGrid = memo(() => {
   const { products, loading, error } = useProducts();
   const containerRef = useRef<HTMLElement | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
-  const pageContainersRef = useRef<Record<number, HTMLDivElement | null>>({});
+  const chunkContainersRef = useRef<Record<number, HTMLDivElement | null>>({});
   const isMobile = useIsMobile();
+  const { scrollContainerRef, useScrollContainer } = useMainScroll();
   const [positions, setPositions] = useState<Record<string, { x: number; y: number }>>({});
-  const [numMobilePages, setNumMobilePages] = useState(INITIAL_MOBILE_PAGES);
+  const [numMobileChunks, setNumMobileChunks] = useState(INITIAL_MOBILE_CHUNKS);
+  const loadingMoreChunksRef = useRef(false);
 
-  // Бесконечный скролл на мобилке: подгрузка страниц при достижении низа
+  // Бесконечный скролл на мобилке: root = контейнер скролла (Safari) или viewport; подгружаем по 2 чанка
   useEffect(() => {
-    if (!isMobile || !sentinelRef.current) return;
+    if (!isMobile) return;
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const scrollRoot = useScrollContainer && scrollContainerRef?.current ? scrollContainerRef.current : null;
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0]?.isIntersecting) {
-          setNumMobilePages((n) => n + PAGES_LOAD_MORE);
-        }
+        if (!entries[0]?.isIntersecting || loadingMoreChunksRef.current) return;
+        loadingMoreChunksRef.current = true;
+        setNumMobileChunks((n) => n + 2);
+        setTimeout(() => {
+          loadingMoreChunksRef.current = false;
+        }, 350);
       },
-      { rootMargin: "200px", threshold: 0 }
+      { root: scrollRoot, rootMargin: "500px 0px 500px 0px", threshold: 0 }
     );
-    observer.observe(sentinelRef.current);
+    observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [isMobile, numMobilePages]);
+  }, [isMobile, useScrollContainer]);
 
   // При загрузке и при появлении новых товаров назначаем случайные позиции без наложения (десктоп)
   useEffect(() => {
@@ -167,36 +203,37 @@ const ProductGrid = memo(() => {
 
   const productIds = products.map((p) => String(p.id));
 
-  // Мобилка: бесконечный скролл — страницы по 100vh, при скролле вниз подгружаются новые с новыми рандомными позициями
+  // Мобилка: бесконечный скролл — по 1 чанку (1–2 товара) при скролле вниз, без пачки дубликатов
   if (isMobile) {
+    const productsById = Object.fromEntries(products.map((p) => [String(p.id), p]));
     return (
       <section
         id="shop"
-        className="scroll-mt-20 relative z-30 px-4 md:px-8 lg:px-[30px] pb-0 overflow-visible md:overflow-visible"
-        style={{ backgroundColor: "transparent" }}
+        className="scroll-mt-20 relative z-30 px-4 md:px-8 lg:px-[30px] pb-0"
+        style={{ backgroundColor: "transparent", minHeight: "auto" }}
       >
-        <div
-          className="relative w-full"
-          style={{ minHeight: `${numMobilePages * MOBILE_PAGE_HEIGHT_VH}vh` }}
-        >
-          {Array.from({ length: numMobilePages }, (_, pageIndex) => {
-            const pagePositions = getPositionsForPage(pageIndex, productIds);
-            const containerRefForPage: React.RefObject<HTMLDivElement | null> = {
+        <div className="relative w-full" style={{ minHeight: "auto" }}>
+          {Array.from({ length: numMobileChunks }, (_, chunkIndex) => {
+            const chunkProductIds = getChunkProductIds(chunkIndex, productIds);
+            const chunkPositions = getChunkPositions(chunkIndex, chunkProductIds);
+            const containerRefForChunk: React.RefObject<HTMLDivElement | null> = {
               get current() {
-                return pageContainersRef.current[pageIndex] ?? null;
+                return chunkContainersRef.current[chunkIndex] ?? null;
               },
             } as React.RefObject<HTMLDivElement | null>;
             return (
               <div
-                key={pageIndex}
+                key={chunkIndex}
                 ref={(el) => {
-                  pageContainersRef.current[pageIndex] = el;
+                  chunkContainersRef.current[chunkIndex] = el;
                 }}
                 className="relative w-full"
-                style={{ height: `${MOBILE_PAGE_HEIGHT_VH}vh` }}
+                style={{ height: `${MOBILE_CHUNK_HEIGHT_VH}vh` }}
               >
-                {products.map((product, index) => {
-                  const pos = pagePositions[String(product.id)];
+                {chunkProductIds.map((id, index) => {
+                  const product = productsById[id];
+                  if (!product) return null;
+                  const pos = chunkPositions[id];
                   if (pos == null) return null;
                   const firstImage =
                     product.image || (product.images?.[0] ?? "") || "";
@@ -208,14 +245,14 @@ const ProductGrid = memo(() => {
                     firstImage;
                   return (
                     <ProductTile
-                      key={`${pageIndex}-${product.id}`}
+                      key={`${chunkIndex}-${product.id}`}
                       id={product.id}
                       image={firstImage}
                       hoverImage={secondImage}
                       position={pos}
                       onPositionChange={handlePositionChange}
-                      containerRef={containerRefForPage}
-                      priority={pageIndex === 0 && index < 6}
+                      containerRef={containerRefForChunk}
+                      priority={chunkIndex === 0 && index < 2}
                       disableDrag
                     />
                   );
@@ -223,7 +260,12 @@ const ProductGrid = memo(() => {
               </div>
             );
           })}
-          <div ref={sentinelRef} className="h-0 w-full" aria-hidden="true" style={{ minHeight: 1 }} />
+          <div
+            ref={sentinelRef}
+            className="w-full"
+            aria-hidden="true"
+            style={{ height: 1, minHeight: 1 }}
+          />
         </div>
       </section>
     );
