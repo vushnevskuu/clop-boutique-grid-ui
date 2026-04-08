@@ -1,4 +1,4 @@
-import { Suspense, useMemo, useRef, useEffect } from "react";
+import { Suspense, useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
@@ -21,22 +21,6 @@ function SquirrelModel({ modelPath }: { modelPath: string }) {
     const baseScale = maxDim > 0 ? 1.65 / maxDim : 1;
     return { object: cloned, scale: baseScale * 0.92 };
   }, [scene]);
-
-  useEffect(() => {
-    const obj = clonedScene.object;
-    return () => {
-      obj.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
-          child.geometry?.dispose();
-          if (Array.isArray(child.material)) {
-            child.material.forEach((m) => m.dispose());
-          } else {
-            child.material?.dispose();
-          }
-        }
-      });
-    };
-  }, [clonedScene.object]);
 
   useFrame((_, delta) => {
     if (meshRef.current) {
