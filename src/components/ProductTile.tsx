@@ -5,35 +5,13 @@ interface ProductTileProps {
   id: string | number;
   image: string;
   hoverImage?: string;
-  position: { x: number; y: number };
-  onPositionChange: (id: string | number, x: number, y: number) => void;
-  containerRef: React.RefObject<HTMLElement | null>;
   priority?: boolean;
-  /** На мобилке в режиме бесконечного скролла перетаскивание отключено — только тап для перехода */
-  disableDrag?: boolean;
 }
 
-const ProductTile = memo(({
-  id,
-  image,
-  hoverImage,
-  position,
-  onPositionChange,
-  containerRef,
-  priority = false,
-  disableDrag = false,
-}: ProductTileProps) => {
+const ProductTile = memo(({ id, image, hoverImage, priority = false }: ProductTileProps) => {
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
   const [isInView, setIsInView] = useState(priority);
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStartRef = useRef<{
-    offsetX: number;
-    offsetY: number;
-    clientX: number;
-    clientY: number;
-    didMove: boolean;
-  } | null>(null);
   const tileRef = useRef<HTMLDivElement>(null);
 
   const displayImage = isHovered && hoverImage ? hoverImage : image;
@@ -49,110 +27,50 @@ const ProductTile = memo(({
           }
         });
       },
-      { rootMargin: "50px" }
+      { rootMargin: "80px" }
     );
     observer.observe(tileRef.current);
     return () => observer.disconnect();
   }, [priority]);
 
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      if (disableDrag || e.button !== 0) return;
-      e.preventDefault();
-      const rect = tileRef.current?.getBoundingClientRect();
-      if (!rect) return;
-      setIsDragging(true);
-      dragStartRef.current = {
-        offsetX: e.clientX - rect.left,
-        offsetY: e.clientY - rect.top,
-        clientX: e.clientX,
-        clientY: e.clientY,
-        didMove: false,
-      };
-    },
-    [disableDrag]
-  );
+  const go = useCallback(() => {
+    navigate(`/product/${encodeURIComponent(String(id))}`);
+  }, [id, navigate]);
 
-  useEffect(() => {
-    if (!isDragging || !dragStartRef.current || !containerRef.current) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!containerRef.current || !dragStartRef.current) return;
-      const { offsetX, offsetY, clientX, clientY } = dragStartRef.current;
-      if (Math.abs(e.clientX - clientX) > 5 || Math.abs(e.clientY - clientY) > 5) {
-        dragStartRef.current.didMove = true;
-      }
-      const rect = containerRef.current.getBoundingClientRect();
-      const tileLeft = e.clientX - offsetX;
-      const tileTop = e.clientY - offsetY;
-      const xPct = ((tileLeft - rect.left) / rect.width) * 100;
-      const yPct = ((tileTop - rect.top) / rect.height) * 100;
-      const clampedX = Math.max(0, Math.min(66, xPct));
-      const clampedY = Math.max(0, Math.min(58, yPct));
-      onPositionChange(id, clampedX, clampedY);
-    };
-
-    const handleMouseUp = (e: MouseEvent) => {
-      if (e.button !== 0) return;
-      const didDrag = dragStartRef.current?.didMove ?? false;
-      dragStartRef.current = null;
-      setIsDragging(false);
-      if (!didDrag) {
-        navigate(`/product/${encodeURIComponent(String(id))}`);
-      }
-    };
-
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [isDragging, id, onPositionChange, containerRef]);
-
-  const handleMouseEnter = useCallback(() => setIsHovered(true), []);
-  const handleMouseLeave = useCallback(() => setIsHovered(false), []);
-
-  const handleClick = useCallback(
-    (e: React.MouseEvent) => {
-      if (disableDrag) {
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
-        navigate(`/product/${encodeURIComponent(String(id))}`);
+        go();
       }
     },
-    [disableDrag, id, navigate]
+    [go]
   );
 
   return (
     <div
       ref={tileRef}
-      role={disableDrag ? "button" : undefined}
-      tabIndex={disableDrag ? 0 : undefined}
-      className={`absolute touch-none select-none ${disableDrag ? "cursor-pointer" : "cursor-grab active:cursor-grabbing"}`}
-      style={{
-        left: `${position.x}%`,
-        top: `${position.y}%`,
-        width: "clamp(140px, 27vw, 320px)",
-        aspectRatio: "4/5",
-        zIndex: isDragging ? 50 : 1,
-      }}
-      onMouseDown={handleMouseDown}
-      onClick={handleClick}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      role="button"
+      tabIndex={0}
+      className="w-full cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
+      style={{ aspectRatio: "4/5" }}
+      onClick={go}
+      onKeyDown={handleKeyDown}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {isInView ? (
         <img
           src={displayImage}
           alt=""
-          className="w-full h-full object-cover pointer-events-none transition-opacity duration-300 block"
+          className="block h-full w-full object-cover transition-opacity duration-300"
           loading={priority ? "eager" : "lazy"}
           decoding="async"
           fetchPriority={priority ? "high" : "low"}
           draggable={false}
         />
       ) : (
-        <div className="w-full h-full bg-gray-100 animate-pulse" />
+        <div className="h-full w-full animate-pulse bg-muted" />
       )}
     </div>
   );
