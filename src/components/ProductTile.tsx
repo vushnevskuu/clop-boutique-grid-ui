@@ -1,15 +1,14 @@
 import { useState, useCallback, useRef, memo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 
 interface ProductTileProps {
   id: string | number;
   image: string;
   hoverImage?: string;
   priority?: boolean;
+  onOpen: (id: string | number) => void;
 }
 
-const ProductTile = memo(({ id, image, hoverImage, priority = false }: ProductTileProps) => {
-  const navigate = useNavigate();
+const ProductTile = memo(({ id, image, hoverImage, priority = false, onOpen }: ProductTileProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isInView, setIsInView] = useState(priority);
   const tileRef = useRef<HTMLDivElement>(null);
@@ -34,8 +33,8 @@ const ProductTile = memo(({ id, image, hoverImage, priority = false }: ProductTi
   }, [priority]);
 
   const go = useCallback(() => {
-    navigate(`/product/${encodeURIComponent(String(id))}`);
-  }, [id, navigate]);
+    onOpen(id);
+  }, [id, onOpen]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -52,7 +51,7 @@ const ProductTile = memo(({ id, image, hoverImage, priority = false }: ProductTi
       ref={tileRef}
       role="button"
       tabIndex={0}
-      className="w-full cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
+      className="relative w-full cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
       style={{ aspectRatio: "4/5" }}
       onClick={go}
       onKeyDown={handleKeyDown}

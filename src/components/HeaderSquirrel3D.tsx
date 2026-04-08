@@ -33,20 +33,20 @@ function SquirrelModel({ modelPath }: { modelPath: string }) {
       ref={meshRef}
       object={clonedScene.object}
       scale={clonedScene.scale}
-      position={[0, -0.06, 0]}
+      position={[0, -0.04, 0]}
     />
   );
 }
 
-/** Компактная белка для шапки: маленький canvas, минимум света, без тяжёлой камеры. */
+/** Компактная белка в шапке: ровное освещение с нескольких сторон + экспозиция. */
 export default function HeaderSquirrel3D() {
   return (
     <div
-      className="h-9 w-9 md:h-10 md:w-10 shrink-0 overflow-hidden rounded-full bg-white/95 ring-1 ring-black/5"
+      className="h-9 w-9 md:h-10 md:w-10 shrink-0 overflow-hidden rounded-full bg-white ring-1 ring-black/5"
       aria-hidden
     >
       <Canvas
-        camera={{ position: [0, 0, 2.15], fov: 40 }}
+        camera={{ position: [0.12, 0.2, 2.45], fov: 38 }}
         gl={{
           alpha: true,
           antialias: false,
@@ -56,9 +56,20 @@ export default function HeaderSquirrel3D() {
         }}
         dpr={1}
         performance={{ min: 0.4 }}
+        onCreated={({ gl }) => {
+          gl.toneMapping = THREE.ACESFilmicToneMapping;
+          gl.toneMappingExposure = 1.35;
+          gl.outputColorSpace = THREE.SRGBColorSpace;
+        }}
       >
-        <ambientLight intensity={0.75} />
-        <directionalLight position={[2.5, 4, 3]} intensity={0.45} />
+        <color attach="background" args={["#ffffff"]} />
+        <ambientLight intensity={1.05} />
+        <hemisphereLight args={["#ffffff", "#e8e8e8", 0.85]} />
+        <directionalLight position={[2.8, 4.5, 5]} intensity={0.95} />
+        <directionalLight position={[-4, 2, 3]} intensity={0.55} />
+        <directionalLight position={[0, -2, 4]} intensity={0.4} />
+        <directionalLight position={[0, 1.5, -3]} intensity={0.35} />
+        <pointLight position={[0.5, 0.4, 2.2]} intensity={0.45} distance={8} decay={2} />
         <Suspense fallback={null}>
           <SquirrelModel modelPath="/model.glb" />
         </Suspense>

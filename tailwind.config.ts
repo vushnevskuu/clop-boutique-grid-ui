@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        heading: ['Arial', 'sans-serif'],
-        body: ['Arial', 'sans-serif'],
+        heading: ["Arial", "sans-serif"],
+        body: ["Arial", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

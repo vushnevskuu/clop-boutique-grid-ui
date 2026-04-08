@@ -11,6 +11,7 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
   const imgRef = useRef<HTMLImageElement>(null);
   const createShoeRef = useRef<((fromCenter?: boolean) => void) | null>(null);
   const autoShoeLaunchedRef = useRef(false); // Флаг для отслеживания автоматического запуска
+  const aspectRatioRef = useRef<number | null>(null);
   const isMobile = useIsMobile();
 
   const isAtBottom = useCallback(() => {
@@ -54,29 +55,52 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
     }
   }, [onShoeCreate]);
 
-  // Автоматический запуск ботинка при доскролле до футера
+  const syncFooterHeight = useCallback(() => {
+    const footer = footerRef.current;
+    const ar = aspectRatioRef.current;
+    if (!footer || !ar || ar <= 0) return;
+    const w = footer.offsetWidth;
+    if (w <= 0) return;
+    // Десктоп: картинка 100% ширины контейнера. Мобильный кроп 150% — высота пропорциональна 1.5W
+    const effectiveWidth = isMobile ? w * 1.5 : w;
+    footer.style.height = `${effectiveWidth / ar}px`;
+  }, [isMobile]);
+
+  useEffect(() => {
+    const footer = footerRef.current;
+    if (!footer) return;
+    const ro = new ResizeObserver(() => syncFooterHeight());
+    ro.observe(footer);
+    return () => ro.disconnect();
+  }, [syncFooterHeight]);
+
+  useEffect(() => {
+    syncFooterHeight();
+  }, [isMobile, syncFooterHeight]);
+
+  // Автоматический запуск ботинка при доскролле до футера (root — скролл-контейнер Safari)
   useEffect(() => {
     const footer = footerRef.current;
     if (!footer) return;
 
+    const root = scrollContainerRef?.current ?? null;
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          // Если футер виден и автоматический ботинок еще не был запущен
           if (entry.isIntersecting && !autoShoeLaunchedRef.current && createShoeRef.current) {
             autoShoeLaunchedRef.current = true;
-            // Небольшая задержка для более плавного эффекта
             setTimeout(() => {
               if (createShoeRef.current) {
-                createShoeRef.current(true); // Первый ботинок вылетает из центра
+                createShoeRef.current(true);
               }
             }, 300);
           }
         });
       },
       {
-        threshold: 0.3, // Футер должен быть виден минимум на 30%
-        rootMargin: '0px'
+        root,
+        threshold: 0.3,
+        rootMargin: "0px",
       }
     );
 
@@ -85,7 +109,7 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
     return () => {
       observer.disconnect();
     };
-  }, []); // Запускается только один раз при монтировании
+  }, [scrollContainerRef]);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!footerRef.current) return;
@@ -176,43 +200,35 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
     return `perspective(1000px) scale(${scale}) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(${translateZ}px)`;
   }, [mousePosition.x, mousePosition.y]);
 
-  const handleImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
-    const img = e.currentTarget;
-    if (footerRef.current && img.naturalHeight) {
-      const aspectRatio = img.naturalWidth / img.naturalHeight;
-      const containerWidth = footerRef.current.offsetWidth;
-      
-      if (isMobile) {
-        // На мобильных: изображение увеличено до 150%, высота рассчитывается с учетом этого
-        // Но видимая часть остается в пределах контейнера благодаря overflow: hidden
-        const calculatedHeight = containerWidth / aspectRatio;
-        footerRef.current.style.height = `${calculatedHeight}px`;
-      } else {
-        // На десктопе: обычная высота
-        const calculatedHeight = containerWidth / aspectRatio;
-        footerRef.current.style.height = `${calculatedHeight}px`;
-      }
-    }
-  }, [isMobile]);
+  const handleImageLoad = useCallback(
+    (e: React.SyntheticEvent<HTMLImageElement>) => {
+      const img = e.currentTarget;
+      if (!img.naturalWidth || !img.naturalHeight) return;
+      aspectRatioRef.current = img.naturalWidth / img.naturalHeight;
+      syncFooterHeight();
+    },
+    [syncFooterHeight]
+  );
 
   return (
-    <footer 
+    <footer
       ref={footerRef}
-      className="w-full" 
-      style={{ 
-        display: 'block', 
-        margin: 0, 
-        padding: 0, 
-        position: 'relative', 
+      className="w-full shrink-0"
+      style={{
+        display: "block",
+        margin: 0,
+        padding: 0,
+        position: "relative",
         zIndex: 25,
-        overflow: 'hidden',
-        width: '100%',
-        touchAction: isMobile ? 'auto' : 'none',
-        overscrollBehavior: 'none',
-        backgroundColor: 'transparent',
-        background: 'none',
-        minHeight: isMobile ? '200px' : 'auto',
-        cursor: isMobile ? 'pointer' : 'default',
+        overflow: "hidden",
+        width: "100%",
+        maxWidth: "100%",
+        touchAction: isMobile ? "auto" : "none",
+        overscrollBehavior: "none",
+        backgroundColor: "transparent",
+        background: "none",
+        minHeight: isMobile ? "200px" : "auto",
+        cursor: isMobile ? "pointer" : "default",
       }}
     >
       <div
@@ -229,7 +245,7 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
         <img 
           ref={imgRef}
           src="/footer.webp" 
-          alt="Footer" 
+          alt="" 
           className="w-full h-auto"
           style={{ 
             display: 'block', 

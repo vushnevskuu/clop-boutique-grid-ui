@@ -8,6 +8,14 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    // Dev: без CORS на стороне Medusa можно проксировать Store API (см. medusa/README.md)
+    proxy: {
+      "/medusa": {
+        target: "http://localhost:9000",
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/medusa/, ""),
+      },
+    },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {

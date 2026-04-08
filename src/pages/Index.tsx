@@ -1,10 +1,12 @@
-import { memo, useRef, useCallback, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { memo, useRef, useCallback, useEffect, useMemo } from "react";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useMainScroll } from "@/contexts/MainScrollContext";
+import { useProducts } from "@/hooks/useProducts";
 import Header from "@/components/Header";
-import Hero from "@/components/Hero";
 import ProductGrid from "@/components/ProductGrid";
+import ProductModal from "@/components/ProductModal";
+import GeoHomeJsonLd from "@/components/GeoHomeJsonLd";
 import Footer from "@/components/Footer";
 import ShoeCanvas from "@/components/ShoeCanvas";
 
@@ -12,7 +14,46 @@ const Index = memo(() => {
   const createShoeRef = useRef<(() => void) | null>(null);
   const { scrollContainerRef, useScrollContainer } = useMainScroll();
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { products, loading, error } = useProducts();
   const isMobile = useIsMobile();
+
+  const itemRaw = searchParams.get("item");
+
+  const selectedProduct = useMemo(() => {
+    if (!itemRaw || !products.length) return null;
+    const dec = decodeURIComponent(itemRaw);
+    return (
+      products.find(
+        (p) => String(p.id) === dec || p.id === itemRaw || String(p.id) === itemRaw || p.id === dec
+      ) ?? null
+    );
+  }, [itemRaw, products]);
+
+  const modalOpen = Boolean(itemRaw);
+
+  const handleOpenProduct = useCallback(
+    (id: string | number) => {
+      setSearchParams({ item: String(id) }, { replace: false });
+    },
+    [setSearchParams]
+  );
+
+  const handleModalOpenChange = useCallback(
+    (open: boolean) => {
+      if (!open) {
+        setSearchParams(
+          (prev) => {
+            const next = new URLSearchParams(prev);
+            next.delete("item");
+            return next;
+          },
+          { replace: true }
+        );
+      }
+    },
+    [setSearchParams]
+  );
 
   const handleShoeCreate = useCallback((createFn: () => void) => {
     createShoeRef.current = createFn;
@@ -32,7 +73,7 @@ const Index = memo(() => {
         const container = scrollContainerRef?.current;
         if (shopEl && useScrollContainer && container) {
           const top = shopEl.getBoundingClientRect().top + container.scrollTop;
-          container.scrollTo({ top: top - 80, behavior: 'smooth' });
+          container.scrollTo({ top: top - 24, behavior: 'smooth' });
         } else if (shopEl) {
           shopEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
@@ -40,11 +81,16 @@ const Index = memo(() => {
     }
   }, [location.hash, useScrollContainer]);
 
-  const content = (
+  const pageBody = (
     <>
-      <main className="m-0 p-0 mb-12 md:mb-[60px]">
-        <Hero />
-        <ProductGrid />
+      <GeoHomeJsonLd />
+      <main className="m-0 flex-1 p-0 pt-[120px] pb-16 md:pb-20 md:pt-[132px]">
+        <ProductGrid
+          products={products}
+          loading={loading}
+          error={error}
+          onProductOpen={handleOpenProduct}
+        />
       </main>
       {!isMobile && <ShoeCanvas onShoeCreate={handleShoeCreate} />}
       {!isMobile && <Footer onShoeCreate={handleFooterShoeCreate} />}
@@ -52,21 +98,34 @@ const Index = memo(() => {
   );
 
   return (
-    <div className="min-h-screen" style={{ margin: 0, padding: 0 }}>
+    <div
+      className="flex min-h-0 flex-col bg-background"
+      style={{ margin: 0, padding: 0, minHeight: "100dvh" }}
+    >
+      <ProductModal
+        open={modalOpen}
+        loading={loading}
+        product={selectedProduct}
+        onOpenChange={handleModalOpenChange}
+      />
       <Header />
       {useScrollContainer ? (
         <div
           ref={scrollContainerRef}
-          className="overflow-y-auto overflow-x-hidden w-full"
+          className="flex min-h-0 w-full flex-1 flex-col overflow-y-auto overflow-x-hidden"
           style={{
-            height: '100vh',
-            WebkitOverflowScrolling: 'touch',
+            height: "100dvh",
+            maxHeight: "100dvh",
+            WebkitOverflowScrolling: "touch",
           }}
         >
-          {content}
+          {/* min-h-full: при малом контенте футер остаётся внизу окна */}
+          <div className="flex min-h-full flex-col">{pageBody}</div>
         </div>
       ) : (
-        content
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="flex min-h-[100dvh] flex-col">{pageBody}</div>
+        </div>
       )}
     </div>
   );

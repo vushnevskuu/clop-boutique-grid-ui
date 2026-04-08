@@ -1,0 +1,29 @@
+# Проверка сборки при push/PR (без деплоя — деплой делает Vercel после подключения репозитория).
+name: Build storefront
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        env:
+          # Плейсхолдеры: на Vercel задаёте реальные значения в Dashboard → Settings → Environment Variables
+          VITE_MEDUSA_BACKEND_URL: https://example.invalid
+          VITE_MEDUSA_PUBLISHABLE_KEY: pk_build_placeholder
+        run: npm run build

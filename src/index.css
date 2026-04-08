@@ -102,6 +102,20 @@
   }
 }
 
+/* Текст товара: комфортная длина строки и межстрочный интервал */
+.prose-product {
+  max-width: 65ch;
+  font-size: clamp(0.9375rem, 2.5vw, 1rem);
+  line-height: 1.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee,
+  .marquee-content {
+    animation: none !important;
+  }
+}
+
 @layer components {
   .product-card {
     @apply relative overflow-hidden cursor-pointer;

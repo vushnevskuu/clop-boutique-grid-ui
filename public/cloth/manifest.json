@@ -1,4 +1,14 @@
 {
+  "prices": {
+    "Le_grande_blue": "35 000 ₽",
+    "Jackrose_made_in_Japan": "15 000 ₽",
+    "Jackrose_blue_made_in_Japan": "15 000 ₽",
+    "Chimala": "10 000 ₽",
+    "Diet_butcher_slim_skin": "10 000 ₽",
+    "Love_boat_jacket": "5 000 ₽",
+    "Leather_engineer_boots": "8 000 ₽",
+    "kazuyuki_kumagai": "12 000 ₽"
+  },
   "products": [
     "Chimala",
     "Diet_butcher_slim_skin",

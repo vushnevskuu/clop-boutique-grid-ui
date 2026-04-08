@@ -13,7 +13,8 @@ import { useIsSafari } from "@/hooks/use-is-safari";
 import Index from "./pages/Index";
 
 // Lazy load other pages for better performance
-const Product = lazy(() => import("./pages/Product"));
+import ProductRedirect from "./pages/ProductRedirect";
+const Info = lazy(() => import("./pages/Info"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -40,7 +41,8 @@ const App = () => {
               <Suspense fallback={null}>
                 <Routes>
                   <Route path="/" element={<Index />} />
-                  <Route path="/product/:id" element={<Product />} />
+                  <Route path="/product/:id" element={<ProductRedirect />} />
+                  <Route path="/info" element={<Info />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

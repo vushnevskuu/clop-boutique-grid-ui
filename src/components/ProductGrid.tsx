@@ -1,9 +1,18 @@
 import { memo, useEffect } from "react";
 import ProductTile from "./ProductTile";
-import { useProducts } from "@/hooks/useProducts";
+import type { Product } from "@/types/product";
 
-const ProductGrid = memo(() => {
-  const { products, loading, error } = useProducts();
+const sectionShell =
+  "relative z-30 scroll-mt-[120px] bg-transparent px-4 pb-12 md:scroll-mt-[132px] md:px-8 lg:px-[30px] md:pb-12";
+
+export type ProductGridProps = {
+  products: Product[];
+  loading: boolean;
+  error: Error | null;
+  onProductOpen: (id: string | number) => void;
+};
+
+const ProductGrid = memo(({ products, loading, error, onProductOpen }: ProductGridProps) => {
 
   useEffect(() => {
     if (products.length === 0) return;
@@ -29,9 +38,9 @@ const ProductGrid = memo(() => {
     return (
       <section
         id="shop"
-        className="relative z-30 scroll-mt-20 bg-transparent px-4 pb-12 md:px-8 lg:px-[30px]"
+        className={sectionShell}
       >
-        <div className="py-8 text-center">Loading products...</div>
+        <div className="py-12 text-center text-muted-foreground">Загрузка товаров…</div>
       </section>
     );
   }
@@ -40,9 +49,11 @@ const ProductGrid = memo(() => {
     return (
       <section
         id="shop"
-        className="relative z-30 scroll-mt-20 bg-transparent px-4 pb-12 md:px-8 lg:px-[30px]"
+        className={sectionShell}
       >
-        <div className="py-8 text-center text-red-500">Error loading products: {error.message}</div>
+        <div className="py-12 text-center text-red-600">
+          Ошибка загрузки: {error.message}
+        </div>
       </section>
     );
   }
@@ -51,18 +62,15 @@ const ProductGrid = memo(() => {
     return (
       <section
         id="shop"
-        className="relative z-30 scroll-mt-20 bg-transparent px-4 pb-12 md:px-8 lg:px-[30px]"
+        className={sectionShell}
       >
-        <div className="py-8 text-center">No products found</div>
+        <div className="py-12 text-center text-muted-foreground">Товары не найдены</div>
       </section>
     );
   }
 
   return (
-    <section
-      id="shop"
-      className="relative z-30 scroll-mt-20 bg-transparent px-4 pb-12 md:px-8 lg:px-[30px]"
-    >
+    <section id="shop" className={sectionShell}>
       <div className="mx-auto grid w-full max-w-[1600px] grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 md:gap-5 lg:grid-cols-4 lg:gap-6">
         {products.map((product, index) => {
           const firstImage = product.image || (product.images?.[0] ?? "") || "";
@@ -79,6 +87,7 @@ const ProductGrid = memo(() => {
               image={firstImage}
               hoverImage={secondImage}
               priority={index < 8}
+              onOpen={onProductOpen}
             />
           );
         })}

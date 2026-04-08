@@ -1,0 +1,25 @@
+# PostgreSQL + Redis для локального Medusa (v2).
+# Запуск: docker compose up -d
+# Затем создайте бэкенд: см. README.md в этой папке.
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: clop-medusa-postgres
+    environment:
+      POSTGRES_USER: medusa
+      POSTGRES_PASSWORD: medusa
+      POSTGRES_DB: medusa
+    ports:
+      - "5432:5432"
+    volumes:
+      - medusa_pg_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: clop-medusa-redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  medusa_pg_data:

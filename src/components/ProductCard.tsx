@@ -45,8 +45,8 @@ const ProductCard = memo(({ id, image, hoverImage, title, price, size, brand, pr
     e.stopPropagation();
     
     // Создаём ссылку на карточку товара
-    const productUrl = `${window.location.origin}/product/${encodeURIComponent(String(id))}`;
-    const messageText = `Hey! I want this ${productUrl}`;
+    const productUrl = `${window.location.origin}/?item=${encodeURIComponent(String(id))}`;
+    const messageText = `Здравствуйте! Интересует этот товар: ${productUrl}`;
     const telegramUrl = `https://t.me/hithisisi?text=${encodeURIComponent(messageText)}`;
     
     // Открываем Telegram в новой вкладке
@@ -55,7 +55,7 @@ const ProductCard = memo(({ id, image, hoverImage, title, price, size, brand, pr
 
   return (
     <Link 
-      to={`/product/${encodeURIComponent(String(id))}`}
+      to={`/?item=${encodeURIComponent(String(id))}`}
       className="flex flex-col"
       style={{
         backgroundColor: '#ffffff',

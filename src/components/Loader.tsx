@@ -83,11 +83,10 @@ const Loader = memo(() => {
     const checkComponentsRendered = () => {
       // Wait for main content to appear (header, hero, or product grid)
       const checkInterval = setInterval(() => {
-        const hasContent = 
-          document.querySelector('header') ||
-          document.querySelector('[class*="Hero"]') ||
-          document.querySelector('[class*="ProductGrid"]') ||
-          document.querySelector('main');
+        const hasContent =
+          document.querySelector("header") ||
+          document.querySelector("#shop") ||
+          document.querySelector("main");
         
         if (hasContent) {
           componentsRendered = true;
@@ -204,7 +203,7 @@ const Loader = memo(() => {
             fontFamily: 'Arial, sans-serif',
           }}
         >
-          {loadingProgress}%
+          Загрузка {loadingProgress}%
         </div>
       </div>
     </div>

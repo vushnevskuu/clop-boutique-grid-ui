@@ -1,0 +1,97 @@
+import { memo } from "react";
+import { GEO_FAQ_ITEMS, GEO_LAST_UPDATED, GEO_CATALOG_POSITIONS } from "@/data/geoFaq";
+import { info } from "@/lib/infoTypography";
+
+/** FAQ на странице «О каталоге»; тексты совпадают с GEO (JSON-LD в GeoInfoJsonLd). */
+const SiteGeoFaq = memo(() => {
+  return (
+    <section
+      id="faq"
+      className="scroll-mt-[120px] border-t border-foreground/10 bg-transparent py-12 md:scroll-mt-[132px] md:py-16"
+      aria-labelledby="geo-faq-heading"
+    >
+      <div className="w-full">
+        <h2 id="geo-faq-heading" className={info.h2}>
+          Частые вопросы о CLOP
+        </h2>
+
+        <p className={`${info.sectionMeta} mt-3`}>
+          Кратко: в сетке —{" "}
+          <span className="font-semibold text-foreground">{GEO_CATALOG_POSITIONS} позиций</span>, цена и текст — в
+          карточке (по клику на фото). Уточнения — в Telegram перед покупкой.
+        </p>
+
+        <p className={`${info.body} mt-5 max-w-prose md:mt-6`}>
+          <span className="font-semibold text-foreground">Коротко: </span>
+          CLOP — витрина винтажа и селектива с честными карточками товаров. Здесь не «всё подряд», а отобранные вещи:
+          от японского денима до редких кроёв, с замерами там, где это важно для посадки.
+        </p>
+
+        <h3 className={info.labelUpper}>Во что мы верим</h3>
+        <ul className={info.list}>
+          <li>Прозрачные описания и размеры снижают сюрпризы при примерке.</li>
+          <li>Главный шаг после выбора — диалог в мессенджере, а не скрытые условия.</li>
+        </ul>
+
+        <h3 className={info.labelUpper}>Как устроен каталог</h3>
+        <ol className={info.orderedList}>
+          <li>На главной — только фото; открываете карточку — там цена и описание.</li>
+          <li>В карточке — полный текст, таблица замеров при наличии, кнопка в Telegram.</li>
+        </ol>
+
+        <div className="mt-10 space-y-0 border-t border-foreground/10 pt-8 md:mt-12">
+          {GEO_FAQ_ITEMS.map((item) => (
+            <details
+              key={item.question}
+              className="group border-b border-foreground/10 py-3.5 last:border-b-0 open:pb-5"
+            >
+              <summary className="cursor-pointer list-none rounded-sm py-1 text-base font-medium text-foreground marker:content-none outline-none transition-colors hover:text-foreground/80 [&::-webkit-details-marker]:hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">
+                {item.question}
+              </summary>
+              <p className={`${info.body} mt-3 max-w-prose pl-0`}>{item.answer}</p>
+            </details>
+          ))}
+        </div>
+
+        <p className={`${info.lead} mt-8 flex flex-nowrap items-center gap-x-3 overflow-x-auto whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mt-10`}>
+          <a href="#privacy" className={`${info.inlineMutedLink} shrink-0 text-sm md:text-[15px]`}>
+            Политика конфиденциальности
+          </a>
+          <span className="shrink-0 text-muted-foreground/35" aria-hidden>
+            ·
+          </span>
+          <a href="#returns" className={`${info.inlineMutedLink} shrink-0 text-sm md:text-[15px]`}>
+            Условия продажи
+          </a>
+        </p>
+
+        <p className={`${info.lead} mt-4 md:mt-5`}>
+          Обновлено:{" "}
+          <time dateTime={`${GEO_LAST_UPDATED}T12:00:00+03:00`}>
+            {new Date(`${GEO_LAST_UPDATED}T12:00:00+03:00`).toLocaleDateString("ru-RU", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
+          </time>
+        </p>
+
+        <p className={`${info.lead} mt-3 md:mt-4`}>
+          Материалы каталога и описания:{" "}
+          <a
+            href="https://www.instagram.com/clo.p_market"
+            className={`${info.inlineMutedLink} text-sm md:text-[15px]`}
+            target="_blank"
+            rel="author noopener noreferrer"
+          >
+            CLOP / ПОВТОР
+          </a>
+        </p>
+      </div>
+    </section>
+  );
+});
+
+SiteGeoFaq.displayName = "SiteGeoFaq";
+
+export default SiteGeoFaq;

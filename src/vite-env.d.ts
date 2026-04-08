@@ -1,1 +1,12 @@
 /// <reference types="vite/client" />
+
+interface ImportMetaEnv {
+  /** URL Medusa Store API. В dev можно указать относительный `/medusa` при включённом proxy в vite.config. */
+  readonly VITE_MEDUSA_BACKEND_URL?: string;
+  /** Publishable API key из Medusa Admin → Settings → Publishable API Keys */
+  readonly VITE_MEDUSA_PUBLISHABLE_KEY?: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
