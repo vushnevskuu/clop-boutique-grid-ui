@@ -1,5 +1,10 @@
 # Welcome to your Lovable project
 
+## CLOP / витрина
+
+- **Деплой на Vercel по шагам (на русском):** см. **[VERCEL-RU.md](./VERCEL-RU.md)**  
+- **Medusa + CORS + env:** см. **[medusa/README.md](./medusa/README.md)**
+
 ## Project info
 
 **URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
