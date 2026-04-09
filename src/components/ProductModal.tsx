@@ -198,7 +198,7 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                               <ImageWithFormatFallback
                                 src={img.src}
                                 alt={`${product.title}, миниатюра ${index + 1}`}
-                                className="h-full w-full object-cover"
+                                className="h-full w-full object-contain"
                                 loading="lazy"
                                 decoding="async"
                               />
@@ -221,7 +221,7 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                               <ImageWithFormatFallback
                                 src={img.src || ""}
                                 alt={`${product.title} — фото ${index + 1}`}
-                                className="h-auto w-full cursor-pointer object-cover"
+                                className="h-auto w-full cursor-pointer object-contain"
                                 loading="lazy"
                                 decoding="async"
                                 onClick={() => handleImageClick(img.src || "")}

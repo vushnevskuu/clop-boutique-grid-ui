@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, memo, useEffect } from "react";
+import ImageWithFormatFallback from "@/components/ImageWithFormatFallback";
 
 interface ProductTileProps {
   id: string | number;
@@ -51,25 +52,24 @@ const ProductTile = memo(({ id, image, hoverImage, priority = false, onOpen }: P
       ref={tileRef}
       role="button"
       tabIndex={0}
-      className="relative w-full cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
-      style={{ aspectRatio: "4/5" }}
+      className="relative w-full cursor-pointer select-none border border-[#f3f3f3] bg-white outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
       onClick={go}
       onKeyDown={handleKeyDown}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {isInView ? (
-        <img
+        <ImageWithFormatFallback
           src={displayImage}
           alt=""
-          className="block h-full w-full object-cover transition-opacity duration-300"
+          className="block h-auto w-full object-contain transition-opacity duration-300"
           loading={priority ? "eager" : "lazy"}
           decoding="async"
           fetchPriority={priority ? "high" : "low"}
           draggable={false}
         />
       ) : (
-        <div className="h-full w-full animate-pulse bg-muted" />
+        <div className="flex min-h-[min(60vw,320px)] w-full items-center justify-center animate-pulse bg-muted" />
       )}
     </div>
   );

@@ -81,7 +81,7 @@ const ProductGrid = memo(({ products, loading, error, onProductOpen }: ProductGr
 
   return (
     <section id="shop" className={sectionShell}>
-      <div className="mx-auto grid w-full max-w-[1600px] grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 md:gap-5 lg:grid-cols-4 lg:gap-6">
+      <div className="mx-auto grid w-full max-w-[1600px] grid-cols-2 items-start gap-3 sm:gap-4 md:grid-cols-3 md:gap-5 lg:grid-cols-4 lg:gap-6">
         {products.map((product, index) => {
           const firstImage = product.image || (product.images?.[0] ?? "") || "";
           const secondImage =

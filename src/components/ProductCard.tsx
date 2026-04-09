@@ -65,18 +65,18 @@ const ProductCard = memo(({ id, image, hoverImage, title, price, size, brand, pr
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div ref={imgRef} className="relative aspect-[4/5] overflow-hidden">
+      <div ref={imgRef} className="relative w-full overflow-hidden bg-white">
         {isInView ? (
           <ImageWithFormatFallback
             src={displayImage}
             alt={title}
-            className="w-full h-full object-cover transition-opacity duration-300"
+            className="h-auto w-full object-contain transition-opacity duration-300"
             loading={priority ? "eager" : "lazy"}
             decoding="async"
             fetchPriority={priority ? "high" : "low"}
           />
         ) : (
-          <div className="w-full h-full bg-gray-100 animate-pulse" />
+          <div className="min-h-[min(60vw,320px)] w-full bg-gray-100 animate-pulse" />
         )}
         {/* Message Us button - appears on hover */}
         <button
