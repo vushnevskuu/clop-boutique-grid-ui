@@ -82,6 +82,12 @@ npx create-medusa-app@latest clop-medusa \
 
 В админке создайте **регион** с валютой **RUB**. Витрина выбирает регион с `rub` или первый доступный.
 
+### Фото товаров (важно для iPhone)
+
+**HEIC/HEIF** с телефона в обычных браузерах (Chrome, Firefox и др.) **часто не отображаются** в `<img>` — в каталоге будет плейсхолдер. Загружайте в Medusa **JPEG, PNG или WebP** (на Mac: экспорт из «Фото», или снимайте в Настройки → Камера → «Наиболее совместимые»).
+
+Цена в витрине берётся из **Medusa v2 Store API** (`calculated_price.calculated_amount`) в **рублях** (основные единицы), не в копейках. При необходимости точный текст цены можно задать в metadata `clop_price_label`.
+
 ## 5. Publishable API Key
 
 В Medusa Admin: **Settings → Publishable API Keys** — создайте ключ для **Sales Channel**, в котором будут жить товары витрины.

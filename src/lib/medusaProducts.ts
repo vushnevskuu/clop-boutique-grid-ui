@@ -42,12 +42,14 @@ function formatPriceFromCalculated(cp: MedusaCalculatedPrice | null | undefined,
   const code = (cp.currency_code ?? "rub").toUpperCase();
   const currency = code === "RUR" ? "RUB" : code;
   try {
-    const major = n / 100;
+    // Medusa v2 Store API: calculated_amount уже в основных единицах валюты (рубли, евро…),
+    // см. https://docs.medusajs.com/resources/storefront-development/products/price/examples/show-price
     return new Intl.NumberFormat("ru-RU", {
       style: "currency",
       currency: currency === "RUB" ? "RUB" : currency,
-      maximumFractionDigits: 0,
-    }).format(major);
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(n);
   } catch {
     return fallback;
   }

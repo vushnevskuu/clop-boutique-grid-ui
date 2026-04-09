@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import type { Product } from "@/types/product";
 import { formatProductCardTitle } from "@/lib/productCardDisplay";
 import GeoProductJsonLd from "@/components/GeoProductJsonLd";
+import ImageWithFormatFallback from "@/components/ImageWithFormatFallback";
 import { GEO_LAST_UPDATED } from "@/data/geoFaq";
 
 const COLUMN_LABEL_RU: Record<string, string> = {
@@ -171,7 +172,7 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                         aria-hidden={!hoverPreviewSrc || !!selectedImage}
                       >
                         {hoverPreviewSrc && !selectedImage ? (
-                          <img
+                          <ImageWithFormatFallback
                             src={hoverPreviewSrc}
                             alt=""
                             className="max-h-full max-w-full object-contain"
@@ -194,7 +195,7 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                               onMouseEnter={() => !selectedImage && img.src && setHoverPreviewSrc(img.src)}
                               className="aspect-square w-full overflow-hidden border-0 bg-transparent p-0 outline-none"
                             >
-                              <img
+                              <ImageWithFormatFallback
                                 src={img.src}
                                 alt={`${product.title}, миниатюра ${index + 1}`}
                                 className="h-full w-full object-cover"
@@ -217,7 +218,7 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                               }}
                               className="w-full"
                             >
-                              <img
+                              <ImageWithFormatFallback
                                 src={img.src || ""}
                                 alt={`${product.title} — фото ${index + 1}`}
                                 className="h-auto w-full cursor-pointer object-cover"
@@ -225,10 +226,6 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                                 decoding="async"
                                 onClick={() => handleImageClick(img.src || "")}
                                 onMouseEnter={() => !selectedImage && img.src && setHoverPreviewSrc(img.src)}
-                                onError={(e) => {
-                                  console.error(`Failed to load image: ${img.src}`);
-                                  e.currentTarget.style.display = "none";
-                                }}
                               />
                             </div>
                           ))}
@@ -348,7 +345,7 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                   onClick={handleCloseImageModal}
                   aria-label="Закрыть просмотр фото"
                 >
-                  <img
+                  <ImageWithFormatFallback
                     src={selectedImage}
                     alt="Просмотр фото"
                     className="pointer-events-none max-h-[min(85dvh,calc(100vh-2rem))] max-w-[min(96vw,calc(100vw-2rem))] object-contain select-none"

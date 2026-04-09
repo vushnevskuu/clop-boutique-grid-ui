@@ -34,7 +34,7 @@ export default defineConfig(({ mode }) => {
             .replace(/<meta property="og:image"[^>]*>\s*/g, "")
             .replace(/<meta name="twitter:image"[^>]*>\s*/g, "");
         }
-        const ogImage = `${siteUrl}/logo.svg`;
+        const ogImage = `${siteUrl}/og-image.png`;
         return html
           .replaceAll("__SITE_URL__", siteUrl)
           .replaceAll("__OG_IMAGE__", ogImage);

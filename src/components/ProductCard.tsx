@@ -1,5 +1,6 @@
 import { useState, memo, useCallback, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import ImageWithFormatFallback from "@/components/ImageWithFormatFallback";
 
 interface ProductCardProps {
   id: number | string;
@@ -66,7 +67,7 @@ const ProductCard = memo(({ id, image, hoverImage, title, price, size, brand, pr
     >
       <div ref={imgRef} className="relative aspect-[4/5] overflow-hidden">
         {isInView ? (
-          <img
+          <ImageWithFormatFallback
             src={displayImage}
             alt={title}
             className="w-full h-full object-cover transition-opacity duration-300"
