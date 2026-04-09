@@ -7,7 +7,7 @@ const SiteGeoFaq = memo(() => {
   return (
     <section
       id="faq"
-      className="scroll-mt-[120px] border-t border-foreground/10 bg-transparent py-12 md:scroll-mt-[132px] md:py-16"
+      className="scroll-mt-[120px] bg-transparent py-12 md:scroll-mt-[132px] md:py-16"
       aria-labelledby="geo-faq-heading"
     >
       <div className="w-full">

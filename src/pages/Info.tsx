@@ -65,7 +65,7 @@ const Info = memo(() => {
             </nav>
             <aside
               aria-label="Instagram CLOP"
-              className="mt-8 border-t border-foreground/10 pt-8 md:mt-10 md:pt-10"
+              className="mt-8 md:mt-10"
             >
               <div className="flex justify-center">
                 <a
