@@ -67,15 +67,12 @@ const Info = memo(() => {
               aria-label="Instagram CLOP"
               className="mt-8 border-t border-foreground/10 pt-8 md:mt-10 md:pt-10"
             >
-              <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6 md:gap-8">
-                <p className={`${info.lead} max-w-md leading-relaxed`}>
-                  Лента, закулисье и часть новинок — в Instagram. В Direct можно написать до или после просмотра каталога.
-                </p>
+              <div className="flex justify-center">
                 <a
                   href="https://www.instagram.com/clo.p_market"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`${info.socialCta} shrink-0`}
+                  className={info.socialCta}
                 >
                   <Instagram className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
                   Перейти в Instagram
