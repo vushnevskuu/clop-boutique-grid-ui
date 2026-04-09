@@ -86,7 +86,7 @@ npx create-medusa-app@latest clop-medusa \
 
 **HEIC/HEIF** с телефона в обычных браузерах (Chrome, Firefox и др.) **часто не отображаются** в `<img>` — в каталоге будет плейсхолдер. Загружайте в Medusa **JPEG, PNG или WebP** (на Mac: экспорт из «Фото», или снимайте в Настройки → Камера → «Наиболее совместимые»).
 
-**JPEG «битый» на витрине, хотя в админке ок:** (1) в Store API запросите поля как в официальном starter: **`*variants.images`** и **`*images`** — иначе массив картинок может быть пустым; (2) путь к файлу часто **относительный** (`/static/...`) — витрина подставляет **`VITE_MEDUSA_BACKEND_URL`**; (3) если в ответе API в `url` фигурирует **localhost**, в `.env` Medusa в проде должен быть публичный **`MEDUSA_BACKEND_URL`** (Railway URL), не `127.0.0.1`. После правок env — перезапуск Medusa и **Redeploy** витрины.
+**Картинка не грузится (JPEG/PNG):** (1) в Store API — поля **`*variants.images`** и **`*images`**; (2) относительный путь `/static/...` — витрина подставляет **`VITE_MEDUSA_BACKEND_URL`**; (3) если в JSON у файла **другой host** (localhost, внутренний URL), витрина переписывает **`/static/`** и **`/uploads/`** на origin из **`VITE_MEDUSA_BACKEND_URL`** или **`VITE_MEDUSA_ASSET_URL`** (если статика отдельно); (4) в `.env` Medusa в проде — публичный **`MEDUSA_BACKEND_URL`**. Перезапуск Medusa и **Redeploy** витрины.
 
 Цена в витрине берётся из **Medusa v2 Store API** (`calculated_price.calculated_amount`) в **рублях** (основные единицы), не в копейках. При необходимости точный текст цены можно задать в metadata `clop_price_label`.
 

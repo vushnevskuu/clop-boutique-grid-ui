@@ -24,10 +24,9 @@ type MedusaStoreProduct = {
   variants?: MedusaVariant[] | null;
 };
 
-/** Публичный origin Medusa для статики (картинки). Учитывает dev-proxy вида `/medusa`. */
-function getMedusaAssetBase(): string {
-  const raw = (import.meta.env.VITE_MEDUSA_BACKEND_URL as string | undefined) ?? "";
-  const trimmed = raw.replace(/\/$/, "");
+/** База URL для статики: опционально отдельно от API (CDN / тот же Railway без /store). */
+function resolveMedusaBaseFromEnv(rawEnv: string | undefined): string {
+  const trimmed = (rawEnv ?? "").replace(/\/$/, "");
   if (!trimmed) return "";
   if (trimmed.startsWith("/")) {
     if (typeof window !== "undefined") {
@@ -38,24 +37,56 @@ function getMedusaAssetBase(): string {
   return trimmed;
 }
 
+function getMedusaAssetBase(): string {
+  const fromAsset = resolveMedusaBaseFromEnv(import.meta.env.VITE_MEDUSA_ASSET_URL as string | undefined);
+  if (fromAsset) return fromAsset;
+  return resolveMedusaBaseFromEnv(import.meta.env.VITE_MEDUSA_BACKEND_URL as string | undefined);
+}
+
+/** Локальный модуль файлов Medusa отдаёт преимущественно эти префиксы (jpg, png, webp — без разницы). */
+function isMedusaServedFilePath(pathname: string): boolean {
+  const p = pathname.toLowerCase();
+  return p.startsWith("/static/") || p.startsWith("/uploads/");
+}
+
 /**
- * Store API часто отдаёт `url` как `/static/...` — в img это уходит на домен витрины и ломается.
- * Если бэкенд подставил localhost в абсолютный URL — подменяем origin на публичный Medusa.
+ * Относительные пути — дополняем базой витрины.
+ * Абсолютные с «чужим» host (localhost, старый домен, внутренний URL) для /static|/uploads — переписываем на origin из env
+ * (PNG часто приходит так же, как JPEG; сбой бывает, когда в JSON другой origin, чем публичный Medusa).
  */
 function absolutizeMedusaImageUrl(url: string): string {
   let u = url.trim();
   if (!u) return u;
-  if (u.startsWith("//")) {
-    u = `https:${u}`;
-  }
+
+  const base = getMedusaAssetBase();
+
+  const rewriteToConfiguredOrigin = (pathname: string, search: string, hash: string): string | null => {
+    if (!base || !isMedusaServedFilePath(pathname)) return null;
+    try {
+      return `${new URL(base).origin}${pathname}${search}${hash}`;
+    } catch {
+      return null;
+    }
+  };
+
+  if (u.startsWith("//")) u = `https:${u}`;
+
   if (/^https?:\/\//i.test(u)) {
     try {
       const parsed = new URL(u);
-      if (/^(localhost|127\.0\.0\.1)$/i.test(parsed.hostname)) {
-        const base = getMedusaAssetBase();
-        if (base) {
-          const origin = new URL(base).origin;
-          return `${origin}${parsed.pathname}${parsed.search}${parsed.hash}`;
+      const target = rewriteToConfiguredOrigin(parsed.pathname, parsed.search, parsed.hash);
+      if (target && base) {
+        try {
+          if (parsed.origin !== new URL(base).origin) return target;
+        } catch {
+          return u;
+        }
+      }
+      if (/^(localhost|127\.0\.0\.1)$/i.test(parsed.hostname) && base) {
+        try {
+          return `${new URL(base).origin}${parsed.pathname}${parsed.search}${parsed.hash}`;
+        } catch {
+          /* ignore */
         }
       }
     } catch {
@@ -63,8 +94,8 @@ function absolutizeMedusaImageUrl(url: string): string {
     }
     return u;
   }
-  const base = getMedusaAssetBase();
-  if (!base) return u;
+
+  if (!base) return u.startsWith("/") ? u : `/${u}`;
   const path = u.startsWith("/") ? u : `/${u}`;
   return `${base}${path}`;
 }
