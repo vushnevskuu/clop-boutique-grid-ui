@@ -321,7 +321,7 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                             }}
                             className="min-h-[52px] w-full bg-black px-6 py-3.5 text-sm font-medium text-white motion-safe:transition-colors motion-safe:duration-200 hover:bg-neutral-900 md:px-8 md:text-base"
                           >
-                            написать нам
+                            Написать в Telegram
                           </button>
                         </div>
                       </div>

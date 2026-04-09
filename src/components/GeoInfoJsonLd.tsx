@@ -23,7 +23,7 @@ export default function GeoInfoJsonLd() {
           url: pageUrl,
           name: "О нас CLOP — FAQ, конфиденциальность, условия продажи",
           description:
-            "Вещи с историей без масс-маркета: частые вопросы, политика конфиденциальности и условия продажи без возврата после согласования и оплаты.",
+            "О CLOP: ответы на частые вопросы, политика конфиденциальности и условия продажи (final sale после согласования и оплаты).",
           inLanguage: "ru-RU",
           dateModified: `${GEO_LAST_UPDATED}T12:00:00+03:00`,
           publisher: { "@id": `${siteUrl}/#organization` },

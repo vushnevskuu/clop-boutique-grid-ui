@@ -49,7 +49,7 @@ const Header = memo(() => {
               e.currentTarget.style.color = "#000000";
             }}
           >
-            о нас
+            О нас
           </Link>
           <button
             type="button"
@@ -92,7 +92,7 @@ const Header = memo(() => {
             }}
             onClick={() => setIsMenuOpen(false)}
           >
-            о нас
+            О нас
           </Link>
           <button
             type="button"

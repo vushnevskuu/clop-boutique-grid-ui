@@ -12,9 +12,9 @@ const NotFound = () => {
     <div className="flex min-h-screen items-center justify-center bg-muted">
       <div className="text-center">
         <h1 className="mb-4 text-4xl font-bold">404</h1>
-        <p className="mb-4 text-xl text-muted-foreground">Страница не найдена</p>
+        <p className="mb-4 text-xl text-muted-foreground">Такой страницы нет — возможно, ссылка устарела.</p>
         <a href="/" className="text-primary underline hover:text-primary/90">
-          На главную
+          В каталог
         </a>
       </div>
     </div>

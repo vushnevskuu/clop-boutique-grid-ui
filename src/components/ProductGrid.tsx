@@ -40,7 +40,7 @@ const ProductGrid = memo(({ products, loading, error, onProductOpen }: ProductGr
         id="shop"
         className={sectionShell}
       >
-        <div className="py-12 text-center text-muted-foreground">Загрузка товаров…</div>
+        <div className="py-12 text-center text-muted-foreground">Загружаем каталог…</div>
       </section>
     );
   }
@@ -64,7 +64,9 @@ const ProductGrid = memo(({ products, loading, error, onProductOpen }: ProductGr
         id="shop"
         className={sectionShell}
       >
-        <div className="py-12 text-center text-muted-foreground">Товары не найдены</div>
+        <div className="py-12 text-center text-muted-foreground">
+          В каталоге пока нет позиций. Загляните позже или напишите нам в Instagram — @clo.p_market
+        </div>
       </section>
     );
   }

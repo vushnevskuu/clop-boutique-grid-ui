@@ -69,7 +69,7 @@ const Info = memo(() => {
             >
               <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6 md:gap-8">
                 <p className={`${info.lead} max-w-md leading-relaxed`}>
-                  Подборки, процесс и новые позиции — в нашем Instagram. Там же можно написать в Direct.
+                  Лента, закулисье и часть новинок — в Instagram. В Direct можно написать до или после просмотра каталога.
                 </p>
                 <a
                   href="https://www.instagram.com/clo.p_market"
@@ -78,7 +78,7 @@ const Info = memo(() => {
                   className={`${info.socialCta} shrink-0`}
                 >
                   <Instagram className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
-                  ещё вещи
+                  Перейти в Instagram
                 </a>
               </div>
             </aside>
@@ -97,7 +97,7 @@ const Info = memo(() => {
             <p className={info.sectionMeta}>
               Действует для сайта каталога CLOP и связанных каналов связи (в том числе Telegram и Instagram).
               Последнее обновление:{" "}
-              <time dateTime="2026-04-08">8 апреля 2026&nbsp;г.</time>.
+              <time dateTime="2026-04-09">9 апреля 2026&nbsp;г.</time>.
             </p>
 
             <div className={info.sectionStack}>
@@ -210,7 +210,7 @@ const Info = memo(() => {
               Винтаж и подержанные вещи CLOP. Логика близка к распространённой у curated resale модели{" "}
               <span className="font-semibold text-foreground">final sale</span>: после согласования в переписке и оплаты
               сделка окончательная. Последнее обновление:{" "}
-              <time dateTime="2026-04-08">8 апреля 2026&nbsp;г.</time>.
+              <time dateTime="2026-04-09">9 апреля 2026&nbsp;г.</time>.
             </p>
 
             <div className={info.sectionStack}>

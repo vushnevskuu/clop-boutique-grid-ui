@@ -245,7 +245,7 @@ const Footer = memo(({ onShoeCreate }: { onShoeCreate?: (setCreateFn: (fn: () =>
         <img 
           ref={imgRef}
           src="/footer.webp" 
-          alt="" 
+          alt="Декоративная иллюстрация в подвале страницы CLOP" 
           className="w-full h-auto"
           style={{ 
             display: 'block', 
