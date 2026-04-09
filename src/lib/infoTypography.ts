@@ -33,6 +33,10 @@ export const info = {
   sectionMeta: "mt-3 max-w-prose text-sm leading-relaxed text-muted-foreground",
   /** Блок подзаголовков h3 внутри политик */
   sectionStack: "mt-8 space-y-10 md:space-y-12",
+  /** Аккордеон юридических подразделов (как пункты FAQ) */
+  legalDetails: "group border-b border-foreground/10 py-3.5 last:border-b-0 open:pb-5",
+  legalSummary:
+    "cursor-pointer list-none rounded-sm py-1 text-base font-medium text-foreground marker:content-none outline-none transition-colors hover:text-foreground/80 [&::-webkit-details-marker]:hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
   borderTop: "border-t border-foreground/10",
   /** Крупные разделы (политики, условия): единые отступы от разделителя */
   sectionMajor: "border-t border-foreground/10 pt-12 pb-12 md:pt-16 md:pb-16",

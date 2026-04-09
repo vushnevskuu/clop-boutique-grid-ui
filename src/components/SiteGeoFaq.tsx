@@ -41,13 +41,8 @@ const SiteGeoFaq = memo(() => {
 
         <div className="mt-10 space-y-0 border-t border-foreground/10 pt-8 md:mt-12">
           {GEO_FAQ_ITEMS.map((item) => (
-            <details
-              key={item.question}
-              className="group border-b border-foreground/10 py-3.5 last:border-b-0 open:pb-5"
-            >
-              <summary className="cursor-pointer list-none rounded-sm py-1 text-base font-medium text-foreground marker:content-none outline-none transition-colors hover:text-foreground/80 [&::-webkit-details-marker]:hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">
-                {item.question}
-              </summary>
+            <details key={item.question} className={info.legalDetails}>
+              <summary className={info.legalSummary}>{item.question}</summary>
               <p className={`${info.body} mt-3 max-w-prose pl-0`}>{item.answer}</p>
             </details>
           ))}
