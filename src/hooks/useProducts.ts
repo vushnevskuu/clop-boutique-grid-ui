@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import type { Product } from "@/types/product";
 import { isMedusaConfigured, loadProductsFromMedusa } from "@/lib/medusaProducts";
+import { sanitizeExternalPurchaseUrl } from "@/lib/safeExternalUrl";
 
 export type { Product };
 
@@ -39,6 +40,8 @@ export function useProducts() {
         const manifest = await manifestResponse.json();
         const priceMap: Record<string, string> =
           manifest.prices && typeof manifest.prices === "object" ? manifest.prices : {};
+        const vkUrlMap: Record<string, unknown> =
+          manifest.vkUrls && typeof manifest.vkUrls === "object" ? manifest.vkUrls : {};
 
         const productPromises = (manifest.products || []).map(async (productFolder: string) => {
           const productPath = `/cloth/${encodeURIComponent(productFolder)}`;
@@ -72,6 +75,8 @@ export function useProducts() {
           const gridImages: string[] = (manifest.gridImages?.[productFolder] || manifest.images?.[productFolder] || [])
             .map((img: string) => `/cloth/${productFolder}/${img}`);
 
+          const vkPurchaseUrl = sanitizeExternalPurchaseUrl(vkUrlMap[productFolder]);
+
           return {
             id: productFolder,
             title: productFolder,
@@ -81,6 +86,7 @@ export function useProducts() {
             image: gridImages[0] || images[0] || "",
             hoverImage: gridImages[1] || gridImages[0] || images[1] || images[0] || "",
             price: priceMap[productFolder] ?? DEFAULT_PRICE,
+            ...(vkPurchaseUrl ? { vkPurchaseUrl } : {}),
           };
         });
 

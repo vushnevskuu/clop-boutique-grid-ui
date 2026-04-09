@@ -16,4 +16,6 @@ export interface Product {
   brand?: string;
   price?: string;
   size?: string;
+  /** Полная ссылка «Купить в VK» (Medusa: metadata `clop_vk_url`, manifest: `vkUrls`). */
+  vkPurchaseUrl?: string;
 }

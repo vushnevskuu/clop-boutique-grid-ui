@@ -1,5 +1,6 @@
 import Medusa from "@medusajs/js-sdk";
 import type { Product } from "@/types/product";
+import { sanitizeExternalPurchaseUrl } from "@/lib/safeExternalUrl";
 
 /** Medusa Store API: минимальные поля для маппинга (типы API гибкие между версиями). */
 type MedusaImage = { url?: string | null };
@@ -174,6 +175,8 @@ export function mapMedusaStoreProductToProduct(p: MedusaStoreProduct, fallbackPr
   const urls = collectMedusaImageUrls(p);
 
   const description = [p.description, p.subtitle].filter(Boolean).join("\n\n").trim();
+  const meta = p.metadata ?? {};
+  const vkPurchaseUrl = sanitizeExternalPurchaseUrl(meta.clop_vk_url);
 
   return {
     id: p.handle || p.id,
@@ -184,6 +187,7 @@ export function mapMedusaStoreProductToProduct(p: MedusaStoreProduct, fallbackPr
     image: urls[0] ?? "",
     hoverImage: urls[1] ?? urls[0] ?? "",
     price: derivePrice(p, fallbackPrice),
+    ...(vkPurchaseUrl ? { vkPurchaseUrl } : {}),
   };
 }
 

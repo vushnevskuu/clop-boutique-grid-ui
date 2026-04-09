@@ -62,10 +62,12 @@ if (workingDir === clothDir && workingDir !== publicClothDir) {
 
 // Генерируем manifest.json: images — для страницы товара (с фоном), gridImages — для карточек в сетке (1–2 без фона, если есть *-nobg.webp)
 let preservedPrices = {};
+let preservedVkUrls = {};
 if (fs.existsSync(manifestPath)) {
   try {
     const prev = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
     if (prev.prices && typeof prev.prices === 'object') preservedPrices = { ...prev.prices };
+    if (prev.vkUrls && typeof prev.vkUrls === 'object') preservedVkUrls = { ...prev.vkUrls };
   } catch {
     /* ignore */
   }
@@ -73,6 +75,7 @@ if (fs.existsSync(manifestPath)) {
 
 const manifest = {
   prices: preservedPrices,
+  vkUrls: preservedVkUrls,
   products: [],
   images: {},
   gridImages: {},

@@ -306,7 +306,7 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                           </p>
                         )}
 
-                        <div className="pt-4 md:pt-8">
+                        <div className="flex flex-col gap-3 pt-4 md:gap-3.5 md:pt-8">
                           <button
                             type="button"
                             onClick={() => {
@@ -320,6 +320,16 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                           >
                             Написать в Telegram
                           </button>
+                          {product.vkPurchaseUrl ? (
+                            <a
+                              href={product.vkPurchaseUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex min-h-[52px] w-full items-center justify-center border border-foreground bg-background px-6 py-3.5 text-center text-sm font-medium text-foreground motion-safe:transition-colors motion-safe:duration-200 hover:bg-foreground hover:text-background md:px-8 md:text-base"
+                            >
+                              Купить в VK
+                            </a>
+                          ) : null}
                         </div>
                       </div>
                     </div>

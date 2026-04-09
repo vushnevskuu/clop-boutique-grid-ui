@@ -121,6 +121,7 @@ VITE_MEDUSA_PUBLISHABLE_KEY=pk_...
 | Ключ | Назначение |
 |------|------------|
 | `clop_price_label` | Текст цены на витрине, напр. `35 000 ₽` (иначе цена из варианта) |
+| `clop_vk_url` | Полная ссылка **https://…** на объявление VK — в карточке появится кнопка «Купить в VK» |
 | `clop_sizes` | JSON-массив строк замеров, напр. `[{"Chest":"54 cm","Length":"72 cm"}]` |
 | `clop_order` | Число — порядок сортировки на главной (меньше = раньше) |
 | `clop_hidden` | `true` — скрыть товар с витрины |
@@ -129,7 +130,7 @@ VITE_MEDUSA_PUBLISHABLE_KEY=pk_...
 
 ## Статический режим без Medusa
 
-Не задавайте `VITE_MEDUSA_*` — витрина использует только `public/cloth/manifest.json` и папки товаров. Цены правьте в `manifest.json` → поле `prices` (при `npm run generate-manifest` существующие цены **сохраняются**).
+Не задавайте `VITE_MEDUSA_*` — витрина использует только `public/cloth/manifest.json` и папки товаров. Цены — в `manifest.json` → `prices`, ссылки VK — объект **`vkUrls`**: ключ = имя папки товара, значение = полный `https://…`. При `npm run generate-manifest` сохраняются и **цены**, и **vkUrls** (если уже прописали руками).
 
 ## Деплой витрины на Vercel + Medusa в проде
 
