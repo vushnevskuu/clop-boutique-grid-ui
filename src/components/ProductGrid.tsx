@@ -65,7 +65,15 @@ const ProductGrid = memo(({ products, loading, error, onProductOpen }: ProductGr
         className={sectionShell}
       >
         <div className="py-12 text-center text-muted-foreground">
-          В каталоге пока нет позиций. Загляните позже или напишите нам в Instagram — @clo.p_market
+          В каталоге пока нет позиций. Загляните позже или напишите нам в Instagram —{" "}
+          <a
+            href="https://www.instagram.com/clo.p_market"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-foreground underline decoration-foreground/35 underline-offset-[3px] transition-colors hover:decoration-foreground"
+          >
+            @clo.p_market
+          </a>
         </div>
       </section>
     );
