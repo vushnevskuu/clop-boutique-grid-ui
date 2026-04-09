@@ -55,7 +55,6 @@ export type ProductModalProps = {
 
 const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModalProps) => {
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
-    const [hoverPreviewSrc, setHoverPreviewSrc] = useState<string | null>(null);
     const [logoWidth, setLogoWidth] = useState(120);
     const imageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
@@ -69,7 +68,6 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
     }, [product]);
 
     const handleImageClick = useCallback((src: string) => {
-      setHoverPreviewSrc(null);
       setSelectedImage((prev) => (prev === src ? null : src));
     }, []);
 
@@ -85,13 +83,8 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
     useEffect(() => {
       if (!open) {
         setSelectedImage(null);
-        setHoverPreviewSrc(null);
       }
     }, [open]);
-
-    useEffect(() => {
-      setHoverPreviewSrc(null);
-    }, [product?.id]);
 
     useEffect(() => {
       const logo = document.querySelector('header img[alt="Логотип CLOP"]') as HTMLImageElement | null;
@@ -161,26 +154,7 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                     <div
                       className="relative flex flex-1 flex-col gap-4 md:sticky md:top-4 md:max-h-[min(80vh,calc(100vh-8rem))] md:flex-row md:overflow-y-auto"
                       style={{ alignSelf: "flex-start" }}
-                      onMouseLeave={() => setHoverPreviewSrc(null)}
                     >
-                      {/* Превью по hover: по центру колонки с фото, не шире/выше блока галереи */}
-                      <div
-                        className={cn(
-                          "pointer-events-none absolute inset-0 z-[15] flex items-center justify-center bg-background/90 p-2 motion-safe:transition-opacity motion-safe:duration-200 md:p-4",
-                          hoverPreviewSrc && !selectedImage ? "opacity-100" : "opacity-0"
-                        )}
-                        aria-hidden={!hoverPreviewSrc || !!selectedImage}
-                      >
-                        {hoverPreviewSrc && !selectedImage ? (
-                          <ImageWithFormatFallback
-                            src={hoverPreviewSrc}
-                            alt=""
-                            className="max-h-full max-w-full object-contain"
-                            decoding="async"
-                          />
-                        ) : null}
-                      </div>
-
                       <div className="hidden flex-shrink-0 md:block" style={{ width: `${logoWidth}px` }}>
                         <div className="flex flex-col gap-3">
                           {productImages.map((img, index) => (
@@ -192,7 +166,6 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                                 e.stopPropagation();
                                 handleThumbnailClick(index);
                               }}
-                              onMouseEnter={() => !selectedImage && img.src && setHoverPreviewSrc(img.src)}
                               className="aspect-square w-full overflow-hidden border-0 bg-transparent p-0 outline-none"
                             >
                               <ImageWithFormatFallback
@@ -225,7 +198,6 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                                 loading="lazy"
                                 decoding="async"
                                 onClick={() => handleImageClick(img.src || "")}
-                                onMouseEnter={() => !selectedImage && img.src && setHoverPreviewSrc(img.src)}
                               />
                             </div>
                           ))}
