@@ -9,6 +9,8 @@ type MedusaCalculatedPrice = {
 };
 type MedusaVariant = {
   calculated_price?: MedusaCalculatedPrice | null;
+  thumbnail?: string | null;
+  images?: MedusaImage[] | null;
 };
 type MedusaStoreProduct = {
   id: string;
@@ -16,6 +18,7 @@ type MedusaStoreProduct = {
   handle: string;
   description?: string | null;
   subtitle?: string | null;
+  thumbnail?: string | null;
   images?: MedusaImage[] | null;
   metadata?: Record<string, unknown> | null;
   variants?: MedusaVariant[] | null;
@@ -37,16 +40,60 @@ function getMedusaAssetBase(): string {
 
 /**
  * Store API часто отдаёт `url` как `/static/...` — в img это уходит на домен витрины и ломается.
- * Абсолютные http(s) оставляем как есть (S3, CDN).
+ * Если бэкенд подставил localhost в абсолютный URL — подменяем origin на публичный Medusa.
  */
 function absolutizeMedusaImageUrl(url: string): string {
-  const u = url.trim();
+  let u = url.trim();
   if (!u) return u;
-  if (/^https?:\/\//i.test(u)) return u;
+  if (u.startsWith("//")) {
+    u = `https:${u}`;
+  }
+  if (/^https?:\/\//i.test(u)) {
+    try {
+      const parsed = new URL(u);
+      if (/^(localhost|127\.0\.0\.1)$/i.test(parsed.hostname)) {
+        const base = getMedusaAssetBase();
+        if (base) {
+          const origin = new URL(base).origin;
+          return `${origin}${parsed.pathname}${parsed.search}${parsed.hash}`;
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+    return u;
+  }
   const base = getMedusaAssetBase();
   if (!base) return u;
   const path = u.startsWith("/") ? u : `/${u}`;
   return `${base}${path}`;
+}
+
+/** Собираем все URL картинок: товар, thumbnail, вариант (в v2 часть фото только у варианта). */
+function collectMedusaImageUrls(p: MedusaStoreProduct): string[] {
+  const out: string[] = [];
+  const seen = new Set<string>();
+  const push = (raw: string | null | undefined) => {
+    const s = typeof raw === "string" ? raw.trim() : "";
+    if (!s || seen.has(s)) return;
+    seen.add(s);
+    out.push(absolutizeMedusaImageUrl(s));
+  };
+
+  for (const img of p.images ?? []) {
+    push(img?.url);
+  }
+  push(p.thumbnail);
+
+  const v0 = p.variants?.[0];
+  if (v0) {
+    push(v0.thumbnail);
+    for (const img of v0.images ?? []) {
+      push(img?.url);
+    }
+  }
+
+  return out;
 }
 
 function parseSizesFromMetadata(metadata: Record<string, unknown> | null | undefined): Product["sizes"] {
@@ -93,10 +140,7 @@ function derivePrice(p: MedusaStoreProduct, fallback: string): string {
 }
 
 export function mapMedusaStoreProductToProduct(p: MedusaStoreProduct, fallbackPrice: string): Product {
-  const urls = (p.images ?? [])
-    .map((i) => i.url)
-    .filter((u): u is string => typeof u === "string" && u.length > 0)
-    .map(absolutizeMedusaImageUrl);
+  const urls = collectMedusaImageUrls(p);
 
   const description = [p.description, p.subtitle].filter(Boolean).join("\n\n").trim();
 
@@ -143,10 +187,11 @@ export async function loadProductsFromMedusa(): Promise<Product[]> {
     );
   }
 
+  // Как в nextjs-starter-medusa: иначе без *variants.images картинки часто пустые (v2).
   const { products } = await medusa.store.product.list({
     region_id: regionId,
     limit: 100,
-    fields: "*variants.calculated_price,+variants.calculated_price,*images",
+    fields: "*variants.calculated_price,*variants.images,*images,+metadata",
   });
 
   let list = (products ?? []) as MedusaStoreProduct[];
