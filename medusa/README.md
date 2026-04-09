@@ -86,6 +86,8 @@ npx create-medusa-app@latest clop-medusa \
 
 **HEIC/HEIF** с телефона в обычных браузерах (Chrome, Firefox и др.) **часто не отображаются** в `<img>` — в каталоге будет плейсхолдер. Загружайте в Medusa **JPEG, PNG или WebP** (на Mac: экспорт из «Фото», или снимайте в Настройки → Камера → «Наиболее совместимые»).
 
+**JPEG «битый» на витрине, хотя в админке ок:** у Medusa в API путь к файлу часто **относительный** (`/static/...`). Витрина должна подставлять к нему **`VITE_MEDUSA_BACKEND_URL`** (тот же публичный URL, что и для API, без `/app`). На Vercel проверьте переменную и **Redeploy**. На стороне Medusa в проде задайте корректный публичный URL для статики (см. `MEDUSA_BACKEND_URL` / file module в документации Medusa).
+
 Цена в витрине берётся из **Medusa v2 Store API** (`calculated_price.calculated_amount`) в **рублях** (основные единицы), не в копейках. При необходимости точный текст цены можно задать в metadata `clop_price_label`.
 
 ## 5. Publishable API Key

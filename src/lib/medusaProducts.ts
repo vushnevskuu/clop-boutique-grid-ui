@@ -21,6 +21,34 @@ type MedusaStoreProduct = {
   variants?: MedusaVariant[] | null;
 };
 
+/** Публичный origin Medusa для статики (картинки). Учитывает dev-proxy вида `/medusa`. */
+function getMedusaAssetBase(): string {
+  const raw = (import.meta.env.VITE_MEDUSA_BACKEND_URL as string | undefined) ?? "";
+  const trimmed = raw.replace(/\/$/, "");
+  if (!trimmed) return "";
+  if (trimmed.startsWith("/")) {
+    if (typeof window !== "undefined") {
+      return `${window.location.origin}${trimmed}`;
+    }
+    return "";
+  }
+  return trimmed;
+}
+
+/**
+ * Store API часто отдаёт `url` как `/static/...` — в img это уходит на домен витрины и ломается.
+ * Абсолютные http(s) оставляем как есть (S3, CDN).
+ */
+function absolutizeMedusaImageUrl(url: string): string {
+  const u = url.trim();
+  if (!u) return u;
+  if (/^https?:\/\//i.test(u)) return u;
+  const base = getMedusaAssetBase();
+  if (!base) return u;
+  const path = u.startsWith("/") ? u : `/${u}`;
+  return `${base}${path}`;
+}
+
 function parseSizesFromMetadata(metadata: Record<string, unknown> | null | undefined): Product["sizes"] {
   if (!metadata) return [];
   const raw = metadata.clop_sizes;
@@ -67,7 +95,8 @@ function derivePrice(p: MedusaStoreProduct, fallback: string): string {
 export function mapMedusaStoreProductToProduct(p: MedusaStoreProduct, fallbackPrice: string): Product {
   const urls = (p.images ?? [])
     .map((i) => i.url)
-    .filter((u): u is string => typeof u === "string" && u.length > 0);
+    .filter((u): u is string => typeof u === "string" && u.length > 0)
+    .map(absolutizeMedusaImageUrl);
 
   const description = [p.description, p.subtitle].filter(Boolean).join("\n\n").trim();
 
