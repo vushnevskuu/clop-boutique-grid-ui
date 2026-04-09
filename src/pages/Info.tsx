@@ -30,39 +30,40 @@ const Info = memo(() => {
         className={`mx-auto max-w-[65ch] px-4 pb-20 pt-[120px] sm:px-5 md:pt-[132px] md:pb-24 lg:px-6 ${info.article}`}
       >
         <article>
+          <nav
+            aria-label="Содержание страницы"
+            className={`${scrollMt} ${info.navTocContainer}`}
+            id="soderzhanie"
+          >
+            <p className={info.navLabel}>На этой странице</p>
+            <div className={info.navTocRow}>
+              <a href="#o-nas" className={info.navTocLink}>
+                О нас
+              </a>
+              <span className={info.navTocSep} aria-hidden>
+                ·
+              </span>
+              <a href="#faq" className={info.navTocLink}>
+                Частые вопросы
+              </a>
+              <span className={info.navTocSep} aria-hidden>
+                ·
+              </span>
+              <a href="#privacy" className={info.navTocLink}>
+                Политика конфиденциальности
+              </a>
+              <span className={info.navTocSep} aria-hidden>
+                ·
+              </span>
+              <a href="#returns" className={info.navTocLink}>
+                Условия продажи
+              </a>
+            </div>
+          </nav>
+
           <section id="o-nas" className={scrollMt} aria-labelledby="catalog-intro-heading">
             <CatalogIntro />
 
-            <nav
-              aria-label="Содержание страницы"
-              className={`${scrollMt} ${info.navTocContainer}`}
-              id="soderzhanie"
-            >
-              <p className={info.navLabel}>На этой странице</p>
-              <div className={info.navTocRow}>
-                <a href="#o-nas" className={info.navTocLink}>
-                  О нас
-                </a>
-                <span className={info.navTocSep} aria-hidden>
-                  ·
-                </span>
-                <a href="#faq" className={info.navTocLink}>
-                  Частые вопросы
-                </a>
-                <span className={info.navTocSep} aria-hidden>
-                  ·
-                </span>
-                <a href="#privacy" className={info.navTocLink}>
-                  Политика конфиденциальности
-                </a>
-                <span className={info.navTocSep} aria-hidden>
-                  ·
-                </span>
-                <a href="#returns" className={info.navTocLink}>
-                  Условия продажи
-                </a>
-              </div>
-            </nav>
             <aside
               aria-label="Instagram CLOP"
               className="mt-8 md:mt-10"

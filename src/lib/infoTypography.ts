@@ -1,8 +1,8 @@
 /** Единая шкала типографики для страницы «О нас» (/info). Вертикальные отступы — кратны 8px. */
 export const info = {
   article: "font-body text-foreground antialiased",
-  /** Оглавление: отступ сверху от вводного блока, без лишнего зазора снизу */
-  navTocContainer: "mt-8 mb-0 md:mt-10",
+  /** Оглавление в начале страницы: отступ только снизу до основного контента */
+  navTocContainer: "mb-8 md:mb-10",
   navLabel:
     "font-heading text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground",
   /** Ряд ссылок оглавления: одна линия, без подчёркивания; на узком экране — горизонтальный свайп */
