@@ -49,12 +49,12 @@ export default function HeaderSquirrel3D() {
         camera={{ position: [0.12, 0.2, 2.45], fov: 38 }}
         gl={{
           alpha: true,
-          antialias: false,
-          powerPreference: "low-power",
+          antialias: true,
+          powerPreference: "default",
           stencil: false,
           depth: true,
         }}
-        dpr={1}
+        dpr={[1, 2]}
         performance={{ min: 0.4 }}
         onCreated={({ gl }) => {
           gl.toneMapping = THREE.ACESFilmicToneMapping;
