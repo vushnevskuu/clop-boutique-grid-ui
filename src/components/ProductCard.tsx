@@ -1,6 +1,7 @@
 import { useState, memo, useCallback, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import ImageWithFormatFallback from "@/components/ImageWithFormatFallback";
+import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
   id: number | string;
@@ -17,8 +18,6 @@ const ProductCard = memo(({ id, image, hoverImage, title, price, size, brand, pr
   const [isHovered, setIsHovered] = useState(false);
   const [isInView, setIsInView] = useState(priority); // Если priority, сразу загружаем
   const imgRef = useRef<HTMLDivElement>(null);
-  const displayImage = isHovered && hoverImage ? hoverImage : image;
-  
   // Intersection Observer для lazy loading изображений
   useEffect(() => {
     if (priority || !imgRef.current) return; // Если priority, уже загружаем
@@ -65,18 +64,35 @@ const ProductCard = memo(({ id, image, hoverImage, title, price, size, brand, pr
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div ref={imgRef} className="relative w-full overflow-hidden bg-white">
+      <div ref={imgRef} className="relative aspect-[4/5] w-full overflow-hidden bg-white">
         {isInView ? (
-          <ImageWithFormatFallback
-            src={displayImage}
-            alt={title}
-            className="h-auto w-full object-contain transition-opacity duration-300"
-            loading={priority ? "eager" : "lazy"}
-            decoding="async"
-            fetchPriority={priority ? "high" : "low"}
-          />
+          <>
+            <ImageWithFormatFallback
+              src={image}
+              alt={title}
+              className={cn(
+                "pointer-events-none absolute left-1/2 top-1/2 max-h-full max-w-full -translate-x-1/2 -translate-y-1/2 object-contain transition-opacity duration-300",
+                isHovered && hoverImage ? "opacity-0" : "opacity-100"
+              )}
+              loading={priority ? "eager" : "lazy"}
+              decoding="async"
+              fetchPriority={priority ? "high" : "low"}
+            />
+            {hoverImage ? (
+              <ImageWithFormatFallback
+                src={hoverImage}
+                alt=""
+                className={cn(
+                  "pointer-events-none absolute left-1/2 top-1/2 max-h-full max-w-full -translate-x-1/2 -translate-y-1/2 object-contain transition-opacity duration-300",
+                  isHovered ? "opacity-100" : "opacity-0"
+                )}
+                loading="lazy"
+                decoding="async"
+              />
+            ) : null}
+          </>
         ) : (
-          <div className="min-h-[min(60vw,320px)] w-full bg-gray-100 animate-pulse" />
+          <div className="absolute inset-0 bg-gray-100 animate-pulse" />
         )}
         {/* Message Us button - appears on hover */}
         <button

@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, memo, useEffect } from "react";
 import ImageWithFormatFallback from "@/components/ImageWithFormatFallback";
+import { cn } from "@/lib/utils";
 
 interface ProductTileProps {
   id: string | number;
@@ -13,8 +14,6 @@ const ProductTile = memo(({ id, image, hoverImage, priority = false, onOpen }: P
   const [isHovered, setIsHovered] = useState(false);
   const [isInView, setIsInView] = useState(priority);
   const tileRef = useRef<HTMLDivElement>(null);
-
-  const displayImage = isHovered && hoverImage ? hoverImage : image;
 
   useEffect(() => {
     if (priority || !tileRef.current) return;
@@ -58,19 +57,40 @@ const ProductTile = memo(({ id, image, hoverImage, priority = false, onOpen }: P
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {isInView ? (
-        <ImageWithFormatFallback
-          src={displayImage}
-          alt=""
-          className="block h-auto w-full object-contain transition-opacity duration-300"
-          loading={priority ? "eager" : "lazy"}
-          decoding="async"
-          fetchPriority={priority ? "high" : "low"}
-          draggable={false}
-        />
-      ) : (
-        <div className="flex min-h-[min(60vw,320px)] w-full items-center justify-center animate-pulse bg-muted" />
-      )}
+      {/* Единый эталон 4:5 для всех карточек; hover — только смена opacity, без смены размера */}
+      <div className="relative aspect-[4/5] w-full overflow-hidden bg-white">
+        {isInView ? (
+          <>
+            <ImageWithFormatFallback
+              src={image}
+              alt=""
+              className={cn(
+                "pointer-events-none absolute left-1/2 top-1/2 max-h-full max-w-full -translate-x-1/2 -translate-y-1/2 object-contain transition-opacity duration-300",
+                isHovered && hoverImage ? "opacity-0" : "opacity-100"
+              )}
+              loading={priority ? "eager" : "lazy"}
+              decoding="async"
+              fetchPriority={priority ? "high" : "low"}
+              draggable={false}
+            />
+            {hoverImage ? (
+              <ImageWithFormatFallback
+                src={hoverImage}
+                alt=""
+                className={cn(
+                  "pointer-events-none absolute left-1/2 top-1/2 max-h-full max-w-full -translate-x-1/2 -translate-y-1/2 object-contain transition-opacity duration-300",
+                  isHovered ? "opacity-100" : "opacity-0"
+                )}
+                loading="lazy"
+                decoding="async"
+                draggable={false}
+              />
+            ) : null}
+          </>
+        ) : (
+          <div className="absolute inset-0 animate-pulse bg-muted" />
+        )}
+      </div>
     </div>
   );
 });
