@@ -106,7 +106,7 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
           <DialogOverlay className="z-[100]" />
           <DialogPrimitive.Content
             className={cn(
-              "fixed left-[50%] top-[50%] z-[100] grid w-[min(1600px,calc(100vw-12px))] max-h-[calc(100vh-12px)] translate-x-[-50%] translate-y-[-50%] gap-0 overflow-y-auto border border-border bg-background p-0 shadow-lg duration-200",
+              "fixed left-[50%] top-[50%] z-[100] flex max-h-[calc(100vh-12px)] w-[min(1600px,calc(100vw-12px))] translate-x-[-50%] translate-y-[-50%] flex-col gap-0 overflow-y-auto overscroll-y-contain border border-border bg-background p-0 shadow-lg duration-200",
               "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
             )}
             onOpenAutoFocus={(e) => e.preventDefault()}
@@ -152,7 +152,7 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                   {open && <GeoProductJsonLd product={product} />}
                   <div className="flex flex-col gap-8 md:flex-row md:gap-10 lg:gap-12">
                     <div
-                      className="relative flex flex-1 flex-col gap-4 md:sticky md:top-4 md:max-h-[min(80vh,calc(100vh-8rem))] md:flex-row md:overflow-y-auto"
+                      className="relative flex min-h-0 flex-1 flex-col gap-4 md:sticky md:top-4 md:flex-row"
                       style={{ alignSelf: "flex-start" }}
                     >
                       <div className="hidden flex-shrink-0 md:block" style={{ width: `${logoWidth}px` }}>
