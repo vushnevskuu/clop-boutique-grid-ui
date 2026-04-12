@@ -196,7 +196,7 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                   <div className="flex min-w-0 flex-col gap-8 md:flex-row md:items-start md:gap-10 lg:gap-12">
                     <div className="relative flex w-full min-w-0 flex-col gap-4 md:sticky md:top-0 md:max-w-[min(100%,720px)] md:flex-1 md:flex-row md:items-start">
                       <div
-                        className="hidden max-h-[min(70dvh,calc(100dvh-8rem))] shrink-0 overflow-y-auto overflow-x-hidden overscroll-y-contain pr-1 [scrollbar-width:thin] md:block"
+                        className="hidden shrink-0 pr-1 md:block"
                         style={{ width: thumbColW }}
                       >
                         <div className="flex w-full flex-col gap-3">
