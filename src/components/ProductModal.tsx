@@ -171,12 +171,12 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                                 e.stopPropagation();
                                 handleThumbnailClick(index);
                               }}
-                              className="aspect-square w-full overflow-hidden border-0 bg-transparent p-0 outline-none"
+                              className="aspect-[4/5] w-full shrink-0 overflow-hidden border-0 bg-white p-0 outline-none"
                             >
                               <ImageWithFormatFallback
                                 src={img.src}
                                 alt={`${product.title}, миниатюра ${index + 1}`}
-                                className="h-full w-full object-contain"
+                                className="h-full w-full object-cover"
                                 loading="lazy"
                                 decoding="async"
                               />
@@ -186,7 +186,7 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                       </div>
 
                       <div className="w-full flex-1">
-                        <div className="flex flex-col">
+                        <div className="flex flex-col gap-4">
                           {productImages.map((img, index) => (
                             <div
                               key={index}
@@ -194,12 +194,12 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                                 if (el) imageRefs.current.set(index, el);
                                 else imageRefs.current.delete(index);
                               }}
-                              className="w-full"
+                              className="aspect-[4/5] w-full shrink-0 overflow-hidden bg-white"
                             >
                               <ImageWithFormatFallback
                                 src={img.src || ""}
                                 alt={`${product.title} — фото ${index + 1}`}
-                                className="h-auto w-full cursor-pointer object-contain"
+                                className="h-full w-full cursor-pointer object-cover"
                                 loading="lazy"
                                 decoding="async"
                                 onClick={() => handleImageClick(img.src || "")}

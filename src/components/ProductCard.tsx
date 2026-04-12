@@ -71,7 +71,7 @@ const ProductCard = memo(({ id, image, hoverImage, title, price, size, brand, pr
               src={image}
               alt={title}
               className={cn(
-                "pointer-events-none absolute left-1/2 top-1/2 max-h-full max-w-full -translate-x-1/2 -translate-y-1/2 object-contain transition-opacity duration-300",
+                "pointer-events-none absolute inset-0 h-full w-full object-cover transition-opacity duration-300",
                 isHovered && hoverImage ? "opacity-0" : "opacity-100"
               )}
               loading={priority ? "eager" : "lazy"}
@@ -83,7 +83,7 @@ const ProductCard = memo(({ id, image, hoverImage, title, price, size, brand, pr
                 src={hoverImage}
                 alt=""
                 className={cn(
-                  "pointer-events-none absolute left-1/2 top-1/2 max-h-full max-w-full -translate-x-1/2 -translate-y-1/2 object-contain transition-opacity duration-300",
+                  "pointer-events-none absolute inset-0 h-full w-full object-cover transition-opacity duration-300",
                   isHovered ? "opacity-100" : "opacity-0"
                 )}
                 loading="lazy"
