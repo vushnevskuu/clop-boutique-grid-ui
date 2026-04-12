@@ -8,6 +8,7 @@ import { formatProductCardTitle } from "@/lib/productCardDisplay";
 import GeoProductJsonLd from "@/components/GeoProductJsonLd";
 import ImageWithFormatFallback from "@/components/ImageWithFormatFallback";
 import { GEO_LAST_UPDATED } from "@/data/geoFaq";
+import { productPhotoFrameInnerClass } from "@/lib/productPhotoFrame";
 
 const COLUMN_LABEL_RU: Record<string, string> = {
   size: "Размер",
@@ -116,9 +117,7 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
     const titleText = product ? formatProductCardTitle(product.title) : "Товар";
     // Миниатюры не уже 88px — иначе колонка превращается в «щель» и ломается вёрстка рядом.
     const thumbColW = Math.min(160, Math.max(88, logoWidth));
-    // h-0 + pb-[125%]: высота = 5/4 ширины (4:5), надёжнее чем aspect-ratio с пустым flow и absolute img
-    const galleryShellClass =
-      "relative h-0 w-full min-w-0 shrink-0 overflow-hidden bg-neutral-100 pb-[125%]";
+    const galleryShellClass = cn(productPhotoFrameInnerClass, "bg-neutral-100");
     const galleryImgCoverClass =
       "absolute inset-0 box-border h-full w-full max-h-none max-w-none object-cover object-center select-none";
 

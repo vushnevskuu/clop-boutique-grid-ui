@@ -1,6 +1,7 @@
 import { useState, memo, useCallback, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import ImageWithFormatFallback from "@/components/ImageWithFormatFallback";
+import { productPhotoFrameInnerClass } from "@/lib/productPhotoFrame";
 import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
@@ -64,7 +65,8 @@ const ProductCard = memo(({ id, image, hoverImage, title, price, size, brand, pr
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div ref={imgRef} className="relative aspect-[4/5] w-full overflow-hidden bg-white">
+      <div ref={imgRef} className="relative w-full overflow-hidden bg-white">
+        <div className={productPhotoFrameInnerClass}>
         {isInView ? (
           <>
             <ImageWithFormatFallback
@@ -115,6 +117,7 @@ const ProductCard = memo(({ id, image, hoverImage, title, price, size, brand, pr
         >
           message us
         </button>
+        </div>
       </div>
       <div className="p-3 md:p-4 bg-white">
         <div className="flex flex-col gap-1">

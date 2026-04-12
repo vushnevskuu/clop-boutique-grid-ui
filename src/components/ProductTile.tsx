@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, memo, useEffect } from "react";
 import ImageWithFormatFallback from "@/components/ImageWithFormatFallback";
+import { productPhotoFrameInnerClass } from "@/lib/productPhotoFrame";
 import { cn } from "@/lib/utils";
 
 interface ProductTileProps {
@@ -57,8 +58,9 @@ const ProductTile = memo(({ id, image, hoverImage, priority = false, onOpen }: P
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Единый эталон 4:5 для всех карточек; hover — только смена opacity, без смены размера */}
-      <div className="relative aspect-[4/5] w-full overflow-hidden bg-white">
+      {/* Рамка 1399:1999 как у исходных фото; hover — только opacity */}
+      <div className="relative w-full overflow-hidden bg-white">
+        <div className={productPhotoFrameInnerClass}>
         {isInView ? (
           <>
             <ImageWithFormatFallback
@@ -90,6 +92,7 @@ const ProductTile = memo(({ id, image, hoverImage, priority = false, onOpen }: P
         ) : (
           <div className="absolute inset-0 animate-pulse bg-muted" />
         )}
+        </div>
       </div>
     </div>
   );
