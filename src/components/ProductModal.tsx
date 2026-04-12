@@ -1,4 +1,4 @@
-import { memo, useState, useMemo, useCallback, useRef, useEffect } from "react";
+import { memo, useState, useMemo, useCallback, useRef, useEffect, type CSSProperties } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { Dialog, DialogPortal } from "@/components/ui/dialog";
@@ -54,10 +54,20 @@ export type ProductModalProps = {
   onOpenChange: (open: boolean) => void;
 };
 
+const coverImgStyle: CSSProperties = {
+  objectFit: "cover",
+  objectPosition: "center",
+  width: "100%",
+  height: "100%",
+  maxWidth: "none",
+  maxHeight: "none",
+};
+
 const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModalProps) => {
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [logoWidth, setLogoWidth] = useState(120);
     const imageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+    const contentScrollRef = useRef<HTMLDivElement | null>(null);
 
     const productImages = useMemo(() => {
       if (!product) return [];
@@ -114,12 +124,45 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
       return () => window.removeEventListener("resize", update);
     }, [open, product?.id]);
 
+    // WebKit + wheel: если внутренний overflow не получает событие, крутим корень модалки сами.
+    useEffect(() => {
+      const el = contentScrollRef.current;
+      if (!el || !open) return;
+      const canScrollY = (node: HTMLElement, deltaY: number) => {
+        if (node.scrollHeight <= node.clientHeight + 2) return false;
+        if (deltaY > 0) return node.scrollTop + node.clientHeight < node.scrollHeight - 2;
+        if (deltaY < 0) return node.scrollTop > 2;
+        return false;
+      };
+      const onWheel = (e: WheelEvent) => {
+        let n = e.target as Node | null;
+        const root = el;
+        while (n && n !== root) {
+          if (n instanceof HTMLElement) {
+            const { overflowY } = window.getComputedStyle(n);
+            if (
+              (overflowY === "auto" || overflowY === "scroll") &&
+              canScrollY(n, e.deltaY)
+            ) {
+              return;
+            }
+          }
+          n = n.parentNode;
+        }
+        if (root.scrollHeight <= root.clientHeight + 2) return;
+        root.scrollTop += e.deltaY;
+        e.preventDefault();
+      };
+      el.addEventListener("wheel", onWheel, { passive: false });
+      return () => el.removeEventListener("wheel", onWheel);
+    }, [open, product?.id]);
+
     const titleText = product ? formatProductCardTitle(product.title) : "Товар";
     // Миниатюры не уже 88px — иначе колонка превращается в «щель» и ломается вёрстка рядом.
     const thumbColW = Math.min(160, Math.max(88, logoWidth));
     const galleryShellClass = cn(productPhotoFrameInnerClass, "bg-neutral-100");
     const galleryImgCoverClass =
-      "absolute inset-0 box-border h-full w-full max-h-none max-w-none object-cover object-center select-none";
+      "pointer-events-auto absolute inset-0 box-border block h-full w-full select-none";
 
     return (
       <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
@@ -132,10 +175,13 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
             />
           ) : null}
           <DialogPrimitive.Content
+            ref={contentScrollRef}
             className={cn(
-              "fixed left-[50%] top-[50%] z-[100] flex h-[calc(100dvh-12px)] max-h-[calc(100dvh-12px)] w-[min(1600px,calc(100vw-12px))] min-h-0 translate-x-[-50%] translate-y-[-50%] flex-col gap-0 overflow-hidden border border-border bg-background p-0 shadow-lg duration-200",
+              // Без translate на корне: иначе WebKit часто ломает overflow-scroll и fixed внутри.
+              "fixed bottom-[6px] left-[6px] right-[6px] top-[6px] z-[100] mx-auto flex w-full max-w-[min(1600px,calc(100vw-12px))] flex-col overflow-y-auto overflow-x-hidden overscroll-y-contain border border-border bg-background p-0 shadow-lg [-webkit-overflow-scrolling:touch]",
               "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
             )}
+            style={{ touchAction: "pan-y" }}
             onOpenAutoFocus={(e) => e.preventDefault()}
             onEscapeKeyDown={(e) => {
               if (selectedImage) {
@@ -144,24 +190,21 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
               }
             }}
           >
-            <DialogPrimitive.Close
-              className="absolute right-2 top-2 z-[5] rounded-sm bg-background/80 p-2 opacity-90 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-              aria-label="Закрыть"
-            >
-              <X className="h-5 w-5" />
-            </DialogPrimitive.Close>
+            <div className="sticky top-0 z-30 flex justify-end border-b border-border/60 bg-background/95 px-2 py-2 backdrop-blur-sm">
+              <DialogPrimitive.Close
+                className="rounded-sm bg-background/90 p-2 opacity-90 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                aria-label="Закрыть"
+              >
+                <X className="h-5 w-5" />
+              </DialogPrimitive.Close>
+            </div>
 
-            {/* Скролл только здесь: у flex-родителя с overflow-y-auto колесо часто «ломается» без min-h-0 + flex-1 */}
-            <div
-              className="min-h-0 flex-1 overflow-y-scroll overflow-x-hidden overscroll-y-contain [-webkit-overflow-scrolling:touch]"
-              style={{ touchAction: "pan-y" }}
-            >
-              <DialogPrimitive.Title className="sr-only">{titleText}</DialogPrimitive.Title>
-              <DialogPrimitive.Description className="sr-only">
-                {product?.description?.slice(0, 200) ?? "Карточка товара в каталоге CLOP"}
-              </DialogPrimitive.Description>
+            <DialogPrimitive.Title className="sr-only">{titleText}</DialogPrimitive.Title>
+            <DialogPrimitive.Description className="sr-only">
+              {product?.description?.slice(0, 200) ?? "Карточка товара в каталоге CLOP"}
+            </DialogPrimitive.Description>
 
-            <div className="px-3 pb-8 pt-12 sm:px-4 md:px-8 md:pb-12 md:pt-14">
+            <div className="px-3 pb-8 pt-4 sm:px-4 md:px-8 md:pb-12 md:pt-6">
               {loading && (
                 <div className="flex min-h-[40vh] items-center justify-center text-muted-foreground">
                   Загрузка…
@@ -183,8 +226,11 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                 <>
                   {open && <GeoProductJsonLd product={product} />}
                   <div className="flex min-w-0 flex-col gap-8 md:flex-row md:items-start md:gap-10 lg:gap-12">
-                    <div className="relative flex w-full min-w-0 flex-col gap-4 md:sticky md:top-4 md:max-w-[min(100%,720px)] md:flex-1 md:flex-row">
-                      <div className="hidden shrink-0 md:block" style={{ width: thumbColW }}>
+                    <div className="relative flex w-full min-w-0 flex-col gap-4 md:sticky md:top-0 md:max-w-[min(100%,720px)] md:flex-1 md:flex-row md:items-start">
+                      <div
+                        className="hidden max-h-[min(70dvh,calc(100dvh-8rem))] shrink-0 overflow-y-auto overflow-x-hidden overscroll-y-contain pr-1 [scrollbar-width:thin] md:block"
+                        style={{ width: thumbColW }}
+                      >
                         <div className="flex w-full flex-col gap-3">
                           {productImages.map((img, index) => (
                             <button
@@ -202,6 +248,7 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                                   src={img.src}
                                   alt={`${product.title}, миниатюра ${index + 1}`}
                                   className={galleryImgCoverClass}
+                                  style={coverImgStyle}
                                   loading="lazy"
                                   decoding="async"
                                   draggable={false}
@@ -212,7 +259,7 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                         </div>
                       </div>
 
-                      <div className="w-full min-w-0 md:flex-1">
+                      <div className="w-full min-w-0 md:min-h-0 md:flex-1">
                         <div className="flex w-full flex-col gap-4">
                           {productImages.map((img, index) => (
                             <div
@@ -228,6 +275,7 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                                   src={img.src || ""}
                                   alt={`${product.title} — фото ${index + 1}`}
                                   className={`${galleryImgCoverClass} cursor-pointer`}
+                                  style={coverImgStyle}
                                   loading="lazy"
                                   decoding="async"
                                   draggable={false}
@@ -343,7 +391,6 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                   </div>
                 </>
               )}
-            </div>
             </div>
 
             {/* Внутри Content: клики не считаются «снаружи» диалога, не ломается hit-testing */}
