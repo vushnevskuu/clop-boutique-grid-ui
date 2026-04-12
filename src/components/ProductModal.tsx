@@ -67,7 +67,6 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [logoWidth, setLogoWidth] = useState(120);
     const imageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
-    const contentScrollRef = useRef<HTMLDivElement | null>(null);
 
     const productImages = useMemo(() => {
       if (!product) return [];
@@ -124,39 +123,6 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
       return () => window.removeEventListener("resize", update);
     }, [open, product?.id]);
 
-    // WebKit + wheel: если внутренний overflow не получает событие, крутим корень модалки сами.
-    useEffect(() => {
-      const el = contentScrollRef.current;
-      if (!el || !open) return;
-      const canScrollY = (node: HTMLElement, deltaY: number) => {
-        if (node.scrollHeight <= node.clientHeight + 2) return false;
-        if (deltaY > 0) return node.scrollTop + node.clientHeight < node.scrollHeight - 2;
-        if (deltaY < 0) return node.scrollTop > 2;
-        return false;
-      };
-      const onWheel = (e: WheelEvent) => {
-        let n = e.target as Node | null;
-        const root = el;
-        while (n && n !== root) {
-          if (n instanceof HTMLElement) {
-            const { overflowY } = window.getComputedStyle(n);
-            if (
-              (overflowY === "auto" || overflowY === "scroll") &&
-              canScrollY(n, e.deltaY)
-            ) {
-              return;
-            }
-          }
-          n = n.parentNode;
-        }
-        if (root.scrollHeight <= root.clientHeight + 2) return;
-        root.scrollTop += e.deltaY;
-        e.preventDefault();
-      };
-      el.addEventListener("wheel", onWheel, { passive: false });
-      return () => el.removeEventListener("wheel", onWheel);
-    }, [open, product?.id]);
-
     const titleText = product ? formatProductCardTitle(product.title) : "Товар";
     // Миниатюры не уже 88px — иначе колонка превращается в «щель» и ломается вёрстка рядом.
     const thumbColW = Math.min(160, Math.max(88, logoWidth));
@@ -175,13 +141,11 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
             />
           ) : null}
           <DialogPrimitive.Content
-            ref={contentScrollRef}
             className={cn(
-              // Без translate на корне: иначе WebKit часто ломает overflow-scroll и fixed внутри.
-              "fixed bottom-[6px] left-[6px] right-[6px] top-[6px] z-[100] mx-auto flex w-full max-w-[min(1600px,calc(100vw-12px))] flex-col overflow-y-auto overflow-x-hidden overscroll-y-contain border border-border bg-background p-0 shadow-lg [-webkit-overflow-scrolling:touch]",
+              // Внешний flex + overflow-hidden + явная высота; скролл только у flex-1 min-h-0 — иначе scrollHeight схлопывается.
+              "fixed bottom-[6px] left-[6px] right-[6px] top-[6px] z-[100] mx-auto flex w-full max-w-[min(1600px,calc(100vw-12px))] min-h-0 flex-col overflow-hidden border border-border bg-background p-0 shadow-lg",
               "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
             )}
-            style={{ touchAction: "pan-y" }}
             onOpenAutoFocus={(e) => e.preventDefault()}
             onEscapeKeyDown={(e) => {
               if (selectedImage) {
@@ -190,7 +154,7 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
               }
             }}
           >
-            <div className="sticky top-0 z-30 flex justify-end border-b border-border/60 bg-background/95 px-2 py-2 backdrop-blur-sm">
+            <div className="flex shrink-0 justify-end border-b border-border/60 bg-background px-2 py-2">
               <DialogPrimitive.Close
                 className="rounded-sm bg-background/90 p-2 opacity-90 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 aria-label="Закрыть"
@@ -199,6 +163,10 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
               </DialogPrimitive.Close>
             </div>
 
+            <div
+              className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain [-webkit-overflow-scrolling:touch]"
+              style={{ touchAction: "pan-y" }}
+            >
             <DialogPrimitive.Title className="sr-only">{titleText}</DialogPrimitive.Title>
             <DialogPrimitive.Description className="sr-only">
               {product?.description?.slice(0, 200) ?? "Карточка товара в каталоге CLOP"}
@@ -391,6 +359,7 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                   </div>
                 </>
               )}
+            </div>
             </div>
 
             {/* Внутри Content: клики не считаются «снаружи» диалога, не ломается hit-testing */}
