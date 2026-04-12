@@ -106,7 +106,7 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
           <DialogOverlay className="z-[100]" />
           <DialogPrimitive.Content
             className={cn(
-              "fixed left-[50%] top-[50%] z-[100] flex max-h-[calc(100vh-12px)] w-[min(1600px,calc(100vw-12px))] translate-x-[-50%] translate-y-[-50%] flex-col gap-0 overflow-y-auto overscroll-y-contain border border-border bg-background p-0 shadow-lg duration-200",
+              "fixed left-[50%] top-[50%] z-[100] flex h-[calc(100dvh-12px)] max-h-[calc(100dvh-12px)] w-[min(1600px,calc(100vw-12px))] min-h-0 translate-x-[-50%] translate-y-[-50%] flex-col gap-0 overflow-hidden border border-border bg-background p-0 shadow-lg duration-200",
               "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
             )}
             onOpenAutoFocus={(e) => e.preventDefault()}
@@ -117,17 +117,22 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
               }
             }}
           >
-            <DialogPrimitive.Title className="sr-only">{titleText}</DialogPrimitive.Title>
-            <DialogPrimitive.Description className="sr-only">
-              {product?.description?.slice(0, 200) ?? "Карточка товара в каталоге CLOP"}
-            </DialogPrimitive.Description>
-
             <DialogPrimitive.Close
               className="absolute right-2 top-2 z-[5] rounded-sm bg-background/80 p-2 opacity-90 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
               aria-label="Закрыть"
             >
               <X className="h-5 w-5" />
             </DialogPrimitive.Close>
+
+            {/* Скролл только здесь: у flex-родителя с overflow-y-auto колесо часто «ломается» без min-h-0 + flex-1 */}
+            <div
+              className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]"
+              onWheel={(e) => e.stopPropagation()}
+            >
+              <DialogPrimitive.Title className="sr-only">{titleText}</DialogPrimitive.Title>
+              <DialogPrimitive.Description className="sr-only">
+                {product?.description?.slice(0, 200) ?? "Карточка товара в каталоге CLOP"}
+              </DialogPrimitive.Description>
 
             <div className="px-3 pb-8 pt-12 sm:px-4 md:px-8 md:pb-12 md:pt-14">
               {loading && (
@@ -308,6 +313,7 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                   </div>
                 </>
               )}
+            </div>
             </div>
 
             {/* Внутри Content: клики не считаются «снаружи» диалога, не ломается hit-testing */}
