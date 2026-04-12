@@ -1,7 +1,7 @@
 import { memo, useState, useMemo, useCallback, useRef, useEffect } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
-import { Dialog, DialogPortal, DialogOverlay } from "@/components/ui/dialog";
+import { Dialog, DialogPortal } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/types/product";
 import { formatProductCardTitle } from "@/lib/productCardDisplay";
@@ -86,6 +86,21 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
       }
     }, [open]);
 
+    // modal={false}: без RemoveScroll на оверлее — иначе wheel часто «глухой» внутри модалки.
+    useEffect(() => {
+      if (!open) return;
+      const html = document.documentElement;
+      const body = document.body;
+      const prevHtml = html.style.overflow;
+      const prevBody = body.style.overflow;
+      html.style.overflow = "hidden";
+      body.style.overflow = "hidden";
+      return () => {
+        html.style.overflow = prevHtml;
+        body.style.overflow = prevBody;
+      };
+    }, [open]);
+
     useEffect(() => {
       const logo = document.querySelector('header img[alt="Логотип CLOP"]') as HTMLImageElement | null;
       if (!logo) return;
@@ -101,15 +116,22 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
     const titleText = product ? formatProductCardTitle(product.title) : "Товар";
     // Миниатюры не уже 88px — иначе колонка превращается в «щель» и ломается вёрстка рядом.
     const thumbColW = Math.min(160, Math.max(88, logoWidth));
-    const galleryFrameClass =
-      "relative aspect-[4/5] w-full min-w-0 shrink-0 overflow-hidden bg-neutral-100";
+    // h-0 + pb-[125%]: высота = 5/4 ширины (4:5), надёжнее чем aspect-ratio с пустым flow и absolute img
+    const galleryShellClass =
+      "relative h-0 w-full min-w-0 shrink-0 overflow-hidden bg-neutral-100 pb-[125%]";
     const galleryImgCoverClass =
-      "absolute inset-0 h-full w-full max-h-none max-w-none object-cover select-none";
+      "absolute inset-0 box-border h-full w-full max-h-none max-w-none object-cover object-center select-none";
 
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
         <DialogPortal>
-          <DialogOverlay className="z-[100]" />
+          {open ? (
+            <div
+              role="presentation"
+              className="fixed inset-0 z-[90] cursor-default bg-black/80"
+              onClick={() => onOpenChange(false)}
+            />
+          ) : null}
           <DialogPrimitive.Content
             className={cn(
               "fixed left-[50%] top-[50%] z-[100] flex h-[calc(100dvh-12px)] max-h-[calc(100dvh-12px)] w-[min(1600px,calc(100vw-12px))] min-h-0 translate-x-[-50%] translate-y-[-50%] flex-col gap-0 overflow-hidden border border-border bg-background p-0 shadow-lg duration-200",
@@ -132,7 +154,7 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
 
             {/* Скролл только здесь: у flex-родителя с overflow-y-auto колесо часто «ломается» без min-h-0 + flex-1 */}
             <div
-              className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain [-webkit-overflow-scrolling:touch]"
+              className="min-h-0 flex-1 overflow-y-scroll overflow-x-hidden overscroll-y-contain [-webkit-overflow-scrolling:touch]"
               style={{ touchAction: "pan-y" }}
             >
               <DialogPrimitive.Title className="sr-only">{titleText}</DialogPrimitive.Title>
@@ -162,7 +184,7 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                 <>
                   {open && <GeoProductJsonLd product={product} />}
                   <div className="flex min-w-0 flex-col gap-8 md:flex-row md:items-start md:gap-10 lg:gap-12">
-                    <div className="relative flex min-h-0 min-w-0 w-full flex-1 flex-col gap-4 md:sticky md:top-4 md:max-w-[min(100%,720px)] md:flex-row">
+                    <div className="relative flex w-full min-w-0 flex-col gap-4 md:sticky md:top-4 md:max-w-[min(100%,720px)] md:flex-1 md:flex-row">
                       <div className="hidden shrink-0 md:block" style={{ width: thumbColW }}>
                         <div className="flex w-full flex-col gap-3">
                           {productImages.map((img, index) => (
@@ -174,23 +196,25 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                                 e.stopPropagation();
                                 handleThumbnailClick(index);
                               }}
-                              className={`${galleryFrameClass} block border-0 bg-transparent p-0 outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring`}
+                              className="block w-full min-w-0 border-0 bg-transparent p-0 outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
                             >
-                              <ImageWithFormatFallback
-                                src={img.src}
-                                alt={`${product.title}, миниатюра ${index + 1}`}
-                                className={galleryImgCoverClass}
-                                loading="lazy"
-                                decoding="async"
-                                draggable={false}
-                              />
+                              <div className={galleryShellClass}>
+                                <ImageWithFormatFallback
+                                  src={img.src}
+                                  alt={`${product.title}, миниатюра ${index + 1}`}
+                                  className={galleryImgCoverClass}
+                                  loading="lazy"
+                                  decoding="async"
+                                  draggable={false}
+                                />
+                              </div>
                             </button>
                           ))}
                         </div>
                       </div>
 
-                      <div className="min-w-0 w-full flex-1">
-                        <div className="flex flex-col gap-4">
+                      <div className="w-full min-w-0 md:flex-1">
+                        <div className="flex w-full flex-col gap-4">
                           {productImages.map((img, index) => (
                             <div
                               key={index}
@@ -198,17 +222,19 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                                 if (el) imageRefs.current.set(index, el);
                                 else imageRefs.current.delete(index);
                               }}
-                              className={galleryFrameClass}
+                              className="w-full min-w-0 shrink-0"
                             >
-                              <ImageWithFormatFallback
-                                src={img.src || ""}
-                                alt={`${product.title} — фото ${index + 1}`}
-                                className={`${galleryImgCoverClass} cursor-pointer`}
-                                loading="lazy"
-                                decoding="async"
-                                draggable={false}
-                                onClick={() => handleImageClick(img.src || "")}
-                              />
+                              <div className={galleryShellClass}>
+                                <ImageWithFormatFallback
+                                  src={img.src || ""}
+                                  alt={`${product.title} — фото ${index + 1}`}
+                                  className={`${galleryImgCoverClass} cursor-pointer`}
+                                  loading="lazy"
+                                  decoding="async"
+                                  draggable={false}
+                                  onClick={() => handleImageClick(img.src || "")}
+                                />
+                              </div>
                             </div>
                           ))}
                         </div>
