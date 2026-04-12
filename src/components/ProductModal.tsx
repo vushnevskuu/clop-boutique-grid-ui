@@ -99,6 +99,12 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
     }, [open, product?.id]);
 
     const titleText = product ? formatProductCardTitle(product.title) : "Товар";
+    // Миниатюры не уже 88px — иначе колонка превращается в «щель» и ломается вёрстка рядом.
+    const thumbColW = Math.min(160, Math.max(88, logoWidth));
+    const galleryFrameClass =
+      "relative aspect-[4/5] w-full min-w-0 shrink-0 overflow-hidden bg-neutral-100";
+    const galleryImgCoverClass =
+      "absolute inset-0 h-full w-full max-h-none max-w-none object-cover select-none";
 
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -126,8 +132,8 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
 
             {/* Скролл только здесь: у flex-родителя с overflow-y-auto колесо часто «ломается» без min-h-0 + flex-1 */}
             <div
-              className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]"
-              onWheel={(e) => e.stopPropagation()}
+              className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain [-webkit-overflow-scrolling:touch]"
+              style={{ touchAction: "pan-y" }}
             >
               <DialogPrimitive.Title className="sr-only">{titleText}</DialogPrimitive.Title>
               <DialogPrimitive.Description className="sr-only">
@@ -155,13 +161,10 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
               {!loading && product && (
                 <>
                   {open && <GeoProductJsonLd product={product} />}
-                  <div className="flex flex-col gap-8 md:flex-row md:gap-10 lg:gap-12">
-                    <div
-                      className="relative flex min-h-0 flex-1 flex-col gap-4 md:sticky md:top-4 md:flex-row"
-                      style={{ alignSelf: "flex-start" }}
-                    >
-                      <div className="hidden flex-shrink-0 md:block" style={{ width: `${logoWidth}px` }}>
-                        <div className="flex flex-col gap-3">
+                  <div className="flex min-w-0 flex-col gap-8 md:flex-row md:items-start md:gap-10 lg:gap-12">
+                    <div className="relative flex min-h-0 min-w-0 w-full flex-1 flex-col gap-4 md:sticky md:top-4 md:max-w-[min(100%,720px)] md:flex-row">
+                      <div className="hidden shrink-0 md:block" style={{ width: thumbColW }}>
+                        <div className="flex w-full flex-col gap-3">
                           {productImages.map((img, index) => (
                             <button
                               key={index}
@@ -171,21 +174,22 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                                 e.stopPropagation();
                                 handleThumbnailClick(index);
                               }}
-                              className="aspect-[4/5] w-full shrink-0 overflow-hidden border-0 bg-white p-0 outline-none"
+                              className={`${galleryFrameClass} block border-0 bg-transparent p-0 outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring`}
                             >
                               <ImageWithFormatFallback
                                 src={img.src}
                                 alt={`${product.title}, миниатюра ${index + 1}`}
-                                className="h-full w-full object-cover"
+                                className={galleryImgCoverClass}
                                 loading="lazy"
                                 decoding="async"
+                                draggable={false}
                               />
                             </button>
                           ))}
                         </div>
                       </div>
 
-                      <div className="w-full flex-1">
+                      <div className="min-w-0 w-full flex-1">
                         <div className="flex flex-col gap-4">
                           {productImages.map((img, index) => (
                             <div
@@ -194,14 +198,15 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                                 if (el) imageRefs.current.set(index, el);
                                 else imageRefs.current.delete(index);
                               }}
-                              className="aspect-[4/5] w-full shrink-0 overflow-hidden bg-white"
+                              className={galleryFrameClass}
                             >
                               <ImageWithFormatFallback
                                 src={img.src || ""}
                                 alt={`${product.title} — фото ${index + 1}`}
-                                className="h-full w-full cursor-pointer object-cover"
+                                className={`${galleryImgCoverClass} cursor-pointer`}
                                 loading="lazy"
                                 decoding="async"
+                                draggable={false}
                                 onClick={() => handleImageClick(img.src || "")}
                               />
                             </div>
@@ -210,7 +215,7 @@ const ProductModal = memo(({ open, loading, product, onOpenChange }: ProductModa
                       </div>
                     </div>
 
-                    <div className="w-full flex-shrink-0 md:ml-2 md:w-[min(100%,560px)] lg:w-[600px]">
+                    <div className="w-full min-w-0 shrink-0 md:ml-2 md:w-[min(100%,560px)] lg:w-[600px]">
                       <div className="space-y-4 md:space-y-6">
                         <h2 className="break-words font-heading text-[clamp(1.25rem,3.5vw,2rem)] font-semibold uppercase leading-[1.15] tracking-tight md:text-[clamp(1.5rem,2.5vw,2rem)]">
                           {formatProductCardTitle(product.title)}
